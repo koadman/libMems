@@ -1,0 +1,280 @@
+LOCUS       AE002162     7501 bp    DNA   circular  BCT       09-MAY-2000
+DEFINITION  Chlamydia muridarum plasmid pMoPn, complete sequence.
+ACCESSION   AE002162
+VERSION     AE002162.1  GI:7190951
+KEYWORDS    .
+SOURCE      Chlamydia muridarum.
+  ORGANISM  Plasmid Chlamydia muridarum
+            Bacteria; Chlamydiales; Chlamydiaceae; Chlamydia.
+REFERENCE   1  (bases 1 to 7501)
+  AUTHORS   Read,T.D., Brunham,R., Shen,C., Gill,S.R., Heidelberg,J.F.,
+            White,O., Hickey,E.K., Peterson,J., Umayam,L.A., Utterback,T.,
+            Berry,K., Bass,S., Linher,K., Weidman,J., Khouri,H., Craven,B.,
+            Bowman,C., Dodson,R., Gwinn,M., Nelson,W., DeBoy,R., Kolonay,J.,
+            McClarty,G., Salzberg,S.L., Eisen,J. and Fraser,C.M.
+  TITLE     Genome sequences of Chlamydia trachomatis MoPn and Chlamydia
+            pneumoniae AR39
+  JOURNAL   Nucleic Acids Res. 28 (6), 1397-1406 (2000)
+  MEDLINE   20150255
+   PUBMED   10684935
+REFERENCE   2  (bases 1 to 7501)
+  AUTHORS   Read,T.D., Brunham,R., Shen,C., Gill,S.R., Heidelberg,J.F.,
+            White,O., Hickey,E.K., Peterson,J., Umayam,L.A., Utterback,T.,
+            Berry,K., Bass,S., Linher,K., Weidman,J., Khouri,H., Craven,B.,
+            Bowman,C., Dodson,R., Gwinn,M., Nelson,W., DeBoy,R., Kolonay,J.,
+            McClarty,G., Salzberg,S.L., Eisen,J. and Fraser,C.M.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (29-FEB-2000) The Institute for Genomic Research, 9712
+            Medical Center Dr, Rockville, MD 20850, USA
+FEATURES             Location/Qualifiers
+     source          1..7501
+                     /organism="Chlamydia muridarum"
+                     /plasmid="pMoPn"
+                     /db_xref="taxon:83560"
+                     /note="synonym: Chlamydia trachomatis MoPn"
+     gene            98..1015
+                     /gene="TCA01"
+     CDS             98..1015
+                     /gene="TCA01"
+                     /note="similar to SP:P10561; identified by sequence
+                     similarity; putative"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="virulence plasmid integrase pGP7-D"
+                     /protein_id="AAF39715.1"
+                     /db_xref="GI:7190954"
+                     /translation="MNSKFYHRSRLFLTFGEASEIWLSTLSPLTRKNYASGIKFLVSL
+                     KVLDLTKTLDNAISFDHSESLFKIKSLTIFNGKPVSEASKQARAACYISFTKFLYRLT
+                     KGYINPAIPLKDFGNTTFFKIRDRVKTVSISKKEWTVFFEALRLVSYRDYLIGKLIVQ
+                     GIRKLDEILSLCMEDLFFASNQISFRIKKRQNKEINIPITFPFSLMKELKDYVGGRNG
+                     RVFISEDGSPIATSQVVHNFKIAALRSAMTTKITPRVLRASALIHLKQMGLRDEEIMR
+                     VSCLSSKQSLCSYVCSGGNSSVANIPTIL"
+     gene            complement(1064..2086)
+                     /gene="TCA02"
+     CDS             complement(1064..2086)
+                     /gene="TCA02"
+                     /note="similar to GB:X06707 SP:P08788 GB:X07547 PID:40731
+                     PID:473191; identified by sequence similarity; putative"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="virulence plasmid integrase pGP8-D"
+                     /protein_id="AAF39714.1"
+                     /db_xref="GI:7190953"
+                     /translation="MRLGYITRNFVGKGILSLQQEMPLEYIGKSYQEVLKIRQESYWK
+                     RMRSFSLFEVIMHWTASLNQHTCRSYRGSFLALEKIGLLSLDMNLQEFSLLNHNLILD
+                     AIKKIPSSKASWTEGTKQVRAASYISLTRFLNRMTQGIVSIAQPSKQENSRTFFKTRE
+                     IVKTNAMNRLQTASFLKELKKINPRDWLIAQTMLQGGKRSSEVLSLEIDQICFQQATI
+                     SFSQLKNRQTEKRIIITYPQKFMHALREYIGPRRGLVFVTSSGKMVGLRQIARTFSQA
+                     GLQASIPFKITPHVLRATAVTEYKRLGCSDSDIMKVTGHTTAKMVFAYDKSSREDNAS
+                     KKMALI"
+     gene            2154..3509
+                     /gene="TCA03"
+     CDS             2154..3509
+                     /gene="TCA03"
+                     /note="similar to SP:P22445 SP:P10555 GB:X07547 GB:Y00505
+                     PID:40732; identified by sequence similarity; putative"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="virulence plasmid helicase pGP1-D"
+                     /protein_id="AAF39713.1"
+                     /db_xref="GI:7190952"
+                     /translation="MKTNSEIENRMQDIEYALLGKALVFEDCTEYILRQLVNYEFKCS
+                     RHKNIFIVFKHLKDNALPITVDSAWEELLRRRVKDIDKSYLGIMLHDAMFNDKLRPIS
+                     HTVLLDDLSVCSAEENLTNFIFRSFNEYNENPLRRSPFLLLDRIKDRLDRTIAKTFST
+                     RSVRGRSVYDIFSQAELGVLARIKKRRAAYSENNDSFYDGLPTGYQDIDSKGVILANG
+                     NFVIIAARPSIGKTALAIDIAINIAIHQRRRVGFLSLEMSAGQIVERIISNLTGVSGE
+                     KLQRGSLSEEEIFCIEEAGNTIRDSHLYICSDNQYKLNLIANQIRLLKRDDRVDVIFI
+                     DYLQLINSSVGENRQNEIADISRTLRGLAAELNIPIVCLSQLSRKVEDRANKVPMLSD
+                     LRDSGQIEQDADVILFINRKETSPNCEITVGKNRHGSVFSTVLQFDPKTSKFSAIKKV
+                     W"
+     gene            4703..5425
+                     /gene="TCA04"
+     CDS             4703..5425
+                     /gene="TCA04"
+                     /note="similar to GB:X06707 SP:P10557 GB:X07547 PID:40734
+                     PID:473193; identified by sequence similarity; putative"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="virulence protein pGP3-D"
+                     /protein_id="AAF39719.1"
+                     /db_xref="GI:7190958"
+                     /translation="MTEPLTDQQIILGTSTTPVAAKITASEGISLTITNNAQANSSVN
+                     IGLDAEKAYQLILDKLGDQIFDGITGSIVESAVQDIIDKITSDPSLGLLKAFYNFQIT
+                     GKIQCNGLFTSSNVTTLLGGTEIGRFTVTPRSSGSMFLVSADIIASRMEGGVVLALVK
+                     EGDTQPCAISYGYSSGVPNLCSLKTCVTNSGSTPTTYSLRIGGLESGVVWVNALSNGN
+                     DILGITNTSNVSFLEVIPQKNT"
+     gene            5494..5802
+                     /gene="TCA05"
+     CDS             5494..5802
+                     /gene="TCA05"
+                     /note="similar to PID:583029; identified by sequence
+                     similarity; putative"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="virulence protein pGP4-D"
+                     /protein_id="AAF39718.1"
+                     /db_xref="GI:7190957"
+                     /translation="MQNKRKLRNDFIKIVKDVEKDFPELDLKIRVNKERVTFLNSPLE
+                     LYHKSISLILGLLQQIEKSLELFPDSPVLEKLEDNSLKLKKALIMLILSRKDMFSKAE
+                     "
+     gene            5819..6625
+                     /gene="TCA06"
+     CDS             5819..6625
+                     /gene="TCA06"
+                     /note="similar to SP:P10559 GB:X07547 PID:581013
+                     PID:581015; identified by sequence similarity; putative"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="virulence plasmid ParA family protein pGP5-D"
+                     /protein_id="AAF39717.1"
+                     /db_xref="GI:7190956"
+                     /translation="MEYTLQTLVFCSFKGGTGKTTLSLNVGCNLAQFLGKRVLLIDLD
+                     PQSNLSSGLGASIEGNHKGLHEVMCASNDLKSIICKTKKTGVDIIPASFLSEQFREFS
+                     TNGIPSSNLRLFLDEYCSPLYDVCIVDTPPSLGGLTKEAFIAGDKLIVCLIPEPFSIL
+                     GLQKIREFLISIGKPEEEHILGVALSFWDDRSSTNQTYIDIIESIYENKIFSTKIRRD
+                     ISLSRSLLKEDSVINVYPTSRAATDILNLTHEISALLNSKHKQDFSQRTL"
+     gene            6622..7362
+                     /gene="TCA07"
+     CDS             6622..7362
+                     /gene="TCA07"
+                     /note="similar to SP:P10560 GB:X07547 GB:X54450 GB:X54451
+                     PID:581014; identified by sequence similarity; putative"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="virulence protein pGP6-D"
+                     /protein_id="AAF39716.1"
+                     /db_xref="GI:7190955"
+                     /translation="MNKLEKEASVFFKKNQESVSQDFKKKVSSIEMFSTSLNSEENQS
+                     LDRLFLSETQNLSDEESYQEDVLSVKLLTSQIKAIQKQHVLLLGEKIYNARKILSKSC
+                     FSSTTFSSWLDLVFRTKSSAYNALAYYELFISLPSTTLQKEFQSIPYKSAYILAARKG
+                     DLKTKVSVIGKVCGMSNASAIRVMDQLLPSSRSKDNQRFFESDLEKNRQLSDLLVELL
+                     RIVCSGVFLSPYNENLLQQLFEVYKQKS"
+BASE COUNT     2468 a   1262 c   1417 g   2354 t
+ORIGIN      
+        1 gcaactcttg gtggtagact tagtcgggat agacttttgt gtaaaaaaaa aataaactct
+       61 tgagactctg aatcagagtc atattgttta agaaaagatg aactcaaaat tttaccacag
+      121 aagtaggcta ttcctaactt ttggagaagc ttcggaaatt tggttgtcaa cgttgtcccc
+      181 gctaactaga aagaattatg catctggaat taagttttta gtttctctga aggttttgga
+      241 tttaaccaaa accttagata acgccatttc ctttgatcac agcgagtctt tgtttaagat
+      301 caaatctcta accattttta atgggaaacc tgtttcagaa gcttctaaac aagccagagc
+      361 tgcttgttac atatcattta ctaagttttt gtacagattg actaaggggt atattaatcc
+      421 tgctattcct ttaaaagact ttggtaacac tacatttttt aaaattagag atagagtcaa
+      481 aacagtttcg atttctaaga aggagtggac ggtatttttt gaagcgcttc gtttggtgag
+      541 ttatagagac tatctaattg gcaaattaat tgtgcaaggc attaggaagt tagacgagat
+      601 tttatctttg tgcatggagg atctcttttt tgcatctaat caaatttcgt ttcggattaa
+      661 aaaaagacaa aataaagaga ttaatatccc tattacgttt cctttcagtt tgatgaaaga
+      721 attgaaagat tatgttggtg gaagaaatgg gcgtgtgttt atttctgagg atggatctcc
+      781 cattgcaaca agtcaagtag tgcataattt taaaatagca gcgcttcgga gcgcaatgac
+      841 aactaaaatc actcccagag tgcttcgagc tagcgcgttg attcatttga aacaaatggg
+      901 attaagagat gaagaaatta tgcgagtttc ttgtctttcc tcgaagcaaa gtttgtgttc
+      961 ttatgtttgt tctggcggga actcttctgt cgcaaatata ccaactatat tgtgatataa
+     1021 ttaaaattat atccatttag ttgccctcaa aagcaactgt agattatatt agggccatct
+     1081 tctttgaggc attgtcttct ctagaggatt tatcgtacgc aaataccatc tttgcggttg
+     1141 tgtgtcctgt gaccttcatg atgtcggagt ccgaacaccc taggcgtttg tactctgtca
+     1201 cagcggttgc tctaagcacg tgaggggtta tcttaaatgg gatagatgct tgcagtcctg
+     1261 cttgagagaa cgtgcgggca atttgtctta accccaccat ttttccagaa ctagttacga
+     1321 agaccaaacc tcttcgtggc ccaatgtact ctcttagagc gtgcatgaac ttctgaggat
+     1381 aagttataat aatcctcttt tctgtctgac gattcttaag ctgggagaaa gagatagttg
+     1441 cttgttgaaa gcagatctga tcgatctcta agcttaagac ttcagaagaa cgcttacctc
+     1501 cttgcagcat agtttgggcg atcaaccaat ctctgggatt gatttttttt agttctttca
+     1561 agaaagaagc tgtttgcaat ctattcattg catttgtttt tacaatttct ctggttttga
+     1621 aaaatgttcg gctgttttct tgtttagaag gttgtgcgat agaaacaatt ccctgagtca
+     1681 ttctgtttaa aaatctagtc aaagagatat aactagctgc acgaacttgt ttggtgcctt
+     1741 ctgtccatga agcttttgac gatggaatct ttttaattgc atccaatatc aagttatgat
+     1801 tcaaaagaga aaattcttgt agattcatgt ctaaagacaa tagcccaatc ttttctaaag
+     1861 ctaaaaaaga gcctcggtaa gatctacaag tatgctgatt tagtgatgca gtccaatgca
+     1921 tgataacttc gaataaagag aagcttctca tgcgtttcca gtaagattct tgtcggattt
+     1981 ttaatacttc ctgataagac tttccgatat attctaatgg catttcttgc tgcaaagata
+     2041 aaatcccttt acccacgaaa ttcctcgtga tataacctaa acgcaaatgt cctgattagt
+     2101 gaaataatca ggttatcatt aggatagcac gcgctgcatt tttttagaaa agcatgaaaa
+     2161 ctaattctga aatagaaaac cgcatgcaag atattgagta tgcgttacta ggaaaagctt
+     2221 tggtatttga agactgtaca gagtacattc ttaggcaact tgttaattac gaattcaagt
+     2281 gctctcgcca taaaaacata ttcattgttt ttaaacactt aaaagacaac gctctgccaa
+     2341 taactgtaga ttcagcttgg gaagagctgt taagaaggcg tgtcaaagat atagataagt
+     2401 cttatctcgg tataatgtta catgatgcca tgtttaacga taagctcagg cctatttcgc
+     2461 atacggttct tttagatgac ttaagtgtat gtagcgctga agaaaattta actaatttca
+     2521 tttttcgttc gtttaatgaa tataacgaaa atccattgag acgatcacca tttttactat
+     2581 tagaccgcat aaaagatcgt ctcgacagaa ctatcgcaaa aactttttct actcgtagcg
+     2641 ttagaggacg atctgtttat gatatctttt ctcaagcaga actcggagta ttagctcgta
+     2701 taaaaaaaag aagggcggct tattctgaga ataatgattc attttatgac ggcttgccaa
+     2761 ccggatatca agatattgat agtaaagggg ttattttagc gaacggcaat tttgtgataa
+     2821 ttgcagctcg gccttctata gggaaaaccg cactcgctat tgatatagct atcaatattg
+     2881 ctatccatca acgacgtaga gttggttttt tatctcttga aatgagtgca gggcaaatag
+     2941 ttgaaagaat tatttctaac ttaacagggg tatctggaga gaaattacaa aggggctctc
+     3001 tatctgaaga agagattttt tgcattgaag aagcaggaaa tactataaga gattctcatc
+     3061 tttatatttg tagtgacaac caatataagc tcaatttgat agcgaatcaa attcgtttgt
+     3121 taaaacgaga tgatcgtgtc gacgttattt ttatcgatta cttacaactt attaactcat
+     3181 ctgttggaga aaatcgacaa aatgaaatag cagatatatc tagaacttta agggggttag
+     3241 ctgcagagct aaacattcct atagtttgtt tgtctcaatt atccagaaaa gtcgaggata
+     3301 gagcaaacaa agttcctatg ctgtcagacc taagagatag cggtcaaata gaacaggatg
+     3361 cagatgtaat tttgttcatc aatagaaagg aaacttctcc taattgtgaa ataacagtgg
+     3421 gtaaaaatag acatggatcg gttttctcta ctgtattaca gttcgatcca aaaacaagta
+     3481 agttctctgc tattaaaaaa gtatggtaaa ttatagcaac tgtcacttca ttagaagtcc
+     3541 tattcatctt gagaatcaga agtttggtag aagaccaggt caattaatca agatatctcc
+     3601 taagttagct caaaatggct tagtagaagt cataggtctt gactttcttt cttctcatta
+     3661 ccacgcacta gctgctatcc agagattact tacagctaca aattataagg ggaatacaaa
+     3721 aggagttgta ttatcaagag aatcaaacag cttccaattc gaaggttgga ttcctcgaat
+     3781 tagatttaca aaaacagagt tcttagaagc ttacggcgta aaacgataca aaacatctag
+     3841 aaacaaatac gaatttagtg ggaaagaatc tgaaacagct ttagaggctc tgtatcattt
+     3901 aggacatcaa cctttcttga tagtggcaac cagaactcga tggaataatg ggacgcctat
+     3961 tttagatcgt tatcaaaccc tttcgcctat tattagaatt tacgaaggat gggaaggtct
+     4021 aactgatgaa gaaaatacag aaattgatgt aacaccattc aattcaccat caacacgaaa
+     4081 gcataaagga ttcattgtag aaccttgtcc catcttggta gatcaaatag actcttattt
+     4141 cgtagtcaag cctgcgaacg tataccaaga aataaaaatg cgtttcccaa acgcatcaag
+     4201 atatgcttac acctttattg attggataat tactgcatct gccaaaaaga aaagaaaatt
+     4261 gaccaaagag aattcttggc cagaaaactt gtctctgaat gttaacgtta aaagccttgc
+     4321 gtatatttta aggatgaatc gatatatcag cacaagaaac tggaaaaaaa ttgaaatggc
+     4381 tattgataaa tgtgttgaaa tagctattca actaggttgg ttatctagtc ggaaacgagt
+     4441 agagttctta gaagcatcta agctgtctaa aaaagagatc ttgtatttaa acaaagaacg
+     4501 ctttgaagaa ataacaagaa aatcaaaaga acaaatgaat caattcgagc aagaatttaa
+     4561 ttaaaaaata gcaaaacttg aaactaaaaa ccaaatttat ttaaagctca aaataaaaag
+     4621 agtttttaaa atgggaaatt ctggttttta tttgcataac actagcaact gtgtatttgc
+     4681 cgacaatatt aaagttgggc aaatgacaga acctcttaca gatcaacaaa taatacttgg
+     4741 gacatcgaca actcctgtcg cagcaaaaat aacagcttct gaagggatat ccttaacaat
+     4801 aacaaacaat gctcaagcta actcttcagt aaatattgga ttagatgctg aaaaagcgta
+     4861 ccaacttatt ttagataagc ttggcgacca aatctttgat ggaatcacag gatccatagt
+     4921 tgagagtgct gtacaggaca ttatagataa gattacctcg gacccttctc taggattgtt
+     4981 gaaggctttc tataacttcc aaatcactgg gaaaattcaa tgtaacggcc tattcacatc
+     5041 tagcaatgta acaactttat taggaggaac agaaataggt agatttacag taactcctag
+     5101 aagttctgga agcatgtttt tagtttctgc agatatcatt gcatcaagaa tggaaggtgg
+     5161 agttgtatta gccttagtaa aagaaggaga tacacaacca tgtgcgatta gctatggcta
+     5221 ttcttctggt gtgcccaatt tatgtagctt aaaaacctgt gttactaatt ccggatcgac
+     5281 acccacaact tattcattac gaataggagg attagagagc ggagttgtat gggttaatgc
+     5341 tctatccaat ggtaatgata ttcttggaat aacaaatact tctaacgttt cttttttgga
+     5401 ggtgatacct caaaaaaaca cttaaataat tttattggaa ttttcttatc ggttttatat
+     5461 ttagaagaaa cagttctaat tacgggggtt gttatgcaaa acaaaagaaa actgagaaac
+     5521 gattttatta aaattgttaa agatgtagaa aaggatttcc ccgagctaga cttgaaaata
+     5581 cgggtgaata aggaaagggt tactttttta aattcaccct tagaactcta ccacaagagt
+     5641 atttcattaa ttttaggctt gttacaacaa atagaaaagt ctttggaatt atttccagat
+     5701 tcccccgttc ttgaaaaatt agaggataac agtttaaagc taaaaaaagc gttgattatg
+     5761 cttattctgt ctagaaaaga catgttttct aaggcagaat agatgtttta ctctaacgtt
+     5821 ggagtacact ttgcaaacct tagttttttg ctcttttaag ggtgggacag gaaaaacaac
+     5881 actttccctg aatgtagggt gtaatttagc tcaattttta ggaaagagag tacttctaat
+     5941 tgacctagat ccccaatcaa atctctcatc tggattgggg gctagcatcg aaggcaacca
+     6001 taaaggcctt cacgaagtga tgtgtgcctc aaatgattta aaatcaataa tttgtaaaac
+     6061 aaaaaaaact ggggtagaca taatccctgc atcatttttg tcagaacaat ttagagaatt
+     6121 ttctacaaat ggcatcccaa gcagcaattt acggctgttt ttagatgagt attgttcgcc
+     6181 tttatatgat gtgtgcatag tagatactcc acctagtctt ggtggattaa caaaagaagc
+     6241 ctttattgca ggagacaaac taatcgtatg tttgattcct gagccatttt ctattctcgg
+     6301 gctgcagaaa attagagaat ttttaatttc tataggcaaa cctgaggaag aacatattct
+     6361 tggggtagca ctatcttttt gggatgaccg gagttcgact aatcaaacgt acatagatat
+     6421 cattgagtca atttacgaaa ataagatttt ttcaacaaaa atacgcagag atatttcttt
+     6481 gagtcgttcc cttcttaaag aggattctgt gatcaatgta tatccaactt caagagctgc
+     6541 aacagatatt ctgaatttaa cacacgaaat atctgctctt ttaaattcta aacacaaaca
+     6601 agacttttcc cagaggacac tgtgaataaa ctggaaaagg aagctagcgt cttttttaaa
+     6661 aaaaatcagg aatccgtttc tcaagacttt aagaaaaagg tttcttcaat tgagatgttt
+     6721 tcaacttctt taaattcgga ggaaaaccag agtctggatc ggcttttttt gtctgagact
+     6781 cagaatttat cagatgaaga atcttaccaa gaagatgttt tgtcagtaaa acttctgaca
+     6841 agtcaaataa aggctattca aaaacaacac gtgctccttc ttggagagaa gatttacaat
+     6901 gcgagaaaga tactaagtaa aagttgtttc tcttcaacaa ccttttcatc ttggctagat
+     6961 ttagttttca ggactaaatc atccgcctat aatgcgttgg cttattatga acttttcata
+     7021 agtctaccaa gcacaacttt gcagaaagag ttccaatcaa tcccgtataa gtctgcatat
+     7081 attttagctg ctaggaaagg agacttaaaa acaaaagtct ctgttatagg gaaagtttgt
+     7141 ggaatgtcca atgcatctgc tatccgggtt atggaccaac ttcttccttc atctagaagt
+     7201 aaagataatc aaagattttt cgaatctgat ttagagaaaa atcgacagtt atcagatctt
+     7261 ctcgtagaac tgcttcgcat tgtatgttct ggagttttct tatctcctta taacgaaaac
+     7321 cttctgcagc agttgtttga agtctataag caaaagagct gatccgccgt cagctcttat
+     7381 atatatatct attatatata tatattttag ggattcgatt ttacgagagc ttcgcgcaac
+     7441 tcttggtggt agaccttgca actcttggtg gtagaccttg caactcttgg tggtagacct
+     7501 t
+//
