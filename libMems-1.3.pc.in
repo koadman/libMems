@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libMems 
+Description: c++ library supporting DNA sequence and genome alignment 
+Version: @VERSION@
+Requires: libClustalW-1.0 libGenome-1.1
+Libs: -L${libdir} -lMems-@GENERIC_API_VERSION@ @BOOST_LDFLAGS@ -l@BOOST_FILESYSTEM_LIB@ -l@BOOST_PROGRAM_OPTIONS_LIB@ @LIBS@ 
+Cflags: -I${includedir}/@GENERIC_LIBRARY_NAME@-@GENERIC_API_VERSION@ @BOOST_CPPFLAGS@ 
+

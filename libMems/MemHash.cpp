@@ -1,0 +1,378 @@
+/*******************************************************************************
+ * $Id: MemHash.cpp,v 1.32 2004/03/01 02:40:08 darling Exp $
+ * This file is copyright 2002-2004 Aaron Darling.  All rights reserved.
+ * Please see the file called COPYING for licensing, copying, and modification
+ * rights.  Redistribution of this file, in whole or in part is prohibited
+ * without express permission.
+ ******************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "libMems/MemHash.h"
+#include "libGenome/gnFilter.h"
+#include <list>
+#include <map>
+#include <sstream>
+#include "libMems/MemSubsets.h"
+
+using namespace std;
+using namespace genome;
+namespace mems {
+
+	MemHash::MemHash() : MatchFinder(), allocator( SlotAllocator<MatchHashEntry>::GetSlotAllocator() )
+
+{
+	table_size = DEFAULT_MEM_TABLE_SIZE;
+	seq_count = 0;
+	m_mem_count = 0;
+	m_collision_count = 0;
+	m_repeat_tolerance = DEFAULT_REPEAT_TOLERANCE;
+	m_enumeration_tolerance = DEFAULT_ENUMERATION_TOLERANCE;
+	//allocate the hash table
+	mem_table = new set<MatchHashEntry*, MheCompare>[table_size];
+	mem_table_count.reserve( table_size );
+	for(uint32 i=0; i < table_size; ++i)
+		mem_table_count.push_back(0);
+	match_log = NULL;
+}
+
+//make sure this calls the destructor on each element
+MemHash::~MemHash(){
+	if(mem_table != NULL){
+		delete[] mem_table;
+		mem_table = NULL;
+	}
+	// WARNING! WARNING! WARNING! this will destroy ALL objects since the allocator has static lifetime!!
+	// this is bad because if more than one MemHash is in use (e.g. in a multi-threaded program) then
+	// its storage could suddenly disappear.  consider this a temporary workaround until all matches
+	// can be freed individually
+	allocator.Purge();
+}
+
+MemHash::MemHash(const MemHash& mh) : MatchFinder(mh), allocator( SlotAllocator<MatchHashEntry>::GetSlotAllocator() )
+{
+	*this = mh;
+}
+
+MemHash& MemHash::operator=( const MemHash& mh ){
+	table_size = mh.table_size;
+	mer_size = mh.mer_size;
+	seq_count = mh.seq_count;
+	m_mem_count = mh.m_mem_count;
+	m_collision_count = mh.m_collision_count;
+	m_repeat_tolerance = mh.m_repeat_tolerance;
+	m_enumeration_tolerance = mh.m_enumeration_tolerance;
+	//allocate the hash table
+	if(mem_table != NULL)
+		delete[] mem_table;
+	mem_table = new set<MatchHashEntry*, MheCompare>[table_size];
+	for(uint32 i=0; i < table_size; ++i){
+		mem_table_count.push_back(mh.mem_table_count[i]);
+		mem_table[i] = mh.mem_table[i];
+	}
+	match_log = mh.match_log;
+	return *this;
+}
+
+MemHash* MemHash::Clone() const{
+	return new MemHash(*this);
+}
+
+void MemHash::ClearSequences()
+{
+	MatchFinder::Clear();
+}
+
+void MemHash::Clear()
+{
+	MatchFinder::Clear();
+	m_mem_count = 0;
+	m_collision_count = 0;
+	m_repeat_tolerance = DEFAULT_REPEAT_TOLERANCE;
+	m_enumeration_tolerance = DEFAULT_ENUMERATION_TOLERANCE;
+	//clear the hash table
+	for(uint32 listI = 0; listI < table_size; ++listI){
+		mem_table[listI].clear();
+		mem_table_count[ listI ] = 0;
+	}
+	match_log = NULL;
+
+	// WARNING! WARNING! WARNING! this will destroy ALL objects since the allocator has static lifetime!!
+	allocator.Purge();
+}
+
+void MemHash::SetTableSize(uint32 new_table_size){
+	//deallocate the hash table
+	if(mem_table != NULL)
+		delete[] mem_table;
+	//allocate the hash table
+	table_size = new_table_size;
+	mem_table = new set<MatchHashEntry*, MheCompare>[table_size];
+	mem_table_count.clear();
+	for(uint32 i=0; i < table_size; ++i)
+		mem_table_count.push_back(0);
+}
+
+boolean MemHash::CreateMatches(){
+	MatchFinder::FindMatchSeeds();
+	return true;
+}
+
+void MemHash::FindMatches( MatchList& ml ) {
+	vector<gnSeqI> start_points;
+	for( uint32 seqI = 0; seqI < ml.seq_table.size(); ++seqI ){
+		start_points.push_back( 0 );
+	}
+	FindMatchesFromPosition( ml, start_points );
+}
+
+void MemHash::FindMatchesFromPosition( MatchList& ml, const vector<gnSeqI>& start_points ){
+	for( uint32 seqI = 0; seqI < ml.seq_table.size(); ++seqI ){
+		if( !AddSequence( ml.sml_table[ seqI ], ml.seq_table[ seqI ] ) ){
+			ErrorMsg( "Error adding " + ml.seq_filename[seqI] + "\n");
+			return;
+		}
+	}
+	MatchFinder::FindMatchSeeds( start_points );
+
+	GetMatchList( ml );
+}
+
+MatchList MemHash::GetMatchList() const{
+	MatchList ml;
+	GetMatchList( ml );
+	ml.seq_table = seq_table;
+	ml.sml_table = sar_table;
+
+	return ml;
+}
+
+// an attempt to do this without sorting, which appears to be very slow...
+boolean MemHash::EnumerateMatches( IdmerList& match_list )
+{
+	vector< uint > enum_tally(seq_count, 0);
+	IdmerList::iterator iter = match_list.begin();
+	IdmerList hash_list;
+	for(; iter != match_list.end(); ++iter)
+	{
+		if( enum_tally[iter->id] < m_enumeration_tolerance )
+		{
+			hash_list.push_back(*iter);
+		}
+		if(enum_tally[iter->id] > m_repeat_tolerance)
+			return true;
+		++enum_tally[iter->id];
+	}
+
+	if(hash_list.size() > 1){
+		if(m_enumeration_tolerance == 1)
+			return HashMatch(hash_list);
+		else
+			return MatchFinder::EnumerateMatches( hash_list );
+	}
+	return true;
+}
+
+/*
+boolean MemHash::EnumerateMatches( IdmerList& match_list ){
+
+	match_list.sort(&idmer_id_lessthan);
+	IdmerList::iterator iter = match_list.begin();
+	IdmerList::iterator iter2 = match_list.begin();
+	IdmerList hash_list;
+	++iter2;
+	int32 cur_tolerance = m_enumeration_tolerance - 1;
+	uint32 cur_count = 0;	//the number of mers from a particular sequence
+	hash_list.push_back(*iter);
+	for(; iter2 != match_list.end(); ++iter){
+		if(iter->id != iter2->id){
+			hash_list.push_back(*iter2);
+			cur_tolerance = m_enumeration_tolerance - 1;
+			cur_count = 0;
+		}else{
+			if(cur_tolerance > 0){
+				hash_list.push_back(*iter2);
+				cur_tolerance--;
+			}
+			++cur_count;
+		}
+		++iter2;
+		if(cur_count > m_repeat_tolerance)
+			return true;
+	}
+	if(hash_list.size() > 1){
+		if(m_enumeration_tolerance == 1)
+			return HashMatch(hash_list);
+		else
+			return MatchFinder::EnumerateMatches( hash_list );
+	}
+	return true;
+}
+*/
+
+//why have separate hash tables? dunno.  no reason.  what was i thinking
+// at that coffeehouse in portland when i wrote this crappy code?
+// MemHashEntries use GENETICIST coordinates.  They start at 1, not 0.
+boolean MemHash::HashMatch(IdmerList& match_list){
+	//check that there is at least one forward component
+//	match_list.sort(&idmer_id_lessthan);
+	// initialize the hash entry
+	MatchHashEntry mhe = MatchHashEntry(seq_count, GetSar(0)->SeedLength());
+	mhe.SetLength( GetSar(0)->SeedLength() );
+	
+	//Fill in the new Match and set direction parity if needed.
+	IdmerList::iterator iter = match_list.begin();
+	for(; iter != match_list.end(); ++iter)
+		mhe.SetStart(iter->id, iter->position + 1);
+	SetDirection(mhe);
+	mhe.CalculateOffset();
+	if(mhe.Multiplicity() < 2){
+		cout << "red flag " << mhe << "\n";
+		cout << "match_list.size(): " << match_list.size() << endl;
+	}else 
+		AddHashEntry(mhe);
+
+	return true;
+}
+
+void MemHash::SetDirection(MatchHashEntry& mhe){
+	//get the reference direction
+	boolean ref_forward = false;
+	uint32 seqI=0;
+	for(; seqI < mhe.SeqCount(); ++seqI)
+		if(mhe[seqI] != NO_MATCH){
+			ref_forward = !(GetSar(seqI)->GetMer(mhe[seqI] - 1) & 0x1);
+			break;
+		}
+	//set directional parity for the rest
+	for(++seqI; seqI < mhe.SeqCount(); ++seqI)
+		if(mhe[seqI] != NO_MATCH)
+			if(ref_forward == (GetSar(seqI)->GetMer(mhe[seqI] - 1) & 0x1))
+				mhe.SetStart(seqI, -mhe[seqI]);
+}
+
+// Tries to add a new mem to the mem hash table
+// If the mem already exists in the table, a pointer to it
+// is returned.  Otherwise mhe is added and a pointer to
+// it is returned.
+MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe){
+	//first compute which hash table bucket this is going into
+	int64 offset = mhe.Offset();
+
+	uint32 bucketI = ((offset % table_size) + table_size) % table_size;
+    set<MatchHashEntry*, MheCompare>::iterator insert_he;
+	insert_he = mem_table[bucketI].find(&mhe);
+	if( insert_he != mem_table[bucketI].end()){
+		++m_collision_count;
+		return *insert_he;
+	}
+	
+	//if we made it this far there were no collisions
+	//extend the mem into the surrounding region.
+	vector<MatchHashEntry> subset_matches;
+	if( !mhe.Extended() )
+		ExtendMatch(mhe, subset_matches);
+
+	MatchHashEntry* new_mhe = allocator.Allocate();
+	*new_mhe = mhe;
+	
+	// can't insert until after the extend!!
+	mem_table[bucketI].insert(new_mhe);
+
+	// log it.
+	if( match_log != NULL ){
+		(*match_log) << *new_mhe << endl;
+		match_log->flush();
+	}
+	
+	// link up the subset matches
+	for(uint32 subsetI = 0; subsetI < subset_matches.size(); ++subsetI){
+		MatchHashEntry* submem = AddHashEntry( subset_matches[ subsetI ] );
+		new_mhe->LinkSubset( submem );
+	}
+	
+	++mem_table_count[bucketI];
+	++m_mem_count;
+	return new_mhe;
+}
+
+void MemHash::PrintDistribution(ostream& os) const{
+    set<MatchHashEntry*, MheCompare>::const_iterator mem_iter;
+	gnSeqI base_count;
+	for(uint32 i=0; i < mem_table_count.size(); ++i){
+		mem_iter = mem_table[i].begin();
+		base_count = 0;
+		for(; mem_iter != mem_table[i].end(); ++mem_iter){
+			base_count += (*mem_iter)->Length();
+		}
+		os << i << '\t' << mem_table_count[i] << '\t' << base_count << '\n';
+	}
+}
+
+void MemHash::LoadFile(istream& mem_file){
+	string tag;
+	gnSeqI len;
+	int64 start;
+	MatchHashEntry mhe;
+	getline( mem_file, tag );
+	stringstream first_mum( tag );
+	seq_count = 0;
+	first_mum >> len;
+	while( first_mum >> start ){
+		seq_count++;
+	}
+	mhe = MatchHashEntry(seq_count, mer_size, MatchHashEntry::seed);
+	first_mum.str( tag );
+	first_mum.clear();
+	for(uint32 seqI = 0; seqI < seq_count; seqI++){
+		first_mum >> start;
+		mhe.SetStart(seqI, start);
+	}
+	mhe.SetLength( len );
+	mhe.CalculateOffset();
+	AddHashEntry(mhe);
+	
+	while(mem_file.good()){
+		mem_file >> len;
+		if(!mem_file.good())
+			break;
+		mhe.SetLength(len);
+		for(uint32 seqI = 0; seqI < seq_count; seqI++){
+			mem_file >> start;
+			mhe.SetStart(seqI, start);
+		}
+		//break if the stream ended
+		if(!mem_file.good())
+			break;
+		mhe.CalculateOffset();
+		AddHashEntry(mhe);
+	}
+}
+
+void MemHash::WriteFile(ostream& mem_file) const{
+	mem_file << "FormatVersion" << '\t' << 1 << "\n";
+	mem_file << "SequenceCount" << '\t' << sar_table.size() << "\n";
+	for(unsigned int seqI = 0; seqI < seq_count; seqI++){
+		mem_file << "Sequence" << seqI << "File";
+		gnGenomeSpec* specker = seq_table[seqI]->GetSpec();
+		string sourcename = specker->GetName();
+		if( sourcename == "" )
+			sourcename = "null";
+		mem_file << '\t' << sourcename << "\n";
+		mem_file << "Sequence" << seqI << "Length";
+		mem_file << '\t' << seq_table[seqI]->length() << "\n";
+	}
+	mem_file << "MatchCount" << '\t' << m_mem_count << endl;
+	//get all the mems out of the hash table and write them out
+    set<MatchHashEntry*, MheCompare>::const_iterator mem_table_iter;
+	for(uint32 i=0; i < table_size; i++){
+		mem_table_iter = mem_table[i].begin();
+		for(; mem_table_iter != mem_table[i].end(); mem_table_iter++)
+			mem_file << **mem_table_iter << "\n";
+	}
+}
+
+
+} // namespace mems
