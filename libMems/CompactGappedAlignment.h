@@ -100,6 +100,9 @@ public:
 	void copyRange( CompactGappedAlignment& dest, gnSeqI left_column, gnSeqI length );
 	gnSeqI SeqPosToColumn( uint seq, int64 pos);
 
+	/** Eliminates any columns that contain only gap characters */
+	void CondenseGapColumns();
+
 protected:
 	std::vector< bitset_t > align_matrix;		/**< aligned positions have true values, gaps are false */
 	std::vector< std::vector< size_t > > bcount;
@@ -751,6 +754,37 @@ void CompactGappedAlignment<BaseType>::copyRange( CompactGappedAlignment& dest, 
 	}
 
 }
+
+template< class BaseType >
+void CompactGappedAlignment<BaseType>::CondenseGapColumns()
+{
+	const size_t len = this->AlignmentLength();
+	size_t d = 0;	// destination index
+	for( size_t i = 0; i < len; ++i )
+	{
+		size_t seqI = 0;
+		// check whether this is a gap col
+		for( ; seqI < align_matrix.size(); ++seqI )
+			if( LeftEnd(seqI) != 0 && align_matrix[seqI].test(i) )
+				break;
+
+		// copy if not a gap col (and i != d )
+		if( seqI < align_matrix.size() )
+		{
+			if( i != d )
+			{
+				for( seqI = 0; seqI < align_matrix.size(); ++seqI )
+					align_matrix[seqI].set( d, align_matrix[seqI].test(i)  );
+			}
+			d++;
+		}
+		else
+			std::cout << "";
+	}
+	SetAlignmentLength(d);
+	create_bitcount();
+}
+
 
 }
 
