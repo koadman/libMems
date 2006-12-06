@@ -77,7 +77,7 @@ void MatchList::LoadSequences( ostream* log_stream ){
 
 }
 
-void MatchList::LoadSMLs( uint mer_size, ostream* log_stream ){
+void MatchList::LoadSMLs( uint mer_size, ostream* log_stream, int seed_rank ){
 
 	// if the mer_size parameter is 0 then calculate a default mer size for these sequences
 	if( mer_size == 0 ){
@@ -88,7 +88,7 @@ void MatchList::LoadSMLs( uint mer_size, ostream* log_stream ){
 	}
 
 	// load and creates SMLs as necessary
-	uint64 default_seed = getSeed( mer_size );
+	uint64 default_seed = getSeed( mer_size, seed_rank );
 	vector< uint > create_list;
 	uint seqI = 0;
 	for( seqI = 0; seqI < seq_table.size(); seqI++ ){
@@ -165,7 +165,7 @@ uint MatchList::GetDefaultMerSize( const vector< gnSequence* >& seq_table ){
 	return getDefaultSeedWeight( total_len / seq_table.size() );
 }
 
-void MatchList::LoadMFASequences( const string& mfa_filename, uint mer_size, ostream* log_stream, boolean load_smls ) {
+void MatchList::LoadMFASequences( const string& mfa_filename, uint mer_size, ostream* log_stream, boolean load_smls, int seed_rank ) {
 	gnSequence file_sequence;
 	// Load the sequence and tell the user if it loaded successfully
 	try{
@@ -206,7 +206,7 @@ void MatchList::LoadMFASequences( const string& mfa_filename, uint mer_size, ost
 		}
 	}
 
-	uint64 default_seed = getSeed( mer_size );
+	uint64 default_seed = getSeed( mer_size, seed_rank );
 
 	for( uint contigI = 0; contigI < file_sequence.contigListSize(); contigI++ ){
 		// define a DNAMemorySML to store a sorted mer list

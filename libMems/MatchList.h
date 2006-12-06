@@ -43,8 +43,10 @@ public:
 	 * The DNAFileSML objects are created on the heap
 	 * and are not deallocated when this class is destroyed.  They should
 	 * be manually destroyed when no longer in use.
+	 * @param	seed_rank	The rank of the seed to use, 0-2 are ranked spaced seeds, 
+	 *						other options include CODING_SEED and SOLID_SEED
 	 */
-	void LoadSMLs( uint mer_size, std::ostream* log_stream );
+	void LoadSMLs( uint mer_size, std::ostream* log_stream, int seed_rank = 0 );
 
 	/**
 	 * Loads sequences to align from a Multi-FastA file and constructs a SML
@@ -61,7 +63,7 @@ public:
 	 * @param load_smls		Specifies whether sorted mer lists should be created 
 	 * 						for each sequence entry
 	 */
-	void LoadMFASequences( const std::string& mfa_filename, uint mer_size, std::ostream* log_stream, boolean load_smls = true );
+	void LoadMFASequences( const std::string& mfa_filename, uint mer_size, std::ostream* log_stream, boolean load_smls = true, int seed_rank = 0 );
 
 	/**
 	 * Calculates a default search mer size for the given set of sequences
