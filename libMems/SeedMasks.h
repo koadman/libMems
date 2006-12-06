@@ -203,30 +203,8 @@ uint32** seedMasks(){
 	return seed_masks;
 }
 
-/**
- * returns a seed of a given weight.  Setting seed_rank > 0 will select a seed
- * of a lower sensitivity rank according to Choi et. al. 2004
- */
-#ifdef __cplusplus
-static int64 getSeed( int weight, int seed_rank = 0 );
-#else
-int64 getSeed( int weight, int seed_rank );
-#endif
-
-#ifdef __cplusplus
-inline static
-#endif
-int64 getSeed( int weight, int seed_rank ){
-	uint32** masks = seedMasks();
-	int high = masks[ weight ][ seed_rank ];
-	int low = masks[ weight ][ seed_rank + 1 ];
-	
-	int64 seed = 0;
-	seed |= high;
-	seed <<= 32;
-	seed |= low;
-	return seed;
-};
+static const int CODING_SEED = 3;
+static const int SOLID_SEED = INT_MAX;
 
 /**
  * Returns a solid seed of a given weight.
@@ -245,6 +223,38 @@ int64 getSolidSeed( int weight ){
 	seed--;
 	return seed;
 };
+
+/**
+ * returns a seed of a given weight.  Setting seed_rank > 0 will select a seed
+ * of a lower sensitivity rank according to Choi et. al. 2004
+ */
+#ifdef __cplusplus
+static int64 getSeed( int weight, int seed_rank = 0 );
+#else
+int64 getSeed( int weight, int seed_rank );
+#endif
+
+#ifdef __cplusplus
+inline static
+#endif
+int64 getSeed( int weight, int seed_rank ){
+	uint32** masks;
+	int high;
+	int low;
+	int64 seed = 0;
+	if( seed_rank == SOLID_SEED )
+		return getSolidSeed( weight );
+
+	masks = seedMasks();
+	high = masks[ weight ][ seed_rank*2 ];
+	low = masks[ weight ][ seed_rank*2 + 1 ];
+	
+	seed |= high;
+	seed <<= 32;
+	seed |= low;
+	return seed;
+};
+
 
 /**
  * calculates the length of a seed pattern
