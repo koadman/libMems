@@ -19,6 +19,9 @@
 
 namespace mems {
 
+/** When more space is needed to store a datatype, the memory pool will grow by this factor */
+const float POOL_GROWTH_RATE = 1.6;
+	
 /**
  * This class allocates memory according to the slot allocation scheme for
  * fixed size objects.  Each time all slots are full it allocates twice the
@@ -84,7 +87,7 @@ T* SlotAllocator< T >::Allocate(){
 
 	// Last resort:
 	// increase the size of the data array
-	unsigned new_size = n_elems * 2;
+	unsigned new_size = n_elems * POOL_GROWTH_RATE;
 	if( new_size == 0 )
 		new_size++;
 	T* new_data = NULL;
@@ -118,23 +121,6 @@ void SlotAllocator< T >::Free( T* t ){
 		if( *iter == t )
 			cerr << "ERROR DOUBLE FREE\n";
 */	free_list.push_front( t );
-	// if 75% of the entries have been freed, reallocate the
-	// list with a smaller vector.  This is probably really
-	// slow since it completely traverses the free list and
-	// does lots of division
-/*	if( 4 * free_list.size() >= 3 * (sizeof( data ) / sizeof( T )) ){
-		std::vector< bool > used_list( free_list.size(), true );
-#ifdef __MWERKS__
-		Metrowerks::slist< T* >::iterator free_iter;
-#else
-		std::list< T* >::iterator free_iter;
-#endif
-		free_iter = free_list.begin();
-		for( ; free_iter != free_list.end(); free_iter++ ){
-			used_list[ (*free_iter - &data[0]) / sizeof(T) ] = false;
-		}
-	}
-*/
 }
 
 }
