@@ -765,7 +765,7 @@ void CompactGappedAlignment<BaseType>::CondenseGapColumns()
 		size_t seqI = 0;
 		// check whether this is a gap col
 		for( ; seqI < align_matrix.size(); ++seqI )
-			if( LeftEnd(seqI) != 0 && align_matrix[seqI].test(i) )
+			if( this->LeftEnd(seqI) != 0 && align_matrix[seqI].test(i) )
 				break;
 
 		// copy if not a gap col (and i != d )
@@ -781,8 +781,8 @@ void CompactGappedAlignment<BaseType>::CondenseGapColumns()
 		else
 			std::cout << "";
 	}
-	SetAlignmentLength(d);
-	create_bitcount();
+	this->SetAlignmentLength(d);
+	this->create_bitcount();
 }
 
 
