@@ -782,6 +782,8 @@ void CompactGappedAlignment<BaseType>::CondenseGapColumns()
 			std::cout << "";
 	}
 	this->SetAlignmentLength(d);
+	for( size_t seqI = 0; seqI < align_matrix.size(); ++seqI )
+		align_matrix[seqI].resize(d);
 	this->create_bitcount();
 }
 
