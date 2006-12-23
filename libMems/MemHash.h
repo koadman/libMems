@@ -174,12 +174,6 @@ protected:
 };
 
 
-
-/**
- * Thrown when a file being read is invalid
- */
-CREATE_EXCEPTION(InvalidFileFormat)
-
 /**
  * Use this to convert MatchHashEntry mem list to a generic match list type
  * converts the mem_list into the type specified by MatchListType
@@ -208,43 +202,6 @@ void MemHash::GetMatchList( MatchListType& mem_list ) const {
 	}
 
 	RemapSubsetMatchAddresses( address_map, mem_list );
-}
-/**
- * Use this to update linkage pointers after copying an entire set of Matches
- */
-template< class FromType, class ToType, class MatchListType >
-void RemapSubsetMatchAddresses( std::map<FromType, ToType>& old_to_new_map, MatchListType& match_list );
-
-
-template< class FromType, class ToType, class MatchListType >
-void RemapSubsetMatchAddresses( std::map<FromType, ToType>& old_to_new_map, MatchListType& match_list )
-{
-	// now remap the subset and superset links
-	typename MatchListType::iterator match_iter = match_list.begin();
-	//typedef typename MatchListType::value_type MatchType;
-	//typedef typename Match MatchType;
-	typename std::map<FromType, ToType>::iterator map_iter;
-	for(; match_iter != match_list.end(); ++match_iter ){
-		// remap all subsets
-		std::set< Match* >& subsets = (*match_iter)->Subsets();
-		std::set< Match* > new_subsets;
-		std::set< Match* >::iterator sub_iter = subsets.begin();
-		for(; sub_iter != subsets.end(); ++sub_iter ){
-			map_iter = old_to_new_map.find( (FromType)*sub_iter );
-			new_subsets.insert( map_iter->second );
-		}
-		subsets = new_subsets;
-
-		// remap all supersets
-		std::set< Match* >& supersets = (*match_iter)->Supersets();
-		std::set< Match* > new_supersets;
-		std::set< Match* >::iterator super_iter = supersets.begin();
-		for(; super_iter != supersets.end(); ++super_iter ){
-			map_iter = old_to_new_map.find( (FromType)*super_iter );
-			new_supersets.insert( map_iter->second );
-		}
-		supersets = new_supersets;
-	}
 }
 
 
