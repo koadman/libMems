@@ -20,7 +20,7 @@
 namespace mems {
 
 /** When more space is needed to store a datatype, the memory pool will grow by this factor */
-const float POOL_GROWTH_RATE = 1.6;
+const double POOL_GROWTH_RATE = 1.6;
 	
 /**
  * This class allocates memory according to the slot allocation scheme for
@@ -87,7 +87,7 @@ T* SlotAllocator< T >::Allocate(){
 
 	// Last resort:
 	// increase the size of the data array
-	unsigned new_size = n_elems * POOL_GROWTH_RATE;
+	unsigned new_size = (unsigned)(n_elems * POOL_GROWTH_RATE);
 	if( new_size == 0 )
 		new_size++;
 	T* new_data = NULL;
