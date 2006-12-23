@@ -420,6 +420,10 @@
 					RelativePath="..\libMems\MuscleInterface.h"
 					>
 				</File>
+				<File
+					RelativePath="..\libMems\SubstitutionMatrix.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Utility"
