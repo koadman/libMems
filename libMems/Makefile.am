@@ -16,7 +16,7 @@ Islands.h   MaskedMemHash.h   SlotAllocator.h SeedMasks.h GappedAlignment.h \
 MuscleInterface.h GappedAligner.h PhyloTree.h SparseAbstractMatch.h \
 DenseAbstractMatch.h RepeatMatch.h UngappedLocalAlignment.h \
 AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
-twister.h
+twister.h SubstitutionMatrix.h
 
 LIBMEMS_SRC = \
 MemScorer.cpp        RepeatHash.cpp       ClustalInterface.cpp \
