@@ -85,22 +85,7 @@ void simpleFindIslands( IntervalList& iv_list, uint island_size, vector< Island 
 	}
 }
 
-static const score_t subst_matrix[4][4] = 
-{ 
-	{91,	-114,	-31,	-123}, // A
-
-	{-114,	100,	-125,	-31}, // C
-
-	{-31,	-125,	100,	-114}, // G
-
-	{-123,	-31,	-114,	91}, // T
-};
-
-static const score_t term_gap_score = -400;
-static const score_t gap_open_score = -400;
-static const score_t gap_extend_score = -30;
-
-void computeMatchScores( const string& seq1, const string& seq2, vector<score_t>& scores )
+void computeMatchScores( const string& seq1, const string& seq2, const PairwiseScoringScheme& scoring, vector<score_t>& scores )
 {
 	scores.resize( seq1.size() );
 	std::fill(scores.begin(), scores.end(), INVALID_SCORE);
@@ -115,17 +100,20 @@ void computeMatchScores( const string& seq1, const string& seq2, vector<score_t>
 		unsigned uLetter1 = table[c1];
 		unsigned uLetter2 = table[c2];
 
-		score_t scoreMatch = subst_matrix[uLetter1][uLetter2];
+		score_t scoreMatch = scoring.matrix[uLetter1][uLetter2];
 		scores[uColIndex] = scoreMatch;
 	}
 }
 
-void computeGapScores( const string& seq1, const string& seq2, vector<score_t>& scores )
+void computeGapScores( const string& seq1, const string& seq2, const PairwiseScoringScheme& scoring, vector<score_t>& scores )
 {
 	scores.resize(seq1.size());
 
 	bool bGapping1 = false;
 	bool bGapping2 = false;
+	score_t gap_open_score = scoring.gap_open;
+	score_t gap_extend_score = scoring.gap_extend;
+	score_t term_gap_score = gap_open_score;
 
 	unsigned uColCount = seq1.size();
 	unsigned uColStart = 0;

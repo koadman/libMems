@@ -14,6 +14,7 @@
 #endif
 
 #include "libGenome/gnSequence.h"
+#include "libMems/SubstitutionMatrix.h"
 #include "libMems/IntervalList.h"
 #include "libMems/NumericMatrix.h"
 #include "libMems/MatchList.h"
@@ -43,7 +44,6 @@ public:
  * Identifies gaps in the alignment between pairs of sequences that are longer than
  * some number of base pairs in length.  Prints islands to an output stream
  */
-typedef int score_t;
 void simpleFindIslands( IntervalList& iv_list, uint island_size, std::ostream& island_out );
 void findIslandsBetweenLCBs( IntervalList& iv_list, uint island_size, std::ostream& island_out );
 void simpleFindIslands( IntervalList& iv_list, uint island_size, std::vector< Island >& island_list );
@@ -62,19 +62,19 @@ typedef boost::multi_array< hss_list_t, 3 > hss_array_t;
 typedef HssCols IslandCols;	// use the same structure for island segs
 
 template<typename MatchVector>
-void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, score_t significance_threshold, hss_array_t& hss_array );
+void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array );
 
 template<typename MatchVector>
 void hssColsToIslandCols( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, std::vector< HssCols >& hss_list, std::vector< IslandCols >& island_col_list );
 
 template<typename MatchVector>
-void findHssRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, score_t significance_threshold, std::vector< CompactGappedAlignment<>* >& hss_list );
+void findHssRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, std::vector< CompactGappedAlignment<>* >& hss_list );
 
 template<typename MatchVector>
-void findIslandsRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, score_t significance_threshold, std::vector< CompactGappedAlignment<>* >& island_list );
+void findIslandsRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, std::vector< CompactGappedAlignment<>* >& island_list );
 
 template<typename MatchVector>
-void findIslandsRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, score_t significance_threshold, std::vector< Island >& island_list );
+void findIslandsRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, std::vector< Island >& island_list );
 
 /**
  *  Find regions in each sequence that do not belong to any LCB, add them to their own
@@ -346,8 +346,8 @@ void SingleCopyDistanceMatrix( MatchVector& iv_list, std::vector< genome::gnSequ
 }
 
 static const score_t INVALID_SCORE = (std::numeric_limits<score_t>::max)();
-void computeMatchScores( const std::string& seq1, const std::string& seq2, std::vector<score_t>& scores );
-void computeGapScores( const std::string& seq1, const std::string& seq2, std::vector<score_t>& scores );
+void computeMatchScores( const std::string& seq1, const std::string& seq2, const PairwiseScoringScheme& scoring, std::vector<score_t>& scores );
+void computeGapScores( const std::string& seq1, const std::string& seq2, const PairwiseScoringScheme& scoring, std::vector<score_t>& scores );
 
 inline
 void findRightEndpoint( size_t seqI, size_t seqJ, score_t significance_threshold, std::vector< score_t >& scores, hss_list_t& hss_list )
@@ -403,7 +403,7 @@ void findRightEndpoint( size_t seqI, size_t seqJ, score_t significance_threshold
 }
 
 template< typename MatchVector >
-void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, score_t significance_threshold, hss_array_t& hss_array )
+void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array )
 {
 	typedef typename MatchVector::value_type MatchType;
 	if( iv_list.size() == 0 )
@@ -423,8 +423,8 @@ void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSeque
 				hss_list.clear();
 
 				std::vector< score_t > scores;
-				computeMatchScores( aln_table[seqI], aln_table[seqJ], scores );
-				computeGapScores( aln_table[seqI], aln_table[seqJ], scores );
+				computeMatchScores( aln_table[seqI], aln_table[seqJ], scoring, scores );
+				computeGapScores( aln_table[seqI], aln_table[seqJ], scoring, scores );
 
 				// Invert the scores since we're trying to detect rare bouts of non-homologous sequence
 				for( size_t sI = 0; sI < scores.size(); ++sI )
@@ -604,12 +604,12 @@ void HssArrayToCga( const MatchVector& iv_list, std::vector< genome::gnSequence*
 }
 
 template< typename MatchVector >
-void findHssRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, score_t significance_threshold, std::vector< CompactGappedAlignment<>* >& hss_list )
+void findHssRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, std::vector< CompactGappedAlignment<>* >& hss_list )
 {
 	if( iv_list.size() == 0 )
 		return;
 	hss_array_t hss_array;
-	findHssRandomWalk( iv_list, seq_table, significance_threshold, hss_array );
+	findHssRandomWalk( iv_list, seq_table, scoring, significance_threshold, hss_array );
 	hss_array_t homo_array;
 	HssColsToIslandCols( iv_list, seq_table, hss_array, homo_array );
 	HssArrayToCga(iv_list, seq_table, homo_array, hss_list);
@@ -620,19 +620,19 @@ void findIslandsRandomWalkCga( const MatchVector& iv_list, std::vector< genome::
 	if( iv_list.size() == 0 )
 		return;
 	hss_array_t hss_array;
-	findHssRandomWalk( iv_list, seq_table, significance_threshold, hss_array );
+	findHssRandomWalk( iv_list, seq_table, scoring, significance_threshold, hss_array );
 	hss_array_t island_col_array;
 //	HssColsToIslandCols( iv_list, hss_array, island_col_array );
 	HssArrayToCga(iv_list, seq_table, hss_array, island_list);
 }
 
 template< typename MatchVector >
-void findIslandsRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, score_t significance_threshold, std::vector< Island >& island_list )
+void findIslandsRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, std::vector< Island >& island_list )
 {
 	if( iv_list.size() == 0 )
 		return;
 	hss_array_t hss_array;
-	findHssRandomWalk( iv_list, seq_table, significance_threshold, hss_array );
+	findHssRandomWalk( iv_list, seq_table, scoring, significance_threshold, hss_array );
 
 	typedef typename MatchVector::value_type MatchType;
 	for( uint iv_listI = 0; iv_listI < iv_list.size(); iv_listI++ ){
