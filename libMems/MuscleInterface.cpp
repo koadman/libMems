@@ -383,10 +383,16 @@ void MuscleInterface::SetMusclePath( const string& path ){
 	muscle_cmdline = parseCommand( muscle_path + " " + muscle_arguments );
 }
 
-void MuscleInterface::SetMuscleArguments( const string& args ){
-	muscle_arguments = args;
+void MuscleInterface::SetExtraMuscleArguments( const string& args )
+{
+	extra_muscle_arguments = args;
+}
+
+void MuscleInterface::SetMuscleArguments( const string& args )
+{
 	ClearCommandLine();
-	muscle_cmdline = parseCommand( muscle_path + " " + muscle_arguments );
+	muscle_arguments = args + " " + extra_muscle_arguments;
+	muscle_cmdline = parseCommand( muscle_path + " " + args + " " + extra_muscle_arguments );
 }
 
 MuscleInterface& MuscleInterface::operator=( const MuscleInterface& ci ){
@@ -449,6 +455,7 @@ try{
 		create_ok = false;
 
 	if( create_ok ){
+		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
 		vector< string > aln_matrix;
 		if( !CallMuscle( aln_matrix, seq_data ) ){
 			cout << "Muscle was unable to align:\n";
@@ -487,8 +494,8 @@ try{
 
 static int failure_count = 0;
 
-boolean MuscleInterface::CallMuscle( vector< string >& aln_matrix, const vector< string >& seq_table ){
-
+boolean MuscleInterface::CallMuscle( vector< string >& aln_matrix, const vector< string >& seq_table )
+{
 	gnSequence seq;
 	try{
 		ostringstream input_seq_stream;
@@ -496,8 +503,8 @@ boolean MuscleInterface::CallMuscle( vector< string >& aln_matrix, const vector<
 			seq += seq_table[ seqI ];
 			seq.setContigName( seqI, "seq" );
 		}
-		gnFASSource::Write( seq, input_seq_stream, false, true );
-		
+		gnFASSource::Write( seq, input_seq_stream, false, true );		
+
 		// now open a pipe to Muscle
 		string muscle_cmd = muscle_path + " " + muscle_arguments;
 		string output;
@@ -550,7 +557,6 @@ bool MuscleInterface::Refine( GappedAlignment& ga, size_t windowsize )
 		}
 	}
 	vector< string > aln_matrix;
-	string tmp_muscle_args = muscle_arguments;
 	if( windowsize == 0 )
 		SetMuscleArguments( " -quiet -refine -seqtype DNA " );
 	else
@@ -573,7 +579,6 @@ bool MuscleInterface::Refine( GappedAlignment& ga, size_t windowsize )
 		}
 		ga.SetAlignment( aln_table );
 	}
-	SetMuscleArguments( tmp_muscle_args );
 	return success;
 }
 
@@ -669,6 +674,10 @@ bool MuscleInterface::ProfileAlign( const GappedAlignment& ga1, const GappedAlig
 		string output;
 		string error;
 		string muscle_cmd = muscle_path + " " + muscle_arguments;
+		if( debug_muscle )
+		{
+			cerr << "Running " << muscle_cmd << endl;
+		}
 		boolean success = pipeExec( muscle_cmdline, muscle_cmd, input_seq_stream.str(), output, error );
 		if( !success || output.size() == 0 )
 		{

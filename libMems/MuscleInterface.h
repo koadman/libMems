@@ -48,9 +48,12 @@ public:
 
 	/** 
 	 * Set the arguments to use when executing muscle 
-	 * Defaults to -stable -quiet
 	 */
-	void SetMuscleArguments( const std::string& args );
+	void SetExtraMuscleArguments( const std::string& extra_args );
+	/** 
+	 * Get the arguments to use when executing muscle 
+	 */
+	std::string GetExtraMuscleArguments(){ return this->extra_muscle_arguments; };
 
 	/**
 	 * Attempts to perform a multiple alignment using Muscle between
@@ -70,7 +73,10 @@ public:
 protected:
 	std::string muscle_path;
 	std::string muscle_arguments;
+	std::string extra_muscle_arguments;
 	char** muscle_cmdline;
+
+	void SetMuscleArguments( const std::string& extra_args );
 	boolean CallMuscle( std::vector< std::string >& aln_matrix, const std::vector< std::string >& seq_table );
 	void ClearCommandLine()
 	{
