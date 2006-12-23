@@ -1366,26 +1366,25 @@ string CreateTempFileName(const string& prefix)
 }
 
 
-void Aligner::SearchLCBGaps( vector< LCB >& adjacencies, MatchList& new_matches, boolean entire_genome ) {
+/** iv_regions -- lists of intervening regions between LCBs in each sequence
+  * start positions organized as iv_regions[ seqI ][ lcbI * 2 ]
+  * end positions organized as iv_regions[ seqI ][ lcbI * 2 + 1 ] 
+ */
+void Aligner::CreateGapSearchList( vector< LCB >& adjacencies, MatchList& new_matches, vector< vector< int64 > >& iv_regions, boolean entire_genome ) 
+{
+	iv_regions.clear();
 	if( adjacencies.size() == 0 )
 		return;		// there aren't any intervening LCB regions!
 	if( adjacencies.size() == 1 && !entire_genome )
 		return; 	// there aren't any interveniing LCB regions in the local area
 	boolean debug_lcb_extension = false;	/**< enables debugging output */
-	vector< vector< int64 > > iv_regions;	/**< lists of intervening regions between LCBs in each sequence */
-											/**< start positions organized as iv_regions[ seqI ][ lcbI * 2 ] */
-											/**< end positions organized as iv_regions[ seqI ][ lcbI * 2 + 1 ] */
+
 	uint seqI = 0;
 	int lcbI = 0;
-	MatchList gap_list;
-	gap_list.seq_table = vector< gnSequence* >( seq_count );	/**< intervening regions of sequences */
-	gap_list.sml_table = vector< SortedMerList* >( seq_count );
 	iv_regions = vector< vector< int64 > >( seq_count );
 
 	// extract a gnSequence containing only the intervening regions
 	for( seqI = 0; seqI < seq_count; seqI++ ){
-		gap_list.seq_table[ seqI ] = new gnSequence();
-		gap_list.sml_table[ seqI ] = new DNAMemorySML();
 
 		// find the first LCB in this sequence
 		for( lcbI = 0; lcbI < adjacencies.size(); lcbI++ ){
@@ -1426,6 +1425,38 @@ void Aligner::SearchLCBGaps( vector< LCB >& adjacencies, MatchList& new_matches,
 				right_recurseI = adjacencies[ right_recurseI ].right_adjacency[ seqI ];
 			if( r_end + 1 == l_end && right_recurseI == -1 )
 				continue;	// we're at the right end and there's nothing to add
+			seq_len += r_end - l_end;
+			iv_regions[ seqI ].push_back( l_end );
+			iv_regions[ seqI ].push_back( r_end );
+		}
+		if( debug_lcb_extension )
+			cerr << "seqI " << seqI << " seq_len: " << seq_len << endl;
+	}
+
+}
+
+void Aligner::SearchLCBGaps( vector< LCB >& adjacencies, MatchList& new_matches, const vector< vector< int64 > >& iv_regions, boolean entire_genome ) {
+	if( adjacencies.size() == 0 )
+		return;		// there aren't any intervening LCB regions!
+	if( adjacencies.size() == 1 && !entire_genome )
+		return; 	// there aren't any interveniing LCB regions in the local area
+	boolean debug_lcb_extension = false;	/**< enables debugging output */
+
+	uint seqI = 0;
+	int lcbI = 0;
+	MatchList gap_list;
+	gap_list.seq_table = vector< gnSequence* >( seq_count );	/**< intervening regions of sequences */
+	gap_list.sml_table = vector< SortedMerList* >( seq_count );
+
+	// extract a gnSequence containing only the intervening regions
+	for( seqI = 0; seqI < seq_count; seqI++ ){
+		gap_list.seq_table[ seqI ] = new gnSequence();
+		gap_list.sml_table[ seqI ] = new DNAMemorySML();
+		gnSeqI seq_len = 0;
+		for( size_t ivI = 0; ivI < iv_regions[seqI].size(); ivI += 2 )
+		{
+			int64 l_end = iv_regions[seqI][ivI];
+			int64 r_end = iv_regions[seqI][ivI+1];
 			try{
 			if( debug_lcb_extension )
 				cerr << "Adding " << seqI << "\t" << l_end << "\t" << r_end << "\t(" << r_end - l_end << " bp)" << endl;
@@ -1434,8 +1465,6 @@ void Aligner::SearchLCBGaps( vector< LCB >& adjacencies, MatchList& new_matches,
 				cout << "";
 			}
 			seq_len += r_end - l_end;
-			iv_regions[ seqI ].push_back( l_end );
-			iv_regions[ seqI ].push_back( r_end );
 		}
 		if( debug_lcb_extension )
 			cerr << "seqI " << seqI << " seq_len: " << seq_len << endl;
@@ -1517,7 +1546,7 @@ void Aligner::SearchLCBGaps( vector< LCB >& adjacencies, MatchList& new_matches,
 	
 	if( debug_lcb_extension ){
 		ofstream debug_extension_out( "new_extension_matches.txt" );
-		gap_list.WriteList( debug_extension_out );
+		WriteList( gap_list, debug_extension_out );
 		debug_extension_out.close();
 	}
 
@@ -1549,6 +1578,7 @@ void Aligner::SearchLCBGaps( vector< LCB >& adjacencies, MatchList& new_matches,
 
 	new_matches.insert( new_matches.end(), gap_list.begin(), gap_list.end() );
 }
+
 
 
 class MatchLeftEndComparator {
@@ -2540,6 +2570,7 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 	int64 total_weight = 0;
 	int64 prev_total_weight = 0;
 	weightI = 0;
+	vector< vector< int64 > > prev_iv_regions;
 	do {
 
 //		for( ; weightI < weights.size(); weightI++ )
@@ -2552,28 +2583,37 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 		if( entire_genome && extend_lcbs && total_weight != 0 ){
 			if( status_out )
 				*status_out << "Performing LCB extension\n";
-			do {
-				// search the gaps between the LCBs to extend the ends of LCBs
-				new_matches.clear();
-				SearchLCBGaps( adjacencies, new_matches, entire_genome );
-				mlist.insert( mlist.end(), new_matches.begin(), new_matches.end() );
-				
-				AaronsLCB( mlist, breakpoints );
-				ComputeLCBs( mlist, breakpoints, LCB_list, weights );
-				cur_min_coverage = *(std::min_element(weights.begin(), weights.end()));
-				computeLCBAdjacencies_v2( LCB_list, weights, adjacencies );
+			vector< vector< int64 > > cur_iv_regions;
+			CreateGapSearchList( adjacencies, new_matches, cur_iv_regions, entire_genome );
+			// only do the search if there's something new to search
+			if( prev_iv_regions != cur_iv_regions )
+			{
+				do {
+					// search the gaps between the LCBs to extend the ends of LCBs
+					new_matches.clear();
+					vector< vector< int64 > > new_iv_regions;
+					CreateGapSearchList( adjacencies, new_matches, new_iv_regions, entire_genome );
+					SearchLCBGaps( adjacencies, new_matches, new_iv_regions, entire_genome );
+					mlist.insert( mlist.end(), new_matches.begin(), new_matches.end() );
+					
+					AaronsLCB( mlist, breakpoints );
+					ComputeLCBs( mlist, breakpoints, LCB_list, weights );
+					cur_min_coverage = *(std::min_element(weights.begin(), weights.end()));
+					computeLCBAdjacencies_v2( LCB_list, weights, adjacencies );
 
-				// calculate the new total LCB weight
-				prev_extension_weight = extension_weight;
-				extension_weight = 0;
-				for( weightI = 0; weightI < weights.size(); weightI++ )
-					extension_weight += weights[ weightI ];
-				if( status_out )
-					*status_out << "Previous weight: " << prev_extension_weight << " new weight: " << extension_weight << endl;
-				if( prev_extension_weight > extension_weight ){
-					cerr << "Error! Previous weight: " << prev_extension_weight << " new weight: " << extension_weight << endl;
-				}
-			}while( extension_weight > prev_extension_weight );
+					// calculate the new total LCB weight
+					prev_extension_weight = extension_weight;
+					extension_weight = 0;
+					for( weightI = 0; weightI < weights.size(); weightI++ )
+						extension_weight += weights[ weightI ];
+					if( status_out )
+						*status_out << "Previous weight: " << prev_extension_weight << " new weight: " << extension_weight << endl;
+					if( prev_extension_weight > extension_weight ){
+						cerr << "Error! Previous weight: " << prev_extension_weight << " new weight: " << extension_weight << endl;
+					}
+				}while( extension_weight > prev_extension_weight );
+			}
+			swap( prev_iv_regions, cur_iv_regions );
 		}
 		
 /*		if( total_weight != 0 )

@@ -126,7 +126,6 @@ private:
 /** a cache type to remember which intervals have already been searched */
 typedef std::pair< mems::Match*, mems::Match* > search_cache_t;
 
-
 /** 
  * This class is used to track relationships between LCBs during the LCB determination process.
  */
@@ -186,7 +185,9 @@ public:
 	void GetBestLCB( MatchList& r_list, MatchList& best_lcb );
 	void DoSomethingCool( MatchList& mlist, Interval& iv );
 	
-	void SearchLCBGaps( std::vector< LCB >& adjacencies, MatchList& new_matches, boolean entire_genome );
+	void CreateGapSearchList( std::vector< LCB >& adjacencies, MatchList& new_matches, std::vector< std::vector< int64 > >& iv_regions, boolean entire_genome );
+	void SearchLCBGaps( std::vector< LCB >& adjacencies, MatchList& new_matches, const std::vector< std::vector< int64 > >& iv_regions, boolean entire_genome );
+
 	/**
 	 * Set the minimum size of intervening region between two anchor matches that will
 	 * be considered for recursive anchor determination.  When the gaps between two anchors
