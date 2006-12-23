@@ -615,7 +615,7 @@ void findHssRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSe
 	HssArrayToCga(iv_list, seq_table, homo_array, hss_list);
 }
 template< typename MatchVector >
-void findIslandsRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, score_t significance_threshold, std::vector< CompactGappedAlignment<>* >& island_list )
+void findIslandsRandomWalkCga( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, std::vector< CompactGappedAlignment<>* >& island_list )
 {
 	if( iv_list.size() == 0 )
 		return;
