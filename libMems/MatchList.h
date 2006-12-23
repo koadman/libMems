@@ -176,26 +176,26 @@ void LoadSequences( MatchListType& mlist, std::ostream* log_stream ){
 
 	gnSeqI total_len = 0;
 	for( uint seqI = 0; seqI < mlist.seq_filename.size(); seqI++ ){
-		genome::gnSequence* file_sequence = new gnSequence();
+		genome::gnSequence* file_sequence = new genome::gnSequence();
 		// Load the sequence and tell the user if it loaded successfully
 		try{
 			file_sequence->LoadSource( mlist.seq_filename[ seqI ] );
 		}catch( genome::gnException& gne ){
 			delete file_sequence;
-			if( gne.GetCode() == FileNotOpened() )
-				std::cerr << "Error loading " << mlist.seq_filename[ seqI ] << endl;
+			if( gne.GetCode() == genome::FileNotOpened() )
+				std::cerr << "Error loading " << mlist.seq_filename[ seqI ] << std::endl;
 			else
 				std::cerr << gne;
 			return;
 		}catch( std::exception& e ){
 			delete file_sequence;
-			cerr << "Unhandled exception loading " << mlist.seq_filename[ seqI ] << endl;
-			cerr << "At: " << __FILE__ << ":" << __LINE__ << endl;
-			cerr << e.what();
+			std::cerr << "Unhandled exception loading " << mlist.seq_filename[ seqI ] << std::endl;
+			std::cerr << "At: " << __FILE__ << ":" << __LINE__ << std::endl;
+			std::cerr << e.what();
 			return;
 		}catch( ... ){
 			delete file_sequence;
-			cerr << "Unknown exception when loading " << mlist.seq_filename[ seqI ] << endl;
+			std::cerr << "Unknown exception when loading " << mlist.seq_filename[ seqI ] << std::endl;
 			return;
 		}
 		
@@ -222,7 +222,7 @@ void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* lo
 
 	// load and creates SMLs as necessary
 	uint64 default_seed = getSeed( mer_size, seed_rank );
-	vector< uint > create_list;
+	std::vector< uint > create_list;
 	uint seqI = 0;
 	for( seqI = 0; seqI < seq_table.size(); seqI++ ){
 		// define a DNAFileSML to store a sorted mer list
@@ -270,7 +270,7 @@ void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* lo
 			(*log_stream) << "Create time was: " << end_time - start_time << " seconds.\n";
 		
 		}catch(...){
-			cerr << "Error creating sorted mer list\n";
+			std::cerr << "Error creating sorted mer list\n";
 			throw;
 		}
 	}
@@ -284,7 +284,7 @@ void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* lo
 			try{
 				((DNAFileSML*)sml_table[ seqI ])->LoadFile( sml_filename[ seqI ] );
 			}catch( genome::gnException& gne ){
-				cerr << "Error loading sorted mer list\n";
+				std::cerr << "Error loading sorted mer list\n";
 				throw;
 			}
 		}
@@ -318,18 +318,18 @@ void LoadMFASequences( MatchListType& mlist, const std::string& mfa_filename, st
 	try{
 		file_sequence.LoadSource( mfa_filename );
 	}catch( genome::gnException& gne ){
-		if( gne.GetCode() == FileNotOpened() )
-			cerr << "Error loading " << mfa_filename << endl;
+		if( gne.GetCode() == genome::FileNotOpened() )
+			std::cerr << "Error loading " << mfa_filename << std::endl;
 		else
-			cerr << gne;
+			std::cerr << gne;
 		return;
 	}catch( std::exception& e ){
-		cerr << "Unhandled exception loading " << mfa_filename << endl;
-		cerr << "At: " << __FILE__ << ":" << __LINE__ << endl;
-		cerr << e.what();
+		std::cerr << "Unhandled exception loading " << mfa_filename << std::endl;
+		std::cerr << "At: " << __FILE__ << ":" << __LINE__ << std::endl;
+		std::cerr << e.what();
 		return;
 	}catch( ... ){
-		cerr << "Unknown exception when loading " << mfa_filename << endl;
+		std::cerr << "Unknown exception when loading " << mfa_filename << std::endl;
 		return;
 	}
 
@@ -387,14 +387,14 @@ void GenericMatchList< MatchPtrType >::Clear() {
 		if( sml_table[ seqI ] != NULL )
 			delete sml_table[ seqI ];
 	}
-	std::vector<MatchPtrType>::iterator match_iter = begin();
-	for(; match_iter != end(); match_iter++ ){
+	typename std::vector<MatchPtrType>::iterator match_iter = this->begin();
+	for(; match_iter != this->end(); match_iter++ ){
 		(*match_iter)->Free();
 		(*match_iter) = NULL;
 	}
 	seq_table.clear();
 	sml_table.clear();
-	clear();
+	this->clear();
 	seq_filename.clear();
 	sml_filename.clear();
 }
@@ -615,7 +615,7 @@ template< typename MatchPtrType >
 void GenericMatchList< MatchPtrType >::MultiplicityFilter( unsigned mult ){
 
 	size_t cur = 0;
-	for( uint memI = 0; memI < size(); memI++ ){
+	for( uint memI = 0; memI < this->size(); memI++ ){
 		if( (*this)[ memI ]->Multiplicity() == mult )
 			(*this)[cur++] = (*this)[memI];
 		else{
@@ -631,7 +631,7 @@ template< typename MatchPtrType >
 void GenericMatchList< MatchPtrType >::LengthFilter( gnSeqI length ){
 
 	size_t cur = 0;
-	for( size_t memI = 0; memI < size(); memI++ ){
+	for( size_t memI = 0; memI < this->size(); memI++ ){
 		if( (*this)[ memI ]->Length() >= length )
 			(*this)[cur++] = (*this)[memI];
 		else{
@@ -646,17 +646,17 @@ void GenericMatchList< MatchPtrType >::LengthFilter( gnSeqI length ){
 template< typename MatchPtrType >
 void GenericMatchList< MatchPtrType >::UnlinkedFirstStartFilter( unsigned start_seq )
 {
-	ErrorMsg( "GenericMatchList< MatchPtrType >::UnlinkedFirstStartFilter() needs to be re-implemented\n" );
-	std::vector<MatchPtrType>::iterator match_iter;
-	std::vector<MatchPtrType>::iterator to_del;
-	match_iter = begin();
-	while( match_iter != end() ){
+	genome::ErrorMsg( "GenericMatchList< MatchPtrType >::UnlinkedFirstStartFilter() needs to be re-implemented\n" );
+	typename std::vector<MatchPtrType>::iterator match_iter;
+	typename std::vector<MatchPtrType>::iterator to_del;
+	match_iter = this->begin();
+	while( match_iter != this->end() ){
 		if( (*match_iter)->FirstStart() != start_seq ||
 			(*match_iter)->Supersets().size() > 0 ) 
 		{
 			to_del = match_iter;
 			match_iter++;
-			std::erase( to_del );
+			this->erase( to_del );
 			continue;
 		}
 		match_iter++;
