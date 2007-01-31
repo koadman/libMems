@@ -6,7 +6,7 @@ projects/libMems.sln \
 projects/libMems.vcproj
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libMems-1.3.pc
+pkgconfig_DATA = libMems-@GENERIC_API_VERSION@.pc
 
 SUBDIRS = libMems doc 
 

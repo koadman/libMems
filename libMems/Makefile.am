@@ -16,7 +16,7 @@ Islands.h   MaskedMemHash.h   SlotAllocator.h SeedMasks.h GappedAlignment.h \
 MuscleInterface.h GappedAligner.h PhyloTree.h SparseAbstractMatch.h \
 DenseAbstractMatch.h RepeatMatch.h UngappedLocalAlignment.h \
 AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
-twister.h SubstitutionMatrix.h
+twister.h SubstitutionMatrix.h RepeatHashCat.h RepeatMatchList.h
 
 LIBMEMS_SRC = \
 MemScorer.cpp        RepeatHash.cpp       ClustalInterface.cpp \
@@ -36,11 +36,11 @@ library_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/
 library_include_HEADERS = $(LIBMEMS_H) 
 
 # build libraries with gcc (no suffix)
-lib_LTLIBRARIES = libMems-1.3.la
-libMems_1_3_la_SOURCES = $(LIBMEMS_SRC)
+lib_LTLIBRARIES = libMems-1.5.la
+libMems_1_5_la_SOURCES = $(LIBMEMS_SRC)
 
-libMems_1_3_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE) 
-libMems_1_3_la_LIBADD= dmSML/libdmSML.la
+libMems_1_5_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE) 
+libMems_1_5_la_LIBADD= dmSML/libdmSML.la
 
 
 #EXTRA_PROGRAMS = TestSML TestSMLstatic

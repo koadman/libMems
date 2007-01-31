@@ -15,6 +15,7 @@
 
 #include "libGenome/gnClone.h"
 #include <vector>
+#include <algorithm>
 #include <boost/type_traits/remove_pointer.hpp>
 #include <boost/type_traits/add_pointer.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -222,7 +223,7 @@ public:
 	}
 	// TODO??  make this do a wraparound comparison if all is equal?
 	boolean operator()(const MatchType& a, const MatchType& b) const{
-		int start_diff = max( a.FirstStart(), m_seq ) - max( a.FirstStart(), m_seq );
+		int start_diff = std::max( a.FirstStart(), m_seq ) - std::max( a.FirstStart(), m_seq );
 		if(start_diff == 0){
 			uint m_count = a.SeqCount();
 			m_count = m_count <= b.SeqCount() ? m_count : b.SeqCount();
@@ -291,7 +292,7 @@ public:
 	}
 	// TODO??  make this do a wraparound comparison if all is equal?
 	boolean operator()(const MatchType* a, const MatchType* b) const{
-		int start_diff = max( a->FirstStart(), m_seq ) - max( a->FirstStart(), m_seq );
+		int start_diff = std::max( a->FirstStart(), m_seq ) - std::max( a->FirstStart(), m_seq );
 		if(start_diff == 0){
 			uint m_count = a->SeqCount();
 			m_count = m_count <= b->SeqCount() ? m_count : b->SeqCount();
