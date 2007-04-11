@@ -23,6 +23,7 @@ namespace mems {
 
 extern bool debug_muscle;
 
+//template< typename MatchType=AbstractMatch >
 class MuscleInterface : public GappedAligner {
 public:
 	~MuscleInterface()
@@ -59,7 +60,15 @@ public:
 	 * Attempts to perform a multiple alignment using Muscle between
 	 * <code>r_begin</code> and <code>r_end</code>
 	 */
+	
+	//tjt: not the best way of doing this, should have just one Align function that takes an AbstractMatch*,
+	//     not both Match* & AbstractMatch* in separate, nearly identical functions..
+	//     Such a change would involve changes to GappedAligner, and would require some additional care taken
+	//     with SeqCount & Multiplicity, as well as seq_table[ seqI ]->length()/seq_table[ 0 ]->length(i),
+	//     for now, leave like this. hopefully sooner than later, make pretty!
 	boolean Align( GappedAlignment& cr, Match* r_begin, Match* r_end, std::vector< genome::gnSequence* >& seq_table );
+    
+	boolean Align( GappedAlignment& cr, AbstractMatch* r_begin, AbstractMatch* r_end, std::vector< genome::gnSequence* >& seq_table );
 
 	bool Refine( GappedAlignment& ga, size_t windowsize = 0 );
 
@@ -97,6 +106,7 @@ private:
 	MuscleInterface& operator=( const MuscleInterface& ci );
 	MuscleInterface();
 };
+
 
 }
 

@@ -400,10 +400,16 @@ MuscleInterface& MuscleInterface::operator=( const MuscleInterface& ci ){
 	return *this;
 }
 
+//tjt: not the best way of doing this, should have just one Align function that takes an AbstractMatch*,
+	//     not both Match* & AbstractMatch* in separate, nearly identical functions..
+	//     Such a change would involve changes to GappedAligner, and would require some additional care taken
+	//     with SeqCount & Multiplicity, as well as seq_table[ seqI ]->length()/seq_table[ 0 ]->length(i),
+	//     for now, leave like this. hopefully sooner than later, make pretty!
 boolean MuscleInterface::Align( GappedAlignment& cr, Match* r_begin, Match* r_end, vector< gnSequence* >& seq_table ){
 	gnSeqI gap_size = 0;
 	boolean create_ok = true;
 	uint seq_count = seq_table.size();
+	//seq_count = r_begin->Multiplicity();
 	uint seqI;
 	uint align_seqs = 0;
 	vector< string > tmp_mat = vector< string >( seq_count );
@@ -493,6 +499,138 @@ try{
 }
 
 static int failure_count = 0;
+
+boolean MuscleInterface::Align( GappedAlignment& cr, AbstractMatch* r_begin, AbstractMatch* r_end, vector< gnSequence* >& seq_table ){
+	gnSeqI gap_size = 0;
+	boolean create_ok = true;
+	//tjt: set the seq_count to a match m's multiplicity
+	//     even though all components n of match m could be 
+	//     less than the k sequences
+	//     if n == k, then perhaps there is 1 match component per sequence
+	//     if k = 1, n == repeat match multiplicity, where n >= 2
+	//     
+	uint seq_count = r_begin->Multiplicity();
+	uint seqI;
+	uint align_seqs = 0;
+	vector< string > tmp_mat = vector< string >( seq_count );
+try{
+
+// 
+//	Get the sequence in the intervening gaps between these two matches
+//
+	vector< string > seq_data;
+	vector< int64 > starts;
+	vector< uint > seqs;
+	const gnFilter* rc_filter = gnFilter::DNAComplementFilter();
+	
+	//std::cout << "getting regions between match components to align" << std::endl;
+	for( seqI = 0; seqI < seq_count; seqI++ ){
+
+		// skip this sequence if it's undefined
+		if( (r_end != NULL && r_end->Start( seqI ) == NO_MATCH ) ||
+			(r_begin != NULL && r_begin->Start( seqI ) == NO_MATCH) ){
+			starts.push_back( NO_MATCH );
+			continue;
+		}
+
+		// determine the size of the gap
+		int64 gap_start = 0;
+		int64 gap_end = 0;
+		// skip this sequence if it's undefined
+		if( (r_end != NULL && r_end->Start( seqI ) == NO_MATCH) ||
+			(r_begin != NULL && r_begin->Start( seqI ) == NO_MATCH) ){
+			gap_start = 0;
+			gap_end = 0;
+			return true;
+		}
+				
+		// determine the size of the gap
+		gap_end = r_end != NULL ? r_end->Start( seqI ) : seq_table[ seqI ]->length() + 1;
+		gap_start = r_begin != NULL ? r_begin->End( seqI ) + 1 : 1;
+		if( gap_end < 0 || gap_start < 0 ){
+			gap_end   = r_begin != NULL ? -r_begin->Start( seqI ) : seq_table[ 0 ]->length() + 1;
+			gap_start = r_end != NULL ? -r_end->Start( seqI ) + r_end->Length( seqI ) : 1;
+		}
+		if( gap_end <= 0 || gap_start <= 0 ){
+			// if either is still < 0 then there's a problem...
+			genome::ErrorMsg( "Error constructing intervening coordinates" );
+		}
+
+		int64 diff = gap_end - gap_start;
+		
+		//diff <= 0 ||
+		if( diff <= 0 || diff > max_alignment_length ){
+			starts.push_back( NO_MATCH );
+			continue;	// skip this sequence if it's either too big or too small
+		}
+		seqs.push_back( seqI );
+
+		// extract sequence data
+		if (0 )
+		{
+			starts.push_back( gap_start );
+			seq_data.push_back( "A" );
+			std::cout << "A" << std::endl;
+			diff = 1;
+		}
+		if( r_end == NULL || r_end->Start( seqI ) > 0 ){
+			starts.push_back( gap_start );
+			//std::cout << seq_table[ 0 ]->ToString( diff , gap_start ) << std::endl;
+			//tjt: all sequences are concatenated together into 1 seq_table entry
+			//
+			seq_data.push_back( seq_table[ 0 ]->ToString( diff , gap_start ) );
+		}else{
+			// reverse complement the sequence data.
+			starts.push_back( -gap_start );
+			//tjt: all sequences are concatenated together into 1 seq_table entry
+			//     
+			string cur_seq_data = seq_table[ 0 ]->ToString( diff , gap_start );
+			rc_filter->ReverseFilter( cur_seq_data );
+			seq_data.push_back( cur_seq_data );
+			//std::cout << cur_seq_data << std::endl;
+		}
+	}
+
+	if( seqs.size() <= 1 )
+		create_ok = false;
+
+	if( create_ok ){
+		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
+		vector< string > aln_matrix;
+		if( !CallMuscle( aln_matrix, seq_data ) ){
+			cout << "Muscle was unable to align:\n";
+			//if( r_begin )
+			//	cout << "Left match: " << *r_begin << endl;
+			//if( r_end )
+			//	cout << "Right match: " << *r_end << endl;
+			return false;
+		}
+
+		gnSeqI aln_length = aln_matrix.size() == 0 ? 0 : aln_matrix[0].length();
+		cr = GappedAlignment( seq_count, aln_length );
+		vector< string > aln_mat = vector< string >( seq_count );
+
+		// set sequence starts
+		for( uint seqI = 0; seqI < seqs.size(); seqI++ ){
+			cr.SetLength( seq_data[ seqI ].size(), seqs[ seqI ] );
+			aln_mat[ seqs[ seqI ] ] = aln_matrix[ seqI ];
+		}
+		for( uint seqI = 0; seqI < seq_count; seqI++ ){
+			cr.SetStart( seqI, starts[ seqI ] );
+			if( aln_mat[ seqI ].length() != aln_length )
+				aln_mat[ seqI ] = string( aln_length, '-' );
+		}
+
+		cr.SetAlignment( aln_mat );
+
+		return true;
+	}
+}catch(exception& e){
+	cerr << "At: " << __FILE__ << ":" << __LINE__ << endl;
+	cerr << e.what();
+}
+	return false;
+}
 
 boolean MuscleInterface::CallMuscle( vector< string >& aln_matrix, const vector< string >& seq_table )
 {
