@@ -61,6 +61,8 @@ typedef boost::multi_array< hss_list_t, 3 > hss_array_t;
 
 typedef HssCols IslandCols;	// use the same structure for island segs
 
+void findHssRandomWalkScoreVector( std::vector< score_t > scores, score_t significance_threshold, hss_list_t& hss_list, uint seqI = 0, uint seqJ = 0 );
+
 template<typename MatchVector>
 void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array );
 
@@ -402,6 +404,95 @@ void findRightEndpoint( size_t seqI, size_t seqJ, score_t significance_threshold
 	}
 }
 
+inline
+void findHssRandomWalkScoreVector( std::vector< score_t > scores, score_t significance_threshold, hss_list_t& hss_list, uint seqI, uint seqJ )
+{
+	// Invert the scores since we're trying to detect rare bouts of non-homologous sequence
+	for( size_t sI = 0; sI < scores.size(); ++sI )
+		if( scores[sI] != INVALID_SCORE)
+			scores[sI] = -scores[sI];
+
+	score_t score_sum = significance_threshold;	// start in an hss
+	score_t lrh = score_sum;
+	int64 ladder_point = -1;
+	int64 rev_ladder_point = 0;
+	bool fwd_hss = true;
+	bool homology_exists = true;
+
+	for( size_t colI = 0; colI <= scores.size(); ++colI )
+	{
+		if( colI < scores.size() && scores[colI] == INVALID_SCORE )
+			continue;
+
+		if( colI == scores.size() || (score_sum >= 0 && score_sum + scores[colI] < 0) ||
+			(score_sum >= lrh - significance_threshold && score_sum + scores[colI] < lrh - significance_threshold ) )
+		{
+			// end of an excursion
+			score_sum = 0;
+			lrh = 0;
+			if( fwd_hss )
+			{
+				// backtrack to find the MSC in the other direction?
+				// call the entire segment between MSCs the HSS?
+				score_t rev_score_sum = 0;
+				size_t rev_ladder_point = ladder_point;
+				for( size_t rcolI = colI; ((int64)rcolI) > ladder_point && rcolI > 0; --rcolI )
+				{
+					if( scores[rcolI-1] == INVALID_SCORE )
+						continue;
+					if( rev_score_sum > significance_threshold )
+						break;
+					if( rev_score_sum >= 0 && rev_score_sum + scores[rcolI-1] < 0 )
+					{
+						rev_score_sum = 0;
+					}else if( rev_score_sum == 0 && scores[rcolI-1] > 0 )
+					{
+						// start a new excursion
+						rev_score_sum += scores[rcolI-1];
+						rev_ladder_point = rcolI-1;
+					}else
+						rev_score_sum += scores[rcolI-1];
+
+				}
+				// don't make an HSS if there was no reverse HSS, unless we
+				// ended the excursion artificially because we hit the end of the block...
+				if( (rev_ladder_point != 0 || ladder_point != -1) ||
+					colI == scores.size() )
+				{
+					if( colI == scores.size() && ladder_point == -1 )
+					{
+						rev_ladder_point = scores.size()-1;
+						homology_exists = false;
+					}
+					if( ladder_point == -1 )
+						ladder_point = 0;
+					// the segment between ladder_point and rev_ladder_point is an HSS
+					HssCols ic;
+					ic.seqI = seqI;
+					ic.seqJ = seqJ;
+					ic.left_col = ladder_point;
+					ic.right_col = rev_ladder_point;
+					hss_list.push_back( ic );
+				}
+			}
+			fwd_hss = false;
+		}else if( score_sum == 0 && scores[colI] > 0 )
+		{
+			// start a new excursion
+			score_sum += scores[colI];
+			ladder_point = colI;
+		}else
+			score_sum += scores[colI];
+
+		if( score_sum > significance_threshold )
+			fwd_hss = true;
+		if( score_sum > lrh )
+			lrh = score_sum;
+	}
+//	if( homology_exists )
+//		findRightEndpoint( seqI, seqJ, significance_threshold, scores, hss_list );
+}
+
 template< typename MatchVector >
 void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array )
 {
@@ -426,91 +517,7 @@ void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSeque
 				computeMatchScores( aln_table[seqI], aln_table[seqJ], scoring, scores );
 				computeGapScores( aln_table[seqI], aln_table[seqJ], scoring, scores );
 
-				// Invert the scores since we're trying to detect rare bouts of non-homologous sequence
-				for( size_t sI = 0; sI < scores.size(); ++sI )
-					if( scores[sI] != INVALID_SCORE)
-						scores[sI] = -scores[sI];
-
-				score_t score_sum = significance_threshold;	// start in an hss
-				score_t lrh = score_sum;
-				int64 ladder_point = -1;
-				int64 rev_ladder_point = 0;
-				bool fwd_hss = true;
-				bool homology_exists = true;
-
-				for( size_t colI = 0; colI <= scores.size(); ++colI )
-				{
-					if( colI < scores.size() && scores[colI] == INVALID_SCORE )
-						continue;
-
-					if( colI == scores.size() || (score_sum >= 0 && score_sum + scores[colI] < 0) ||
-						(score_sum >= lrh - significance_threshold && score_sum + scores[colI] < lrh - significance_threshold ) )
-					{
-						// end of an excursion
-						score_sum = 0;
-						lrh = 0;
-						if( fwd_hss )
-						{
-							// backtrack to find the MSC in the other direction?
-							// call the entire segment between MSCs the HSS?
-							score_t rev_score_sum = 0;
-							size_t rev_ladder_point = ladder_point;
-							for( size_t rcolI = colI; ((int64)rcolI) > ladder_point && rcolI > 0; --rcolI )
-							{
-								if( scores[rcolI-1] == INVALID_SCORE )
-									continue;
-								if( rev_score_sum > significance_threshold )
-									break;
-								if( rev_score_sum >= 0 && rev_score_sum + scores[rcolI-1] < 0 )
-								{
-									rev_score_sum = 0;
-								}else if( rev_score_sum == 0 && scores[rcolI-1] > 0 )
-								{
-									// start a new excursion
-									rev_score_sum += scores[rcolI-1];
-									rev_ladder_point = rcolI-1;
-								}else
-									rev_score_sum += scores[rcolI-1];
-
-							}
-							// don't make an HSS if there was no reverse HSS, unless we
-							// ended the excursion artificially because we hit the end of the block...
-							if( (rev_ladder_point != 0 || ladder_point != -1) ||
-								colI == scores.size() )
-							{
-								if( colI == scores.size() && ladder_point == -1 )
-								{
-									rev_ladder_point = scores.size()-1;
-									homology_exists = false;
-								}
-								if( ladder_point == -1 )
-									ladder_point = 0;
-								// the segment between ladder_point and rev_ladder_point is an HSS
-								HssCols ic;
-								ic.seqI = seqI;
-								ic.seqJ = seqJ;
-								ic.left_col = ladder_point;
-								ic.right_col = rev_ladder_point;
-								hss_list.push_back( ic );
-							}
-						}
-						fwd_hss = false;
-					}else if( score_sum == 0 && scores[colI] > 0 )
-					{
-						// start a new excursion
-						score_sum += scores[colI];
-						ladder_point = colI;
-					}else
-						score_sum += scores[colI];
-
-					if( score_sum > significance_threshold )
-						fwd_hss = true;
-					if( score_sum > lrh )
-						lrh = score_sum;
-				}
-
-//				if( homology_exists )
-//					findRightEndpoint( seqI, seqJ, significance_threshold, scores, hss_list );
+				findHssRandomWalkScoreVector( scores, significance_threshold, hss_list, seqI, seqJ );
 			}
 		}
 	}
