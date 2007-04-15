@@ -116,12 +116,14 @@ void computeConsensusScore( const vector<string>& alignment, const PairwiseScori
 			computeMatchScores( alignment.at(j), nucleotides.at(i), pss, tscores );
 			
 			for( gnSeqI k = 0; k < alignment.at(j).size(); k++)
-				consensus_scores.at(k) += tscores.at(k);
+				if( tscores.at(k) != INVALID_SCORE )
+					consensus_scores.at(k) += tscores.at(k);
 
 			computeGapScores( alignment.at(j), nucleotides.at(i), pss, tscores );
 
 			for( gnSeqI k = 0; k < alignment.at(j).size(); k++)
-				consensus_scores.at(k) += tscores.at(k);
+				if( tscores.at(k) != INVALID_SCORE )
+					consensus_scores.at(k) += tscores.at(k);
 			
 		}
 		allscores.push_back(consensus_scores);
@@ -130,7 +132,7 @@ void computeConsensusScore( const vector<string>& alignment, const PairwiseScori
 	//tjt: find maxvalue for each column
 	// 0 = A, 1 = G, 2 = C, 3 = T
 	
-	std::vector< int > columnbp( alignment.at(0).size(),0);
+	std::vector< int > columnbp( alignment.at(0).size(), (std::numeric_limits<int>::min)());
 	
 	//for A,G,C,T
 	for( size_t i = 0; i < nucleotides.size(); i++)
@@ -138,7 +140,9 @@ void computeConsensusScore( const vector<string>& alignment, const PairwiseScori
 		//for each column
 		for( size_t j = 0; j < alignment.at(0).size(); j++)
 		{
-			if( i == 0 )
+			if( allscores.at(i).at(j) == INVALID_SCORE )
+				continue;
+			if( i == 0  )
 			{				
 				scores.at(j) = allscores.at(i).at(j);
 				columnbp.at(j) = 0;
@@ -153,7 +157,8 @@ void computeConsensusScore( const vector<string>& alignment, const PairwiseScori
 	//update score with maxvalue from each column
 	for( size_t j = 0; j < alignment.at(0).size(); j++)
 	{
-		score += scores.at(j);
+		if( scores.at(j) != INVALID_SCORE )
+			score += scores.at(j);
 		if (columnbp.at(j) == 0)
 			consensus.append("A");
 		else if (columnbp.at(j) == 1)
