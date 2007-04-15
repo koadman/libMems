@@ -78,7 +78,7 @@ public:
 	 * seqI, if ga1.LeftEnd(seqI) != NO_MATCH, then ga2.LeftEnd(seqI) == NO_MATCH 
 	 */
 	bool ProfileAlign( const GappedAlignment& ga1, const GappedAlignment& ga2, GappedAlignment& aln, bool anchored = true );
-
+	boolean CallMuscle( std::vector< std::string >& aln_matrix, const std::vector< std::string >& seq_table );
 protected:
 	std::string muscle_path;
 	std::string muscle_arguments;
@@ -86,7 +86,7 @@ protected:
 	char** muscle_cmdline;
 
 	void SetMuscleArguments( const std::string& extra_args );
-	boolean CallMuscle( std::vector< std::string >& aln_matrix, const std::vector< std::string >& seq_table );
+	
 	void ClearCommandLine()
 	{
 		if( muscle_cmdline != NULL )
