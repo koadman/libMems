@@ -348,6 +348,9 @@ void SingleCopyDistanceMatrix( MatchVector& iv_list, std::vector< genome::gnSequ
 }
 
 static const score_t INVALID_SCORE = (std::numeric_limits<score_t>::max)();
+
+//tjt: function to compute the consensus column score, consensus sequence, and cumulative consensus score from an alignment
+void computeConsensusScore( const std::vector<std::string>& alignment, const PairwiseScoringScheme& pss, std::vector<score_t>& scores, std::string& consensus, score_t& score );
 void computeMatchScores( const std::string& seq1, const std::string& seq2, const PairwiseScoringScheme& scoring, std::vector<score_t>& scores );
 void computeGapScores( const std::string& seq1, const std::string& seq2, const PairwiseScoringScheme& scoring, std::vector<score_t>& scores );
 

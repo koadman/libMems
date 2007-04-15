@@ -85,6 +85,87 @@ void simpleFindIslands( IntervalList& iv_list, uint island_size, vector< Island 
 	}
 }
 
+//tjt: function to compute the consensus column score, consensus sequence, and cumulative consensus score from an alignment 
+void computeConsensusScore( const vector<string>& alignment, const PairwiseScoringScheme& pss, vector<score_t>& scores, string& consensus, score_t& score )
+{
+
+	consensus.clear();
+	std::vector< std::vector< score_t > > allscores;
+
+	scores.resize( alignment.at(0).size() );
+	std::fill(scores.begin(), scores.end(), INVALID_SCORE);
+
+	score =	INVALID_SCORE;
+
+	std::vector< string > nucleotides;
+	nucleotides.push_back(std::string(alignment.at(0).size(),'A'));
+	nucleotides.push_back(std::string(alignment.at(0).size(),'G'));
+	nucleotides.push_back(std::string(alignment.at(0).size(),'C'));
+	nucleotides.push_back(std::string(alignment.at(0).size(),'T'));
+	
+	for( size_t i = 0; i < nucleotides.size(); i++)
+	{
+		//tjt: score alignment!
+		//for each row in the alignment, compare to string of A,G,C,T and build consensus
+		std::vector< score_t > consensus_scores(alignment.at(0).size(), 0);
+		
+		for( gnSeqI j = 0; j < alignment.size(); j++)
+		{
+			std::vector< score_t > tscores(alignment.at(0).size(), 0);
+		
+			computeMatchScores( alignment.at(j), nucleotides.at(i), pss, tscores );
+			
+			for( gnSeqI k = 0; k < alignment.at(j).size(); k++)
+				consensus_scores.at(k) += tscores.at(k);
+
+			computeGapScores( alignment.at(j), nucleotides.at(i), pss, tscores );
+
+			for( gnSeqI k = 0; k < alignment.at(j).size(); k++)
+				consensus_scores.at(k) += tscores.at(k);
+			
+		}
+		allscores.push_back(consensus_scores);
+	}
+	
+	//tjt: find maxvalue for each column
+	// 0 = A, 1 = G, 2 = C, 3 = T
+	
+	std::vector< int > columnbp( alignment.at(0).size(),0);
+	
+	//for A,G,C,T
+	for( size_t i = 0; i < nucleotides.size(); i++)
+	{
+		//for each column
+		for( size_t j = 0; j < alignment.at(0).size(); j++)
+		{
+			if( i == 0 )
+			{				
+				scores.at(j) = allscores.at(i).at(j);
+				columnbp.at(j) = 0;
+			}
+			else if (allscores.at(i).at(j) > scores.at(j))
+			{
+				scores.at(j) = allscores.at(i).at(j);
+				columnbp.at(j) = i;
+			}
+		}
+	}
+	//update score with maxvalue from each column
+	for( size_t j = 0; j < alignment.at(0).size(); j++)
+	{
+		score += scores.at(j);
+		if (columnbp.at(j) == 0)
+			consensus.append("A");
+		else if (columnbp.at(j) == 1)
+			consensus.append("G");
+		else if (columnbp.at(j) == 2)
+			consensus.append("C");
+		else if (columnbp.at(j) == 3)
+			consensus.append("T");
+	
+	}
+}
+
 void computeMatchScores( const string& seq1, const string& seq2, const PairwiseScoringScheme& scoring, vector<score_t>& scores )
 {
 	scores.resize( seq1.size() );
