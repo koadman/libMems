@@ -108,6 +108,9 @@ private:
 };
 
 
+void stripGapColumns( std::vector< std::string >& aln );
+
+
 }
 
 #endif // _MuscleInterface_h_
