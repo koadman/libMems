@@ -85,6 +85,37 @@ void simpleFindIslands( IntervalList& iv_list, uint island_size, vector< Island 
 	}
 }
 
+void computeSPScore( const vector<string>& alignment, const PairwiseScoringScheme& pss, vector<score_t>& scores, score_t& score )
+{
+	vector< score_t > cur_m_scores( alignment[0].size(), INVALID_SCORE );
+	vector< score_t > cur_g_scores( alignment[0].size(), INVALID_SCORE );
+	scores.resize(alignment[0].size());
+	std::fill(scores.begin(), scores.end(), 0);
+	score = 0;
+	double w = 1;	// weight, to be determined later...
+	for( size_t i = 0; i < alignment.size(); ++i )
+	{
+		for( size_t j = i+1; j < alignment.size(); ++j )
+		{
+			std::fill( cur_m_scores.begin(), cur_m_scores.end(), INVALID_SCORE );
+			std::fill( cur_g_scores.begin(), cur_g_scores.end(), INVALID_SCORE );
+			computeMatchScores( alignment.at(i), alignment.at(j), pss, cur_m_scores );
+			computeGapScores( alignment.at(i), alignment.at(j), pss, cur_g_scores );
+			for( size_t k = 0; k < cur_m_scores.size(); ++k )
+			{
+				score_t s = 0;
+				if( cur_m_scores[k] != INVALID_SCORE )
+					s += cur_m_scores[k];
+				if( cur_g_scores[k] != INVALID_SCORE )
+					s += cur_g_scores[k];
+				scores[k] += w * s;
+			}
+		}
+	}
+	for( size_t k = 0; k < scores.size(); ++k )
+		score += scores[k];
+}
+
 //tjt: function to compute the consensus column score, consensus sequence, and cumulative consensus score from an alignment 
 void computeConsensusScore( const vector<string>& alignment, const PairwiseScoringScheme& pss, vector<score_t>& scores, string& consensus, score_t& score )
 {
