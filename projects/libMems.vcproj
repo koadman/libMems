@@ -619,10 +619,6 @@
 					RelativePath="..\libMems\MuscleInterface.h"
 					>
 				</File>
-				<File
-					RelativePath="..\libMems\SubstitutionMatrix.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Utility"
@@ -645,6 +641,38 @@
 				</File>
 				<File
 					RelativePath="..\libMems\twister.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ProgressiveAligner"
+				>
+				<File
+					RelativePath="..\libMems\Backbone.h"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\PairwiseMatchAdapter.h"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\PairwiseMatchFinder.h"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\ProgressiveAligner.h"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\SeedOccurrenceList.h"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\SubstitutionMatrix.h"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\TreeUtilities.h"
 					>
 				</File>
 			</Filter>
@@ -796,6 +824,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\libMems\Backbone.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\libmems\ClustalInterface.cpp"
 					>
 				</File>
@@ -821,6 +853,18 @@
 				</File>
 				<File
 					RelativePath="..\libMems\twister.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ProgressiveAligner"
+				>
+				<File
+					RelativePath="..\libMems\PairwiseMatchFinder.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\ProgressiveAligner.cpp"
 					>
 				</File>
 			</Filter>
