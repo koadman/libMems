@@ -827,7 +827,7 @@ void createBackboneList( const IntervalList& iv_list, backbone_list_t& ula_list 
 	}
 }
 
-void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold )
+void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold )
 {
 	vector< AbstractMatch* > mlist( 1, m );
 	uint seq_count = seq_table.size();
@@ -875,6 +875,10 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	bb_list = ula_list;
 
 	checkForAllGapColumns( iv_list );
+
+	result = tmp_cga.Copy();
+	if( iv_list.size() > 0 )
+		new (result)CompactGappedAlignment<>( iv_list[0] );
 }
 
 

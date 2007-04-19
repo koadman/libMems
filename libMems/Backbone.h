@@ -46,8 +46,16 @@ void checkForAllGapColumns( IntervalList& iv_list );
 /**
  * Applies pairwise transitive homology statistics to detect backbone in a single collinear alignment
  * Unaligns any regions found to be non-homologous, returns coordinates of the homologous segments in bb_list
+ * @param	m			The input match in which homology detection will be applied
+ * @param	seq_table	A sequence table with one gnSequence pointer per match component
+ * @param	result		(output) A newly allocated CompactGappedAlignment that contains the resulting alignment of 
+ *						homologous sequence.  It is the caller's responsibility to free the memory using AbstractMatch::Free()
+ * @param	bb_list		(output) A list of homologous segments among each component of the output match
+ * @param	subst_scoring	The pairwise scoring scheme to apply
+ * @param	score_threshold	The significance threshold for score drops that will indicate a transition 
+ *							from homology to non-homology
  */
-void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
+void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
 
 /**
  * Applies pairwise transitive homology statistics to detect backbone in a genome alignment
