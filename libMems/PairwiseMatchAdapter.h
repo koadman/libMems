@@ -1,6 +1,11 @@
+#ifndef __PairwiseMatchAdapter_h__
+#define __PairwiseMatchAdapter_h__
+
 #include "libMems/AbstractMatch.h"
-#include "ProgressiveAligner.h"
+#include "libMems/ProgressiveAligner.h"
 #include <vector>
+
+namespace mems {
 
 /**
  * PairwiseMatchAdapter is a wrapper around an AbstractMatch that effectively projects a multi-match to a
@@ -95,3 +100,7 @@ public:
 	uint seq[2];
 	bool inverted;
 };
+
+}
+
+#endif	__PairwiseMatchAdapter_h__  

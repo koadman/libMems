@@ -19,9 +19,12 @@
 #include "libMems/Islands.h"
 #include <boost/type_traits/remove_pointer.hpp>
 #include <boost/multi_array.hpp>
-#include "SeedOccurrenceList.h"
+#include "libMems/SeedOccurrenceList.h"
 #include "libMems/SubstitutionMatrix.h"
 #include "libMems/MatchProjectionAdapter.h"
+
+namespace mems
+{
 
 // this is a 99.9% score threshold derived from the EVD of
 // simulations of homolgous sequence diverged to .75 substitutions per site and .05 indels per site
@@ -304,13 +307,6 @@ protected:
 };
 
 extern bool debug_aligner;
-
-typedef mems::UngappedLocalAlignment< mems::HybridAbstractMatch<> > ULA;
-
-typedef std::vector< std::vector< ULA* > > backbone_list_t;
-void applyIslands( mems::IntervalList& iv_list, backbone_list_t& bb_list, const mems::PairwiseScoringScheme& subst_scoring, mems::score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
-void writeBackboneSeqCoordinates( backbone_list_t& bb_list, mems::IntervalList& iv_list, std::ostream& bb_out );
-void writeBackboneColumns( std::ostream& bb_out, backbone_list_t& bb_list );
 
 	/** Select the next pair of nodes to align
 	 *  The chosen pair will either be unaligned extant sequences or unaligned
@@ -841,5 +837,110 @@ void projectIntervalList( mems::IntervalList& iv_list, std::vector< uint >& proj
 }
 
 
+template< class MatchType = mems::AbstractMatch >
+class GenericMatchSeqManipulator
+{
+public:
+	GenericMatchSeqManipulator( uint seq ) : m_seq(seq) {}
+	gnSeqI LeftEnd(MatchType*& m) const{ return m->LeftEnd(m_seq); }
+	gnSeqI Length(MatchType*& m) const{ return m->Length(m_seq); }
+	void CropLeft(MatchType*& m, gnSeqI amount ) const{ m->CropLeft(amount, m_seq); }
+	void CropRight(MatchType*& m, gnSeqI amount ) const{ m->CropRight(amount, m_seq); }
+	template< typename ContainerType >
+	void AddCopy(ContainerType& c, MatchType*& m) const{ c.push_back( m->Copy() ); }
+private:
+	uint m_seq;
+};
+
+typedef GenericMatchSeqManipulator<> AbstractMatchSeqManipulator;
+
+class SuperIntervalManipulator
+{
+public:
+	gnSeqI LeftEnd(const SuperInterval& siv) const{ return siv.LeftEnd(); }
+	gnSeqI Length(const SuperInterval& siv) const{ return siv.Length(); }
+	void CropLeft( SuperInterval& siv, gnSeqI amount ) const{ siv.CropLeft( amount );}
+	void CropRight( SuperInterval& siv, gnSeqI amount ) const{ siv.CropRight( amount );}
+	template< typename ContainerType >
+	void AddCopy(ContainerType& c, const SuperInterval& siv) const{ c.push_back( siv ); }
+};
+
+
+// iv_list is a container class that contains pointers to intervals or 
+// matches of some sort
+// precondition: both bp_list and intervals *must* be sorted
+template< class T, class Maniplator >
+void applyBreakpoints( std::vector< gnSeqI >& bp_list, std::vector<T>& iv_list, Maniplator& manip )
+{
+
+	size_t iv_count = iv_list.size();
+	size_t bpI = 0;
+	size_t ivI = 0;
+	while( ivI < iv_count && bpI < bp_list.size() )
+	{
+		if( manip.LeftEnd(iv_list[ivI]) == NO_MATCH )
+		{
+			++ivI;
+			continue;	// undefined in seqI, so no breakpoint here
+		}
+		//  -(ivI)----
+		//  -------|--
+		if( manip.LeftEnd(iv_list[ivI]) + manip.Length(iv_list[ivI]) <= bp_list[bpI] )
+		{
+			++ivI;
+			continue;
+		}
+		//  -----(ivI)-
+		//  --|--------
+		if( bp_list[bpI] <= manip.LeftEnd(iv_list[ivI]) )
+		{
+			++bpI;
+			continue;
+		}
+
+		// if split_at isn't 0 then we need to split cur_iv
+		// put the left side in the new list and crop cur_iv
+		gnSeqI crop_amt = bp_list[bpI] - manip.LeftEnd(iv_list[ivI]);
+		manip.AddCopy( iv_list, iv_list[ivI] );
+		T& left_iv = iv_list.back();
+
+		manip.CropLeft( iv_list[ivI], crop_amt );
+		manip.CropRight( left_iv, manip.Length(left_iv)-crop_amt );
+		// restore ordering
+		size_t nextI = ivI + 1;
+		while( nextI < iv_count && manip.LeftEnd( iv_list[nextI-1] ) > manip.LeftEnd( iv_list[nextI] ) )
+		{
+			std::swap( iv_list[nextI-1], iv_list[nextI] );
+			nextI++;
+		}
+
+// assume that crop works correctly and that it's okay to pass matches with NO_MATCH		
+/**/
+		if( manip.Length( iv_list[ivI] ) == 0 )
+		{
+			std::cerr << "Big fat generic zero 1\n";
+			genome::breakHere();
+		}
+		if( manip.Length( left_iv ) == 0 )
+		{
+			std::cerr << "Big fat generic zero 2\n";
+			genome::breakHere();
+		}
+		if( manip.LeftEnd( iv_list[ivI] ) == 0 )
+		{
+			std::cerr << "uh oh\n";
+			genome::breakHere();
+		}
+		if( manip.LeftEnd( left_iv ) == 0 )
+		{
+			std::cerr << "uh oh 2\n";
+			genome::breakHere();
+		}
+/**/
+	}
+}
+
+
+}
 
 #endif // _ProgressiveAligner_h_

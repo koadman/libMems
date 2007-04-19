@@ -1,5 +1,11 @@
+#ifndef __SeedOccurrenceList_h__
+#define __SeedOccurrenceList_h__
+
 #include <vector>
 #include "libMems/SortedMerList.h"
+
+namespace mems
+{
 
 class SeedOccurrenceList
 {
@@ -81,4 +87,6 @@ protected:
 	std::vector<frequency_type> count;	
 };
 
+}
 
+#endif	__SeedOccurrenceList_h__

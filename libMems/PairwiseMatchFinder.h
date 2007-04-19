@@ -15,6 +15,8 @@
 
 #include "libMems/MemHash.h"
 
+namespace mems {
+
 /**
  * Finds all pairwise matches with unique seeds among a group of sequences
  */
@@ -30,5 +32,7 @@ protected:
 
 	virtual boolean EnumerateMatches( mems::IdmerList& match_list );
 };
+
+}
 
 #endif //_PairwiseMatchFinder_h_

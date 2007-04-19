@@ -3,6 +3,8 @@
 
 #include <stack>
 
+namespace mems {
+
 template<class T, class S>
 void findAndErase( T& container, S& item )
 {
@@ -85,5 +87,6 @@ void rerootTree( Tree& t, node_id_t new_root )
 	}
 }
 
+}	// namespace mems
 
 #endif // __TreeUtilities_h__

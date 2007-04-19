@@ -13,6 +13,15 @@
 #include "libMems/ProgressiveAligner.h"
 #include "libMems/Backbone.h"
 #include "libMems/Islands.h"
+#include "libMems/CompactGappedAlignment.h"
+
+#include <boost/property_map.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/topological_sort.hpp>
+#include <boost/graph/johnson_all_pairs_shortest.hpp>
+#include <boost/graph/depth_first_search.hpp>
+#include <boost/graph/undirected_dfs.hpp>
 
 using namespace std;
 using namespace genome;
@@ -1029,3 +1038,7 @@ void writeBackboneSeqCoordinates( backbone_list_t& bb_list, IntervalList& iv_lis
 		}
 	}
 }
+
+
+}  // namespace mems
+

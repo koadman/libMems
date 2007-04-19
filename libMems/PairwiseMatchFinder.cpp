@@ -10,12 +10,13 @@
 #include "config.h"
 #endif
 
-#include "PairwiseMatchFinder.h"
+#include "libMems/PairwiseMatchFinder.h"
 #include <list>
 
 using namespace std;
 using namespace genome;
-using namespace mems;
+
+namespace mems {
 
 PairwiseMatchFinder::PairwiseMatchFinder(){
 }
@@ -68,3 +69,5 @@ boolean PairwiseMatchFinder::EnumerateMatches( IdmerList& match_list ){
 	}
 	return success;
 }
+
+}  // namespace mems
