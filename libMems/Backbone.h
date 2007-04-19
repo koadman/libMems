@@ -26,6 +26,10 @@
 
 namespace mems {
 
+// this is a 99.9% score threshold derived from the EVD of
+// simulations of homolgous sequence diverged to .75 substitutions per site and .05 indels per site
+const mems::score_t DEFAULT_ISLAND_SCORE_THRESHOLD = 2727;
+
 typedef mems::UngappedLocalAlignment< mems::HybridAbstractMatch<> > ULA;
 typedef std::vector< std::vector< ULA* > > backbone_list_t;
 
@@ -43,13 +47,13 @@ void checkForAllGapColumns( IntervalList& iv_list );
  * Applies pairwise transitive homology statistics to detect backbone in a single collinear alignment
  * Unaligns any regions found to be non-homologous, returns coordinates of the homologous segments in bb_list
  */
-void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold );
+void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
 
 /**
  * Applies pairwise transitive homology statistics to detect backbone in a genome alignment
  * Unaligns any regions found to be non-homologous, returns coordinates of the homologous segments in bb_list
  */
-void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold );
+void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
 
 /**
  * Writes a backbone column file.  This file type gets used by the Mauve GUI.
