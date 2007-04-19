@@ -26,9 +26,6 @@
 namespace mems
 {
 
-// this is a 99.9% score threshold derived from the EVD of
-// simulations of homolgous sequence diverged to .75 substitutions per site and .05 indels per site
-const mems::score_t DEFAULT_ISLAND_SCORE_THRESHOLD = 2727;
 
 class SuperInterval
 {
