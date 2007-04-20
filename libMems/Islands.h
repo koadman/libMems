@@ -542,7 +542,7 @@ void HssColsToIslandCols( const MatchVector& iv_list, std::vector< genome::gnSeq
 			for( seqJ = seqI + 1; seqJ < seq_count; seqJ++ ){
 				hss_list_t& hss_list = hss_array[seqI][seqJ][iv_listI];
 				hss_list_t& island_col_list = island_col_array[seqI][seqJ][iv_listI];
-				ComplementHss(iv_list.AlignmentLength(),hss_list,island_col_list,seqI,seqJ);
+				ComplementHss(iv_list[iv_listI]->AlignmentLength(),hss_list,island_col_list,seqI,seqJ);
 			}
 		}
 	}
