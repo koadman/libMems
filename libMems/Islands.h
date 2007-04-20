@@ -531,6 +531,7 @@ void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSeque
 template< typename MatchVector >
 void HssColsToIslandCols( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, hss_array_t& hss_array, hss_array_t& island_col_array )
 {
+
 	typedef typename MatchVector::value_type MatchType;
 	uint seq_count = seq_table.size();
 	island_col_array.resize( boost::extents[seq_count][seq_count][iv_list.size()] );
@@ -541,37 +542,43 @@ void HssColsToIslandCols( const MatchVector& iv_list, std::vector< genome::gnSeq
 			for( seqJ = seqI + 1; seqJ < seq_count; seqJ++ ){
 				hss_list_t& hss_list = hss_array[seqI][seqJ][iv_listI];
 				hss_list_t& island_col_list = island_col_array[seqI][seqJ][iv_listI];
-
-				size_t left_col = 0;
-				for( size_t hssI = 0; hssI < hss_list.size(); ++hssI )
-				{
-					if( left_col >= hss_list[hssI].left_col ) 
-					{
-						left_col = hss_list[hssI].right_col + 1;
-						continue;	// handle the case where the HSS starts at col 0
-					}
-					// ending an island
-					IslandCols isle;
-					isle.seqI = seqI;
-					isle.seqJ = seqJ;
-					isle.left_col = left_col;
-					isle.right_col = hss_list[hssI].left_col;
-					island_col_list.push_back(isle);
-					left_col = hss_list[hssI].right_col + 1;
-				}
-
-				if( left_col < iv->AlignmentLength() )
-				{
-					// add the last island
-					IslandCols isle;
-					isle.seqI = seqI;
-					isle.seqJ = seqJ;
-					isle.left_col = left_col;
-					isle.right_col = iv->AlignmentLength()-1;
-					island_col_list.push_back(isle);
-				}
+				ComplementHss(iv_list.AlignmentLength(),hss_list,island_col_list,seqI,seqJ);
 			}
 		}
+	}
+}
+inline
+void ComplementHss( const size_t alignment_length, hss_list_t& hss_list, hss_list_t& island_col_list, uint seqI=0, uint seqJ=0 )
+{
+
+
+	size_t left_col = 0;
+	for( size_t hssI = 0; hssI < hss_list.size(); ++hssI )
+	{
+		if( left_col >= hss_list[hssI].left_col ) 
+		{
+			left_col = hss_list[hssI].right_col + 1;
+			continue;	// handle the case where the HSS starts at col 0
+		}
+		// ending an island
+		IslandCols isle;
+		isle.seqI = seqI;
+		isle.seqJ = seqJ;
+		isle.left_col = left_col;
+		isle.right_col = hss_list[hssI].left_col;
+		island_col_list.push_back(isle);
+		left_col = hss_list[hssI].right_col + 1;
+	}
+
+	if( left_col < alignment_length )
+	{
+		// add the last island
+		IslandCols isle;
+		isle.seqI = seqI;
+		isle.seqJ = seqJ;
+		isle.left_col = left_col;
+		isle.right_col = alignment_length-1;
+		island_col_list.push_back(isle);
 	}
 }
 
