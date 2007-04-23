@@ -841,7 +841,7 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	vector< CompactGappedAlignment<>* > iv_ptrs(1);
 	CompactGappedAlignment<> tmp_cga;
 	iv_ptrs[0] = tmp_cga.Copy();
-	new (iv_ptrs[0])CompactGappedAlignment<>( *m );
+	new (iv_ptrs[0])CompactGappedAlignment<>( *m );	// this will be freed when unalignIslands() gets called
 
 	vector< CompactGappedAlignment<>* > iv_orig_ptrs(iv_ptrs);
 
@@ -857,6 +857,8 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	// unalignIslands wants an IntervalList
 	IntervalList iv_list;
 	iv_list.seq_table = seq_table;
+	iv_list.resize(1);
+	iv_list[0].SetMatches( vector<AbstractMatch*>(1, iv_orig_ptrs.front()->Copy() ) );
 	// unalign regions found to be non-homologous
 	unalignIslands( iv_list, iv_orig_ptrs, ula_list );
 
