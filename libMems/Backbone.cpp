@@ -274,10 +274,10 @@ typedef boost::multi_array< vector< pair< size_t, size_t > >, 3 > pairwise_genom
 
 void translateToPairwiseGenomeHSS( const hss_array_t& hss_array, pairwise_genome_hss_t& hss_cols )
 {
-	hss_cols.resize( boost::extents[hss_array.shape()[0]][hss_array.shape()[1]][hss_array.shape()[2]] );
-
 	uint seq_count = hss_array.shape()[0];
 	uint iv_count = hss_array.shape()[2];
+	hss_cols.resize( boost::extents[seq_count][seq_count][iv_count] );
+
 	// make pairwise projections of intervals and find LCBs...
 	for( size_t seqI = 0; seqI < seq_count; ++seqI )
 	{
@@ -824,6 +824,41 @@ void createBackboneList( const IntervalList& iv_list, backbone_list_t& ula_list 
 			mula->SetLength( right_col - left_col );
 			ula_list[ivI].push_back(mula);
 		}
+		// merge neighbors that cover identical match components
+		for( size_t ulaI = 1; ulaI < ula_list[ivI].size(); ulaI++ )
+		{
+			size_t seqI = 0;
+			for( ; seqI < ula_list[ivI][ulaI]->SeqCount(); ++seqI )
+			{
+				int64 s1 = ula_list[ivI][ulaI-1]->Start(seqI);
+				int64 s2 = ula_list[ivI][ulaI]->Start(seqI);
+				if( s1 == mems::NO_MATCH && s2 == mems::NO_MATCH )
+					continue;
+				if( s1 == mems::NO_MATCH && s2 != mems::NO_MATCH )
+					break;
+				if( s1 != mems::NO_MATCH && s2 == mems::NO_MATCH )
+					break;
+				int64 r1 = ula_list[ivI][ulaI-1]->RightEnd(seqI);
+				if( r1 + 1 != s2 )
+					break;	// must be adjacent to each other
+			}
+			if( seqI == ula_list[ivI][ulaI]->SeqCount() )
+			{
+				// ulaI-1 needs to be swallowed up by ulaI
+				ula_list[ivI][ulaI]->ExtendStart( ula_list[ivI][ulaI-1]->Length() );
+				ula_list[ivI][ulaI-1]->SetLength(0);
+			}
+		}
+		// get rid of matches that were swallowed up
+		vector< ULA* > condensed_list;
+		for( size_t ulaI = 0; ulaI < ula_list[ivI].size(); ulaI++ )
+		{
+			if( ula_list[ivI][ulaI]->Length() > 0 )
+				condensed_list.push_back(ula_list[ivI][ulaI]);
+			else
+				ula_list[ivI][ulaI]->Free();
+		}
+		swap( ula_list[ivI], condensed_list );
 	}
 }
 
@@ -831,8 +866,6 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 {
 	vector< AbstractMatch* > mlist( 1, m );
 	uint seq_count = seq_table.size();
-
-	boost::multi_array< vector< CompactGappedAlignment<>* >, 2> island_array;
 
 	// indexed by seqI, seqJ, ivI, hssI (left col, right col)
 	pairwise_genome_hss_t hss_cols(boost::extents[seq_count][seq_count][1]);
@@ -844,14 +877,15 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	new (iv_ptrs[0])CompactGappedAlignment<>( *m );	// this will be freed when unalignIslands() gets called
 
 	vector< CompactGappedAlignment<>* > iv_orig_ptrs(iv_ptrs);
+	hss_array_t island_array, hss_array;
 
-	hss_array_t hss_array;
-	findHssRandomWalk( mlist, seq_table, subst_scoring, score_threshold, hss_array );
+	findHssRandomWalk( mlist, seq_table, subst_scoring, score_threshold, island_array );
+	HssColsToIslandCols( mlist, seq_table, island_array, hss_array );
 	translateToPairwiseGenomeHSS( hss_array, hss_cols );
 
-	backbone_list_t ula_list;
 
 	// merge overlapping pairwise homology predictions into n-way predictions
+	backbone_list_t ula_list;
 	mergePairwiseHomologyPredictions( iv_orig_ptrs, hss_cols, ula_list );
 
 	// unalignIslands wants an IntervalList
