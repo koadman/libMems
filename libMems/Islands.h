@@ -461,8 +461,8 @@ void findHssRandomWalkScoreVector( std::vector< score_t > scores, score_t signif
 				}
 				// don't make an HSS if there was no reverse HSS, unless we
 				// ended the excursion artificially because we hit the end of the block...
-				if( (rev_ladder_point != 0 || ladder_point != -1) ||
-					colI == scores.size() )
+				if( ((rev_ladder_point != 0 || ladder_point != -1) ||
+					colI == scores.size()) && rev_ladder_point != -1 )
 				{
 					if( colI == scores.size() && ladder_point == -1 )
 					{
