@@ -54,8 +54,12 @@ void checkForAllGapColumns( IntervalList& iv_list );
  * @param	subst_scoring	The pairwise scoring scheme to apply
  * @param	score_threshold	The significance threshold for score drops that will indicate a transition 
  *							from homology to non-homology
+ * @param	left_homologous	Set to true if the detection code should assume that sequence beyond the left-most alignment
+ *							column is homologous sequence
+ * @param	right_homologous	Set to true if the detection code should assume that sequence beyond the right-most alignment
+ *							column is homologous sequence
  */
-void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
+void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD,  boolean left_homologous = false, boolean right_homologous = false );
 
 /**
  * Applies pairwise transitive homology statistics to detect backbone in a genome alignment

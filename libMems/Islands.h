@@ -61,10 +61,10 @@ typedef boost::multi_array< hss_list_t, 3 > hss_array_t;
 
 typedef HssCols IslandCols;	// use the same structure for island segs
 
-void findHssRandomWalkScoreVector( std::vector< score_t > scores, score_t significance_threshold, hss_list_t& hss_list, uint seqI = 0, uint seqJ = 0 );
+void findHssRandomWalkScoreVector( std::vector< score_t > scores, score_t significance_threshold, hss_list_t& hss_list, uint seqI = 0, uint seqJ = 0, boolean left_homologous = false, boolean right_homologous = false );
 
 template<typename MatchVector>
-void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array );
+void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array, boolean left_homologous = false, boolean right_homologous = false );
 
 template<typename MatchVector>
 void hssColsToIslandCols( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, std::vector< HssCols >& hss_list, std::vector< IslandCols >& island_col_list );
@@ -410,14 +410,16 @@ void findRightEndpoint( size_t seqI, size_t seqJ, score_t significance_threshold
 }
 
 inline
-void findHssRandomWalkScoreVector( std::vector< score_t > scores, score_t significance_threshold, hss_list_t& hss_list, uint seqI, uint seqJ )
+void findHssRandomWalkScoreVector( std::vector< score_t > scores, score_t significance_threshold, hss_list_t& hss_list, uint seqI, uint seqJ, boolean left_homologous, boolean right_homologous )
 {
 	// Invert the scores since we're trying to detect rare bouts of non-homologous sequence
 	for( size_t sI = 0; sI < scores.size(); ++sI )
 		if( scores[sI] != INVALID_SCORE)
 			scores[sI] = -scores[sI];
 
-	score_t score_sum = significance_threshold;	// start in an hss
+	score_t left_end_score = left_homologous ? 0 : significance_threshold;
+	score_t right_end_score = right_homologous ? 0 : significance_threshold;
+	score_t score_sum = left_end_score;	// start in an hss if non-homologous
 	score_t lrh = score_sum;
 	int64 ladder_point = -1;
 	int64 rev_ladder_point = 0;
@@ -499,7 +501,7 @@ void findHssRandomWalkScoreVector( std::vector< score_t > scores, score_t signif
 }
 
 template< typename MatchVector >
-void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array )
+void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array, boolean left_homologous, boolean right_homologous )
 {
 	typedef typename MatchVector::value_type MatchType;
 	if( iv_list.size() == 0 )
@@ -522,7 +524,7 @@ void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSeque
 				computeMatchScores( aln_table[seqI], aln_table[seqJ], scoring, scores );
 				computeGapScores( aln_table[seqI], aln_table[seqJ], scoring, scores );
 
-				findHssRandomWalkScoreVector( scores, significance_threshold, hss_list, seqI, seqJ );
+				findHssRandomWalkScoreVector( scores, significance_threshold, hss_list, seqI, seqJ, left_homologous, right_homologous );
 			}
 		}
 	}
