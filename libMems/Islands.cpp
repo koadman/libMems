@@ -108,7 +108,7 @@ void computeSPScore( const vector<string>& alignment, const PairwiseScoringSchem
 					s += cur_m_scores[k];
 				if( cur_g_scores[k] != INVALID_SCORE )
 					s += cur_g_scores[k];
-				scores[k] += w * s;
+				scores[k] += (score_t)(w * (double)s);
 			}
 		}
 	}
