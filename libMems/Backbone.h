@@ -24,6 +24,9 @@
 #include "libMems/Islands.h"
 #include <boost/multi_array.hpp>
 
+#include <sstream>
+#include <vector>
+
 namespace mems {
 
 // this is a 99.9% score threshold derived from the EVD of
@@ -76,6 +79,72 @@ void writeBackboneColumns( std::ostream& bb_out, backbone_list_t& bb_list );
  * Writes a backbone sequence coordinate file.  This file type is easier to analyze with statistical packages.
  */
 void writeBackboneSeqCoordinates( backbone_list_t& bb_list, IntervalList& iv_list, std::ostream& bb_out );
+
+
+
+typedef std::vector< std::pair< int64, int64 > > bb_seqentry_t;
+typedef struct bb_entry_s
+{
+	bb_seqentry_t bb_seq;
+	ULA bb_cols;
+	size_t iv;
+} bb_entry_t;
+
+inline
+void printBbSeq( std::ostream& os, const bb_seqentry_t& bbseq )
+{
+	for( size_t i = 0; i < bbseq.size(); ++i )
+	{
+		if( i > 0 )
+			os << '\t';
+		os << "(" << bbseq[i].first << ", " << bbseq[i].second << ")";
+	}
+}
+
+inline
+void readBackboneSeqFile( std::istream& bbseq_input, std::vector< bb_seqentry_t >& backbone )
+{
+	std::string cur_line;
+	std::getline( bbseq_input, cur_line );	// read off the header line
+	while( std::getline( bbseq_input, cur_line ) )
+	{
+		bb_seqentry_t bb;
+		std::stringstream line_str( cur_line );
+		int64 lpos = 0;
+		while( line_str >> lpos )
+		{
+			int64 rpos = 0;
+			line_str >> rpos;
+			bb.push_back( std::make_pair( lpos, rpos ) );
+		}
+		backbone.push_back(bb);
+	}
+}
+
+inline
+void readBackboneColsFile( std::istream& bbcol_input, std::vector< std::pair< size_t, ULA > >& bb_list )
+{
+	std::string cur_line;
+	while( std::getline( bbcol_input, cur_line ) )
+	{
+		ULA tmp_ula;
+		size_t ivI;
+		std::stringstream ss( cur_line );
+		ss >> ivI;
+		size_t left_col;
+		size_t len;
+		ss >> left_col;
+		ss >> len;
+		gnSeqI bbseq;
+		while( ss >> bbseq )
+		{
+			tmp_ula.SetStart( bbseq, left_col );
+		}
+		tmp_ula.SetLength( len );
+		bb_list.push_back( std::make_pair( ivI, tmp_ula ) );
+	}
+}
+
 
 }
 
