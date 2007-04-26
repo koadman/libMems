@@ -89,4 +89,5 @@ protected:
 
 }
 
-#endif	__SeedOccurrenceList_h__
+#endif	// __SeedOccurrenceList_h__
+
