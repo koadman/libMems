@@ -16,7 +16,9 @@ Islands.h   MaskedMemHash.h   SlotAllocator.h SeedMasks.h GappedAlignment.h \
 MuscleInterface.h GappedAligner.h PhyloTree.h SparseAbstractMatch.h \
 DenseAbstractMatch.h RepeatMatch.h UngappedLocalAlignment.h \
 AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
-twister.h SubstitutionMatrix.h RepeatHashCat.h RepeatMatchList.h
+twister.h SubstitutionMatrix.h RepeatHashCat.h RepeatMatchList.h \
+Backbone.h ProgressiveAligner.h PairwiseMatchAdapter.h PairwiseMatchFinder.h \
+SeedOccurrenceList.h TreeUtilities.h
 
 LIBMEMS_SRC = \
 MemScorer.cpp        RepeatHash.cpp       ClustalInterface.cpp \
@@ -28,7 +30,8 @@ gnAlignedSequences.cpp                     \
 MatchList.cpp        Aligner.cpp \
 Islands.cpp          MaskedMemHash.cpp    GappedAlignment.cpp \
 MuscleInterface.cpp  PhyloTree.cpp         \
-RepeatHashCat.cpp    RepeatMatchList.cpp  RepeatMatch.cpp 
+RepeatHashCat.cpp    RepeatMatchList.cpp  RepeatMatch.cpp \
+Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp
 
 
 library_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)

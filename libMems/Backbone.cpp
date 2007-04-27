@@ -892,7 +892,8 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	IntervalList iv_list;
 	iv_list.seq_table = seq_table;
 	iv_list.resize(1);
-	iv_list[0].SetMatches( vector<AbstractMatch*>(1, iv_orig_ptrs.front()->Copy() ) );
+	vector<AbstractMatch*> asdf(1, iv_orig_ptrs.front()->Copy() );
+	iv_list[0].SetMatches( asdf );
 	// unalign regions found to be non-homologous
 	unalignIslands( iv_list, iv_orig_ptrs, ula_list );
 
