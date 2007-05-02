@@ -15,7 +15,11 @@
 #include "libGenome/gnFilter.h"
 #include "libGenome/gnFASSource.h"
 #include "libGenome/gnStringTools.h"
-
+#include "libMUSCLE/muscle.h"
+//#include "libMUSCLE/muscle.cpp"
+//#include "libMUSCLE/DoMuscle.cpp"
+//#include "libMUSCLE/MSA.h"
+//#include "libMUSCLE/TEXTfile.h"
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/case_conv.hpp"
 
@@ -463,7 +467,7 @@ try{
 	if( create_ok ){
 		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
 		vector< string > aln_matrix;
-		if( !CallMuscle( aln_matrix, seq_data ) ){
+		if( !CallMuscleFast( aln_matrix, seq_data ) ){
 			cout << "Muscle was unable to align:\n";
 			if( r_begin )
 				cout << "Left match: " << *r_begin << endl;
@@ -597,7 +601,7 @@ try{
 	if( create_ok ){
 		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
 		vector< string > aln_matrix;
-		if( !CallMuscle( aln_matrix, seq_data ) ){
+		if( !CallMuscleFast( aln_matrix, seq_data ) ){
 			cout << "Muscle was unable to align:\n";
 			//if( r_begin )
 			//	cout << "Left match: " << *r_begin << endl;
@@ -635,14 +639,15 @@ try{
 boolean MuscleInterface::CallMuscle( vector< string >& aln_matrix, const vector< string >& seq_table )
 {
 	gnSequence seq;
+
 	try{
 		ostringstream input_seq_stream;
+		//istringstream muscle_input_seq_stream;
 		for( uint seqI = 0; seqI < seq_table.size(); seqI++ ){
 			seq += seq_table[ seqI ];
 			seq.setContigName( seqI, "seq" );
 		}
 		gnFASSource::Write( seq, input_seq_stream, false, true );		
-
 		// now open a pipe to Muscle
 		string muscle_cmd = muscle_path + " " + muscle_arguments;
 		string output;
@@ -683,6 +688,67 @@ boolean MuscleInterface::CallMuscle( vector< string >& aln_matrix, const vector<
 	return false;
 }
 
+boolean MuscleInterface::CallMuscleFast( vector< string >& aln_matrix, const vector< string >& seq_table )
+{
+	gnSequence seq;
+
+	char* gargv[8];
+	gargv[0]= "-quiet";
+	gargv[1]= "-stable";
+	gargv[2]= "-seqtype";
+	gargv[3]= "DNA";
+	gargv[4]= "-in";
+	gargv[5]= "muscle.input";
+	gargv[6]= "-out";
+	gargv[7]= "muscle.output";
+	try{
+		ostringstream input_seq_stream;
+		//istringstream muscle_input_seq_stream;
+		for( uint seqI = 0; seqI < seq_table.size(); seqI++ ){
+			seq += seq_table[ seqI ];
+			seq.setContigName( seqI, "seq" );
+		}	    
+		gnFASSource::Write( seq, "muscle.input");
+	
+		//tjt: don't set this everytime MUSCLE is called..
+		//SetNewHandler();
+
+		ProcessArgVect(8, gargv);
+		SetParams();
+		DoMuscle();
+
+		//tjt: anything need to be cleaned up??
+		
+		ifstream output_aln_stream( "muscle.output" );
+		string cur_line;
+
+		// parse the fasta output
+		while( getline( output_aln_stream, cur_line ) )
+		{
+			if( cur_line[0] == '>' ){
+				aln_matrix.push_back( "" );
+				continue;
+			}
+			gnSeqI len = cur_line.size();
+			len = cur_line[ len - 1 ] == '\r' ? len - 1 : len;
+			uint seqI = aln_matrix.size() - 1;
+			aln_matrix[ seqI ] += cur_line.substr( 0, len );
+		}
+
+		return true;
+	}catch( gnException& gne ){
+	}catch( exception& e ){
+	}catch(...){
+	}
+	cerr << "muscle failed!  saving failed input data to muscle_failure_" << failure_count << ".txt\n";
+	cerr << "Please contact the Mauve developers about this problem\n";
+	stringstream debug_fname;
+	debug_fname << "muscle_failure_" << failure_count++ << ".txt";
+	ofstream debug_file( debug_fname.str().c_str() );
+	gnFASSource::Write(seq, debug_file, false);
+	debug_file.close();
+	return false;
+}
 bool MuscleInterface::Refine( GappedAlignment& ga, size_t windowsize )
 {
 	const vector< string >& seq_table = GetAlignment( ga, vector< gnSequence* >() );
