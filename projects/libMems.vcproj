@@ -776,10 +776,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\libmems\MatchList.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\libmems\MemSubsets.cpp"
 					>
 				</File>
@@ -824,10 +820,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\libMems\Backbone.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\libmems\ClustalInterface.cpp"
 					>
 				</File>
@@ -848,10 +840,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\libMems\PhyloTree.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\libMems\twister.c"
 					>
 				</File>
@@ -859,6 +847,10 @@
 			<Filter
 				Name="ProgressiveAligner"
 				>
+				<File
+					RelativePath="..\libMems\Backbone.cpp"
+					>
+				</File>
 				<File
 					RelativePath="..\libMems\PairwiseMatchFinder.cpp"
 					>
