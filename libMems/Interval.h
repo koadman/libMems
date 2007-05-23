@@ -97,6 +97,27 @@ public:
 		matches.clear();
 	}
 
+	/** Set the matches in this interval *without* cloberring the interval.*/
+	template< class MatchVector >
+	void SetMatchesTemp( MatchVector& matches )
+	{
+		
+		// delete the allocated dummy match
+		for( std::size_t mI = 0; mI < this->matches.size(); mI++ )
+			this->matches[mI]->Free();
+		
+		// now set the matches and update the interval data
+		this->matches.resize(matches.size());
+		std::copy(matches.begin(), matches.end(), this->matches.begin());
+//		this->matches.insert( this->matches.end(), matches.begin(), matches.end() );
+		CalculateOffset();
+		addUnalignedRegions();
+		CalculateAlignmentLength();
+		ValidateMatches();
+
+		// finally, clear the user supplied matches to indicate that we own the memory
+		matches.clear();
+	}
 	/**
 	 * Writes this GenericInterval to the specified output stream (e.g. cout).
 	 */
