@@ -879,8 +879,11 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	vector< CompactGappedAlignment<>* > iv_orig_ptrs(iv_ptrs);
 	hss_array_t island_array, hss_array;
 
-	findHssRandomWalk( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
-	HssColsToIslandCols( mlist, seq_table, island_array, hss_array );
+	findHssHomologyHMM( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
+//	findHssRandomWalk( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
+	// experimental:
+//	findHssRandomWalk_v2( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
+//	HssColsToIslandCols( mlist, seq_table, island_array, hss_array );
 	translateToPairwiseGenomeHSS( hss_array, hss_cols );
 
 
