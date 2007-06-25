@@ -884,7 +884,7 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	// experimental:
 //	findHssRandomWalk_v2( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
 //	HssColsToIslandCols( mlist, seq_table, island_array, hss_array );
-	translateToPairwiseGenomeHSS( hss_array, hss_cols );
+	translateToPairwiseGenomeHSS( island_array, hss_cols );
 
 
 	// merge overlapping pairwise homology predictions into n-way predictions

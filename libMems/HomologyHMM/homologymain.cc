@@ -31,25 +31,25 @@ void run(std::string& sequence, std::string& prediction) {
   iPar.iGoStop = 0.00001;       // probability of going from either to the End state
 
   // these values derived from the HOXD matrix of Chiaramonte et al 2002
-  iPar.aEmitHomologous[0] = 0.449964821576;		//a:a, t:t
-  iPar.aEmitHomologous[1] = 0.446170998402;		//c:c, g:g
-  iPar.aEmitHomologous[2] = 0.00516854193028;	//a:c, c:a, g:t, t:g
-  iPar.aEmitHomologous[3] = 0.0302800394072;	//a:g, g:a, c:t, t:c
-  iPar.aEmitHomologous[4] = 0.00426691391092;	//a:t, t:a
-  iPar.aEmitHomologous[5] = 0.0040889608819;	//g:c, c:g
-  iPar.aEmitHomologous[6] = 0.01;	// gap open (arbitrarily chosen)
-  // gap extend (arbitrarily chosen)
+  iPar.aEmitHomologous[0] = 0.4522941233821017820048370573372;		//a:a, t:t
+  iPar.aEmitHomologous[1] = 0.44848066098577262840393576702477;		//c:c, g:g
+  iPar.aEmitHomologous[2] = 0.0051952975642225538102111260336614;	//a:c, c:a, g:t, t:g
+  iPar.aEmitHomologous[3] = 0.030436787995307373189004842137023;	//a:g, g:a, c:t, t:c
+  iPar.aEmitHomologous[4] = 0.0042890021493835663524878678185533;	//a:t, t:a
+  iPar.aEmitHomologous[5] = 0.0041101279232120962395233396480786;	//g:c, c:g
+  iPar.aEmitHomologous[6] = 0.004461;	// gap open (from an e. coli y pestis alignment)
+  // gap extend // 0.050733
   iPar.aEmitHomologous[7] = 1 - (iPar.aEmitHomologous[0] + iPar.aEmitHomologous[1] + iPar.aEmitHomologous[2] +
 			iPar.aEmitHomologous[3] + iPar.aEmitHomologous[4] + iPar.aEmitHomologous[5] + iPar.aEmitHomologous[6]);
 
-  iPar.aEmitUnrelated[0] = 0.09789843750;	// a:a, t:t
-  iPar.aEmitUnrelated[1] = 0.09102343750;	// c:c, g:g
-  iPar.aEmitUnrelated[2] = 0.09428906250;	// a:c, c:a
+  iPar.aEmitUnrelated[0] = 0.12818742714404662781015820149872;	// a:a, t:t
+  iPar.aEmitUnrelated[1] = 0.10493347210657785179017485428807;	// c:c, g:g
+  iPar.aEmitUnrelated[2] = 0.11597910074937552039966694421313;	// a:c, c:a
   iPar.aEmitUnrelated[3] = iPar.aEmitUnrelated[2];
   iPar.aEmitUnrelated[4] = iPar.aEmitUnrelated[0];
   iPar.aEmitUnrelated[5] = iPar.aEmitUnrelated[1]; 
-  iPar.aEmitUnrelated[6] = 0.0940483020;	// gap open
-  // gap extend
+  iPar.aEmitUnrelated[6] = 0.0483;	// gap open
+  // gap extend // 0.2535
   iPar.aEmitUnrelated[7] = 1 - (iPar.aEmitUnrelated[0] + iPar.aEmitUnrelated[1] + iPar.aEmitUnrelated[2] +
 			iPar.aEmitUnrelated[3] + iPar.aEmitUnrelated[4] + iPar.aEmitUnrelated[5] + iPar.aEmitUnrelated[6]);
 
@@ -65,20 +65,20 @@ void run(std::string& sequence, std::string& prediction) {
   HomologyDPTable *pViterbiDP, *pFWDP, *pBWDP;
   HomologyBaumWelch bw;
 
-  cout << "Calculating Viterbi probability..." << endl;
-  bfloat iVitProb = Viterbi_recurse(&pViterbiDP, iPar, aSequence, iPathLength );
-  cout << "Viterbi: "<<iVitProb<<endl;
-/*
-  cout << "Calculating Forward probability..." << endl;
-  bfloat iFWProb = Forward(&pFWDP, iPar, aSequence, iPathLength );
-  cout << "Forward: "<<iFWProb<<endl;
+//  cout << "Calculating Viterbi probability..." << endl;
+//  bfloat iVitProb = Viterbi_recurse(&pViterbiDP, iPar, aSequence, iPathLength );
+//  cout << "Viterbi: "<<iVitProb<<endl;
 
-  cout << "Calculating Backward probability..." << endl;
+//  cout << "Calculating Forward probability..." << endl;
+  bfloat iFWProb = Forward(&pFWDP, iPar, aSequence, iPathLength );
+//  cout << "Forward: "<<iFWProb<<endl;
+
+//  cout << "Calculating Backward probability..." << endl;
   bfloat iBWProb = Backward(bw, pFWDP, &pBWDP, iPar, aSequence, iPathLength );
-  cout << "Backward:"<<iBWProb<<endl;
-  cout << "Calculating Viterbi path..." << endl;
-*/  
-  Path& iViterbiPath = Viterbi_trace(pViterbiDP, iPar, aSequence, iPathLength );
+//  cout << "Backward:"<<iBWProb<<endl;
+//  cout << "Calculating Viterbi path..." << endl;
+  
+//  Path& iViterbiPath = Viterbi_trace(pViterbiDP, iPar, aSequence, iPathLength );
 /*  
   cout << "Baum Welch emission counts:"<<endl;
 
@@ -90,18 +90,19 @@ void run(std::string& sequence, std::string& prediction) {
   }
 */
   // Compare the true and Viterbi paths, and print the posterior probability of being in the homologous state
-  int iVHomologous = pViterbiDP->getId("homologous");
+//  int iVHomologous = pViterbiDP->getId("homologous");
 
   prediction.resize(iPathLength);
   for (int i=0; i<iPathLength; i++) {
 
 //    cout << " Viterbi:";
-    if (iViterbiPath.toState(i) == iVHomologous) {
+    double iPosterior = pFWDP->getProb("homologous",i+1)*pBWDP->getProb("homologous",i+1)/iFWProb;
+//    if (iViterbiPath.toState(i) == iVHomologous) {
+    if (iPosterior >= 0.5) {
       prediction[i] = 'H';
     } else {
       prediction[i] = 'N';
     }
-//    double iPosterior = pFWDP->getProb("homologous",i+1)*pBWDP->getProb("homologous",i+1)/iFWProb;
 //    cout << " " << iPosterior << endl;
 
   }
