@@ -20,14 +20,15 @@
 #include "homology.h"
 
 
-void run(std::string& sequence, std::string& prediction) {
+void run(std::string& sequence, std::string& prediction) 
+{
 
   // The parameters of the model
   Params iPar;
 
   // Fill it with some values
-  iPar.iGoUnrelated = 0.04;     // probability of going from Homologous to the Unrelated state
-  iPar.iGoHomologous = 0.04;        // probability of going from Unrelated to the Homologous state
+  iPar.iGoUnrelated = 0.004;     // probability of going from Homologous to the Unrelated state
+  iPar.iGoHomologous = 0.004;        // probability of going from Unrelated to the Homologous state
   iPar.iGoStop = 0.00001;       // probability of going from either to the End state
 
   // these values derived from the HOXD matrix of Chiaramonte et al 2002
