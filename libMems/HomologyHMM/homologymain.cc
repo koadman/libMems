@@ -27,6 +27,9 @@ void run(std::string& sequence, std::string& prediction)
   Params iPar;
 
   // Fill it with some values
+//  iPar.iGoUnrelated = 0.00000001;     // probability of going from Homologous to the Unrelated state
+//  iPar.iGoHomologous = 0.000001;        // probability of going from Unrelated to the Homologous state
+//  iPar.iGoStop = 0.0000001;       // probability of going from either to the End state
   iPar.iGoUnrelated = 0.004;     // probability of going from Homologous to the Unrelated state
   iPar.iGoHomologous = 0.004;        // probability of going from Unrelated to the Homologous state
   iPar.iGoStop = 0.00001;       // probability of going from either to the End state
@@ -49,7 +52,9 @@ void run(std::string& sequence, std::string& prediction)
   iPar.aEmitUnrelated[3] = iPar.aEmitUnrelated[2];
   iPar.aEmitUnrelated[4] = iPar.aEmitUnrelated[0];
   iPar.aEmitUnrelated[5] = iPar.aEmitUnrelated[1]; 
-  iPar.aEmitUnrelated[6] = 0.0483;	// gap open
+  iPar.aEmitUnrelated[6] = 0.0483;	// gap open (derived by aligning a 48%GC sequence with 
+									// its reverse--not complement--to derive expected gap frequencies in 
+									// unrelated sequence)
   // gap extend // 0.2535
   iPar.aEmitUnrelated[7] = 1 - (iPar.aEmitUnrelated[0] + iPar.aEmitUnrelated[1] + iPar.aEmitUnrelated[2] +
 			iPar.aEmitUnrelated[3] + iPar.aEmitUnrelated[4] + iPar.aEmitUnrelated[5] + iPar.aEmitUnrelated[6]);
@@ -58,9 +63,10 @@ void run(std::string& sequence, std::string& prediction)
   // Next, build an input emission sequence by sampling the emitted symbols according to true path
   //
 
-  int iPathLength = sequence.length();
+  int iPathLength = sequence.length() + 1;
   char* aSequence = new char[ iPathLength ];
-  memcpy(aSequence, sequence.data(), iPathLength);
+  memcpy(aSequence+1, sequence.data(), iPathLength - 1);
+  aSequence[0] = '0';
 
   // Decode the emission sequence using Viterbi, and compute posteriors and Baum Welch counts using Forward and Backward
   HomologyDPTable *pViterbiDP, *pFWDP, *pBWDP;
@@ -93,16 +99,16 @@ void run(std::string& sequence, std::string& prediction)
   // Compare the true and Viterbi paths, and print the posterior probability of being in the homologous state
 //  int iVHomologous = pViterbiDP->getId("homologous");
 
-  prediction.resize(iPathLength);
-  for (int i=0; i<iPathLength; i++) {
+  prediction.resize(iPathLength-1);
+  for (int i=1; i<iPathLength; i++) {
 
 //    cout << " Viterbi:";
     double iPosterior = pFWDP->getProb("homologous",i+1)*pBWDP->getProb("homologous",i+1)/iFWProb;
 //    if (iViterbiPath.toState(i) == iVHomologous) {
     if (iPosterior >= 0.5) {
-      prediction[i] = 'H';
+      prediction[i-1] = 'H';
     } else {
-      prediction[i] = 'N';
+      prediction[i-1] = 'N';
     }
 //    cout << " " << iPosterior << endl;
 
