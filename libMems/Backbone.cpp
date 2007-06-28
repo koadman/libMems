@@ -332,7 +332,7 @@ void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlign
 			vector< CompactGappedAlignment<>* > hss_list;
 			// now find islands
 			hss_array_t hss_array;
-			findHssHomologyHMM( pair_cgas, pair_ivs.seq_table, subst_scoring, score_threshold, hss_array, true, true );
+			findHssHomologyHMM( pair_cgas, pair_ivs.seq_table, subst_scoring, hss_array, true, true );
 //			hss_array_t homo_array;
 //			HssColsToIslandCols( iv_list, seq_table, hss_array, homo_array );
 			HssArrayToCga(pair_cgas, pair_ivs.seq_table, hss_array, hss_list);
@@ -885,7 +885,7 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	vector< CompactGappedAlignment<>* > iv_orig_ptrs(iv_ptrs);
 	hss_array_t island_array, hss_array;
 
-	findHssHomologyHMM( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
+	findHssHomologyHMM( mlist, seq_table, subst_scoring, island_array, left_homologous, right_homologous );
 //	findHssRandomWalk( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
 	// experimental:
 //	findHssRandomWalk_v2( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
@@ -920,7 +920,7 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	bb_list.clear();
 	bb_list = ula_list;
 
-	checkForAllGapColumns( iv_list );
+	//checkForAllGapColumns( iv_list );
 
 	result = tmp_cga.Copy();
 	if( iv_list.size() > 0 )

@@ -891,7 +891,7 @@ void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSeque
 }
 
 template< typename MatchVector >
-void findHssHomologyHMM( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, score_t significance_threshold, hss_array_t& hss_array, boolean left_homologous, boolean right_homologous )
+void findHssHomologyHMM( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring, hss_array_t& hss_array, boolean left_homologous, boolean right_homologous )
 {
 	typedef typename MatchVector::value_type MatchType;
 	if( iv_list.size() == 0 )
