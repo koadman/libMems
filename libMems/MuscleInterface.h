@@ -19,6 +19,11 @@
 #include "libMems/GappedAlignment.h"
 #include "libMems/GappedAligner.h"
 
+// auto include the MUSCLE library
+#ifdef WIN32
+#pragma comment(lib, "MUSCLE.lib")
+#endif
+
 namespace mems {
 
 extern bool debug_muscle;
