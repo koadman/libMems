@@ -2583,16 +2583,6 @@ void ProgressiveAligner::FixLeftEnds( node_id_t ancestor )
 //			if( m_cga && !m_cga->validate() )
 				cerr << "oh junkedy\n";
 
-			if( siv_list[sivI].reference_iv.Length(0) > 20000000 )
-			{
-				breakHere();
-				cerr << "explosion 1\n";
-			}
-			if( siv_list[sivI].reference_iv.Length(1) > 20000000 )
-			{
-				breakHere();
-				cerr << "explosion 2\n";
-			}
 		}
 	}
 }
