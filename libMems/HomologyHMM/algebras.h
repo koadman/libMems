@@ -40,8 +40,8 @@ using namespace std;
 typedef float BFMantissa;
 const BFMantissa cBFloatRange = 20282409603651670423947251286016.0;  // 2.03e+31; 2^104
 const BFMantissa cBFloatRangeInv = 1.0/cBFloatRange;
-const BFMantissa cBFloatRangeSqrt    = 1.0e+18;           // Value between square root of the exponent, and the exponent
-const BFMantissa cBFloatRangeInvSqrt = 1.0e-18;           // Square of this should still be representable, with full mantissa!
+const BFMantissa cBFloatRangeSqrt    = (BFMantissa)1.0e+18;           // Value between square root of the exponent, and the exponent
+const BFMantissa cBFloatRangeInvSqrt = (BFMantissa)1.0e-18;           // Square of this should still be representable, with full mantissa!
 const BFMantissa logcBFloatRange     = log(cBFloatRange);
 const int cBFloatDigits              = 7;                 // Number of significant digits for printing (7 for floats, 16 for doubles?)
 const int cBFloatInfinity            = 1000000000;        // Tiniest number representable is cBFloatRangeInv ^ BFloatInfinity
