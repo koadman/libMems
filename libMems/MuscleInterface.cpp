@@ -17,9 +17,9 @@
 #include "libGenome/gnStringTools.h"
 #include "libMUSCLE/muscle.h"
 #include "libMUSCLE/params.h"
-#include "libMUSCLE/MSA.h"
-#include "libMUSCLE/Seq.h"
-#include "libMUSCLE/SeqVect.h"
+#include "libMUSCLE/msa.h"
+#include "libMUSCLE/seq.h"
+#include "libMUSCLE/seqvect.h"
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/case_conv.hpp"
 

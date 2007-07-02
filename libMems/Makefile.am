@@ -18,7 +18,9 @@ DenseAbstractMatch.h RepeatMatch.h UngappedLocalAlignment.h \
 AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
 twister.h SubstitutionMatrix.h RepeatHashCat.h RepeatMatchList.h \
 Backbone.h ProgressiveAligner.h PairwiseMatchAdapter.h PairwiseMatchFinder.h \
-SeedOccurrenceList.h TreeUtilities.h
+SeedOccurrenceList.h TreeUtilities.h 
+
+HOMOLOGYHMM_H = HomologyHMM/homology.h HomologyHMM/dptables.h HomologyHMM/algebras.h
 
 LIBMEMS_SRC = \
 MemScorer.cpp        RepeatHash.cpp       ClustalInterface.cpp \
@@ -31,7 +33,8 @@ MatchList.cpp        Aligner.cpp \
 Islands.cpp          MaskedMemHash.cpp    GappedAlignment.cpp \
 MuscleInterface.cpp  PhyloTree.cpp         \
 RepeatHashCat.cpp    RepeatMatchList.cpp  RepeatMatch.cpp \
-Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp
+Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp \
+HomologyHMM/homology.cc HomologyHMM/homologymain.cc
 
 
 library_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)
@@ -44,6 +47,9 @@ libMems_1_5_la_SOURCES = $(LIBMEMS_SRC)
 
 libMems_1_5_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE) 
 libMems_1_5_la_LIBADD= dmSML/libdmSML.la
+
+homologyhmm_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/HomologyHMM
+homologyhmm_include_HEADERS = $(HOMOLOGYHMM_H)
 
 
 #EXTRA_PROGRAMS = TestSML TestSMLstatic

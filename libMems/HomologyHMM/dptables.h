@@ -118,10 +118,10 @@ public:
 // Define index types to serve as keys to the DP table position
 
 template<int dim> class _index {};
-template<> class _index<1> { typedef unsigned int t; };
-template<> class _index<2> { typedef unsigned long t; };
-template<> class _index<3> { typedef unsigned long long t; };
-template<> class _index<4> { typedef unsigned long long t; };
+template<> class _index<1> { public: typedef unsigned int t; };
+template<> class _index<2> { public: typedef unsigned long t; };
+template<> class _index<3> { public: typedef unsigned long long t; };
+template<> class _index<4> { public: typedef unsigned long long t; };
 
 
 //
