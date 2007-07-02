@@ -1,8 +1,8 @@
-SUBDIRS = dmSML
 
 if DEBUG
 D_CXXFLAGS = -Wall -g -D__GNDEBUG__
 endif
+AM_CFLAGS = -DUSE_POSIX_AIO
 AM_CXXFLAGS = $(D_CXXFLAGS)  
 
 LIBMEMS_H = \
@@ -22,6 +22,12 @@ SeedOccurrenceList.h TreeUtilities.h
 
 HOMOLOGYHMM_H = HomologyHMM/homology.h HomologyHMM/dptables.h HomologyHMM/algebras.h
 
+DMSML_H = \
+dmSML/asyncio.h dmSML/alinuxaio.h dmSML/aPOSIXaio.h \
+dmSML/alibc.h dmSML/awin32aio.h dmSML/buffer.h \
+dmSML/util.h dmSML/sorting.h dmSML/dmsort.h \
+dmSML/timing.h dmSML/sml.h
+
 LIBMEMS_SRC = \
 MemScorer.cpp        RepeatHash.cpp       ClustalInterface.cpp \
 DNAFileSML.cpp       MatchFinder.cpp      MemSubsets.cpp \
@@ -33,17 +39,24 @@ MatchList.cpp        Aligner.cpp \
 Islands.cpp          MaskedMemHash.cpp    GappedAlignment.cpp \
 MuscleInterface.cpp  PhyloTree.cpp         \
 RepeatHashCat.cpp    RepeatMatchList.cpp  RepeatMatch.cpp \
-Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp \
+Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp 
+
+HOMOLOGYHMM_SRC = \
 HomologyHMM/homology.cc HomologyHMM/homologymain.cc
 
+DMSML_SRC = \
+dmSML/asyncio.c dmSML/alinuxaio.c dmSML/aPOSIXaio.c \
+dmSML/alibc.c dmSML/awin32aio.c dmSML/buffer.c \
+dmSML/util.c dmSML/sorting.c dmSML/dmsort.c \
+dmSML/timing.c dmSML/sml.c
 
-library_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)
 
-library_include_HEADERS = $(LIBMEMS_H) 
+libmems_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)
+libmems_include_HEADERS = $(LIBMEMS_H) 
 
 # build libraries with gcc (no suffix)
 lib_LTLIBRARIES = libMems-1.5.la
-libMems_1_5_la_SOURCES = $(LIBMEMS_SRC)
+libMems_1_5_la_SOURCES = $(LIBMEMS_SRC) $(HOMOLOGYHMM_SRC) $(DMSML_SRC)
 
 libMems_1_5_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE) 
 libMems_1_5_la_LIBADD= dmSML/libdmSML.la
@@ -51,6 +64,8 @@ libMems_1_5_la_LIBADD= dmSML/libdmSML.la
 homologyhmm_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/HomologyHMM
 homologyhmm_include_HEADERS = $(HOMOLOGYHMM_H)
 
+dmsml_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/dmSML
+dmsml_include_HEADERS = $(DMSML_H)
 
 #EXTRA_PROGRAMS = TestSML TestSMLstatic
 
@@ -59,4 +74,6 @@ homologyhmm_include_HEADERS = $(HOMOLOGYHMM_H)
 #TestSMLstatic_INCLUDES = -I$(top_srcdir)/include/ `wx-config --cxxflags`
 #TestSMLstatic_LDFLAGS = -static $(top_builddir)/libMems/libMems.a `wx-config --static --libs`
 
-INCLUDES = $(DEPS_CFLAGS) @BOOST_CPPFLAGS@
+
+
+

@@ -114,5 +114,5 @@ AC_PROG_GCC_TRADITIONAL
 dnl SAVE_LIBRARY_VERSION
 AC_SUBST(LIBTOOL_VERSION_INFO)
 
-AC_OUTPUT(Makefile libMems/Makefile libMems/dmSML/Makefile doc/Makefile libMems-1.5.pc )
+AC_OUTPUT(Makefile libMems/Makefile doc/Makefile libMems-1.5.pc )
 #doc/html/Makefile  doc/man/Makefile  doc/man/man3/Makefile)
