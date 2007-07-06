@@ -40,6 +40,7 @@ using namespace std;
 typedef float BFMantissa;
 const BFMantissa cBFloatRange = 20282409603651670423947251286016.0;  // 2.03e+31; 2^104
 const BFMantissa cBFloatRangeInv = 1.0/cBFloatRange;
+// aed 6/7/7: need to typecast to avoid compiler warnings about imprecise FP representations
 const BFMantissa cBFloatRangeSqrt    = (BFMantissa)1.0e+18;           // Value between square root of the exponent, and the exponent
 const BFMantissa cBFloatRangeInvSqrt = (BFMantissa)1.0e-18;           // Square of this should still be representable, with full mantissa!
 const BFMantissa logcBFloatRange     = log(cBFloatRange);

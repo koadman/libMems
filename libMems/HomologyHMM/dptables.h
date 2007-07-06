@@ -44,12 +44,13 @@
    namespace Sgi = ::__gnu_cxx;       // GCC 3.1 and later
   #endif
  #endif
-#define HAVE_HASH_MAP
+ #define HAVE_HASH_MAP
 #else      // ...  there are other compilers, right?
-#ifdef WIN32
-#define hash_map unordered_map
+#ifdef _MSC_VER
+// visual studio 2005 has no hash map.  older versions did.
 #else
  namespace Sgi = std;
+ #define HAVE_HASH_MAP
 #endif
 #endif
 

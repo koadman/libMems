@@ -32,7 +32,10 @@ void run(std::string& sequence, std::string& prediction)
 //  iPar.iGoStop = 0.0000001;       // probability of going from either to the End state
   iPar.iGoUnrelated = 0.004;     // probability of going from Homologous to the Unrelated state
   iPar.iGoHomologous = 0.004;        // probability of going from Unrelated to the Homologous state
-  iPar.iGoStop = 0.00001;       // probability of going from either to the End state
+  iPar.iGoStopFromHomologous = 0.00001;       // probability of going to the End state
+  iPar.iGoStopFromUnrelated = 0.00001;
+  iPar.iStartHomologous = 0.5;	// probability of starting in the homologous state.  
+
 
   // these values derived from the HOXD matrix of Chiaramonte et al 2002
   iPar.aEmitHomologous[0] = 0.4522941233821017820048370573372;		//a:a, t:t
@@ -63,10 +66,9 @@ void run(std::string& sequence, std::string& prediction)
   // Next, build an input emission sequence by sampling the emitted symbols according to true path
   //
 
-  int iPathLength = sequence.length() + 1;
+  int iPathLength = sequence.length() ;
   char* aSequence = new char[ iPathLength ];
-  memcpy(aSequence+1, sequence.data(), iPathLength - 1);
-  aSequence[0] = '0';
+  memcpy(aSequence, sequence.data(), iPathLength );
 
   // Decode the emission sequence using Viterbi, and compute posteriors and Baum Welch counts using Forward and Backward
   HomologyDPTable *pViterbiDP, *pFWDP, *pBWDP;
@@ -99,18 +101,20 @@ void run(std::string& sequence, std::string& prediction)
   // Compare the true and Viterbi paths, and print the posterior probability of being in the homologous state
 //  int iVHomologous = pViterbiDP->getId("homologous");
 
-  prediction.resize(iPathLength-1);
-  for (int i=1; i<iPathLength; i++) {
+  prediction.resize(iPathLength);
+  for (int i=0; i<iPathLength; i++) {
 
 //    cout << " Viterbi:";
     double iPosterior = pFWDP->getProb("homologous",i+1)*pBWDP->getProb("homologous",i+1)/iFWProb;
 //    if (iViterbiPath.toState(i) == iVHomologous) {
     if (iPosterior >= 0.5) {
-      prediction[i-1] = 'H';
+      prediction[i] = 'H';
     } else {
-      prediction[i-1] = 'N';
+      prediction[i] = 'N';
     }
 //    cout << " " << iPosterior << endl;
 
   }
 }
+
+
