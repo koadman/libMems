@@ -66,6 +66,9 @@ homologyhmm_include_HEADERS = $(HOMOLOGYHMM_H)
 dmsml_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/dmSML
 dmsml_include_HEADERS = $(DMSML_H)
 
+EXTRA_DIST = \
+HomologyHMM/homology.xml 
+
 #EXTRA_PROGRAMS = TestSML TestSMLstatic
 
 
