@@ -2,8 +2,8 @@
 if DEBUG
 D_CXXFLAGS = -Wall -g -D__GNDEBUG__
 endif
-AM_CFLAGS = -DUSE_POSIX_AIO
-AM_CXXFLAGS = $(D_CXXFLAGS)  
+AM_CFLAGS = @DEPS_CFLAGS@ -DUSE_POSIX_AIO
+AM_CXXFLAGS = @DEPS_CFLAGS@ $(D_CXXFLAGS)  
 
 LIBMEMS_H = \
 MemSubsets.h       RepeatHash.h      MatchHashEntry.h \
@@ -42,7 +42,7 @@ RepeatHashCat.cpp    RepeatMatchList.cpp  RepeatMatch.cpp \
 Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp 
 
 HOMOLOGYHMM_SRC = \
-HomologyHMM/homology.cc HomologyHMM/homologymain.cc
+HomologyHMM/algebras.cc HomologyHMM/homology.cc HomologyHMM/homologymain.cc
 
 DMSML_SRC = \
 dmSML/asyncio.c dmSML/alinuxaio.c dmSML/aPOSIXaio.c \
@@ -59,7 +59,6 @@ lib_LTLIBRARIES = libMems-1.5.la
 libMems_1_5_la_SOURCES = $(LIBMEMS_SRC) $(HOMOLOGYHMM_SRC) $(DMSML_SRC)
 
 libMems_1_5_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE) 
-libMems_1_5_la_LIBADD= dmSML/libdmSML.la
 
 homologyhmm_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/HomologyHMM
 homologyhmm_include_HEADERS = $(HOMOLOGYHMM_H)
