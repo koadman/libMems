@@ -23,6 +23,7 @@
 #include "libMems/MaskedMemHash.h"
 #include <map>
 #include "libMems/NumericMatrix.h"
+#include "libMems/GreedyBreakpointElimination.h"
 #include <list>
 
 namespace mems {
