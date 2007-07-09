@@ -155,17 +155,6 @@ void print2d_matrix( BoostMatType& mat, std::ostream& os )
 	}
 }
 
-void printProgress( uint prev_prog, uint cur_prog, ostream& os )
-{
-	if( prev_prog != cur_prog )
-	{
-		if( cur_prog / 10 != prev_prog / 10 )
-			os << endl;
-		os << cur_prog << "%..";
-		os.flush();
-	}
-}
-
 double getDefaultBreakpointPenalty( std::vector< gnSequence* >& sequences )
 {
 	uint default_mer_size = MatchList::GetDefaultMerSize( sequences );

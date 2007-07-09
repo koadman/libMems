@@ -36,6 +36,18 @@ using namespace genome;
 namespace mems {
 // working in mems
 
+void printProgress( uint prev_prog, uint cur_prog, ostream& os )
+{
+	if( prev_prog != cur_prog )
+	{
+		if( cur_prog / 10 != prev_prog / 10 )
+			os << endl;
+		os << cur_prog << "%..";
+		os.flush();
+	}
+}
+
+
 template< class MatchVector >
 double GetPairwiseAnchorScore( MatchVector& lcb, vector< gnSequence* >& seq_table, const PairwiseScoringScheme& subst_scoring, SeedOccurrenceList& sol_1, SeedOccurrenceList& sol_2, bool penalize_gaps )
 {
