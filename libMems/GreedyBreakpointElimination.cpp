@@ -3,7 +3,7 @@
 #endif
 
 
-#include "libMems/greedyBreakpointElimination.h"
+#include "libMems/GreedyBreakpointElimination.h"
 #include "libMems/ProgressiveAligner.h"
 #include "libMems/Aligner.h"
 #include "libMems/MemSubsets.h"

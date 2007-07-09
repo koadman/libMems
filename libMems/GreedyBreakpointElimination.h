@@ -2,8 +2,8 @@
 #include "config.h"
 #endif
 
-#ifndef __greedyBreakpointElimination_h__
-#define __greedyBreakpointElimination_h__
+#ifndef __GreedyBreakpointElimination_h__
+#define __GreedyBreakpointElimination_h__
 
 #include <libMems/AbstractMatch.h>
 #include <iostream>
@@ -12,11 +12,9 @@
 #include <libMems/SubstitutionMatrix.h>
 #include <libMems/SeedOccurrenceList.h>
 #include <libMems/IntervalList.h>
+#include <libMems/LCB.h>
 
 namespace mems {
-
-// forward declaration
-class LCB;
 
 /**
  * A wrapper that maps a match among extant sequences to a match among ancestral and extant seqs
