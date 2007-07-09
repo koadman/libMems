@@ -199,23 +199,30 @@ void EliminateOverlaps( MatchList& ml ){
 
 
 const gnSeqI default_min_r_gap_size = 200;
+Aligner::Aligner( uint seq_count ) :
+debug(false),
+seq_count(seq_count),
+min_recursive_gap_length(default_min_r_gap_size),
+collinear_genomes(false),
+gal(&(MuscleInterface::getMuscleInterface())),
+permutation_weight(-1),
+cur_min_coverage(-1)
+{}
 
-Aligner::Aligner( uint seq_count )
-{
-	debug = false;
-	this->seq_count = seq_count;
-	min_recursive_gap_length = default_min_r_gap_size;
-	collinear_genomes = false;
-	gal = &(MuscleInterface::getMuscleInterface());
-	this->permutation_filename = "";
-	this->permutation_weight = -1;
-	cur_min_coverage = -1;
-}
-
-Aligner::Aligner( const Aligner& al )
-{
-	operator=( al );
-}
+Aligner::Aligner( const Aligner& al ) :
+gap_mh( al.gap_mh ),
+nway_mh( al.nway_mh ),
+seq_count( al.seq_count ),
+debug( al.debug),
+LCB_minimum_density( al.LCB_minimum_density),
+LCB_minimum_range( al.LCB_minimum_range ),
+cur_min_coverage( al.cur_min_coverage),
+min_recursive_gap_length( al.min_recursive_gap_length ),
+collinear_genomes( al.collinear_genomes ),
+gal( al.gal ),
+permutation_weight( al.permutation_weight ),
+permutation_filename( al.permutation_filename )
+{}
 
 Aligner& Aligner::operator=( const Aligner& al )
 {
