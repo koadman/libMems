@@ -269,42 +269,6 @@ static const uint MIN_ANCHOR_LENGTH = 9;
  */
 std::string CreateTempFileName(const std::string& prefix);
 
-/**
- * Compares LCBs.
- * Used by LCB construction algorithm 
- */
-class LCBLeftComparator {
-public:
-	LCBLeftComparator( uint seq ) : m_seq(seq){};
-	bool operator()(const LCB& a, const LCB& b) const{
-		
-		int64 a_start = a.left_end[ m_seq ], b_start = b.left_end[ m_seq ];
-		if( a_start == NO_MATCH || b_start == NO_MATCH ){
-			if( b_start != NO_MATCH )
-				return true;
-			return false;
-		}
-		if(a_start < 0)
-			a_start = -a_start;
-		if(b_start < 0)
-			b_start = -b_start;
-
-		int64 diff = a_start - b_start;
-		return diff < 0;
-	}
-protected:
-	uint m_seq;
-private:
-	LCBLeftComparator();
-};
-
-class LCBIDComparator {
-public:
-	bool operator()(const LCB& a, const LCB& b) const
-	{
-		return a.lcb_id < b.lcb_id;
-	}
-};
 
 
 /** used for search cache lookups */
