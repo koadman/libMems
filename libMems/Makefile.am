@@ -18,7 +18,7 @@ DenseAbstractMatch.h RepeatMatch.h UngappedLocalAlignment.h \
 AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
 twister.h SubstitutionMatrix.h RepeatHashCat.h RepeatMatchList.h \
 Backbone.h ProgressiveAligner.h PairwiseMatchAdapter.h PairwiseMatchFinder.h \
-SeedOccurrenceList.h TreeUtilities.h 
+SeedOccurrenceList.h TreeUtilities.h SuperInterval.h GreedyBreakpointElimination.h 
 
 HOMOLOGYHMM_H = HomologyHMM/homology.h HomologyHMM/dptables.h HomologyHMM/algebras.h
 
@@ -39,7 +39,8 @@ MatchList.cpp        Aligner.cpp \
 Islands.cpp          MaskedMemHash.cpp    GappedAlignment.cpp \
 MuscleInterface.cpp  PhyloTree.cpp         \
 RepeatHashCat.cpp    RepeatMatchList.cpp  RepeatMatch.cpp \
-Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp 
+Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp \
+SuperInterval.cpp	GreedyBreakpointElimination.cpp
 
 HOMOLOGYHMM_SRC = \
 HomologyHMM/algebras.cc HomologyHMM/homology.cc HomologyHMM/homologymain.cc
