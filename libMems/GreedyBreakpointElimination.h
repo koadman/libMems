@@ -130,7 +130,7 @@ void printMatch( mems::AbstractMatch* m, std::ostream& os )
 	}
 }
 
-void printProgress( uint prev_prog, uint cur_prog, ostream& os );
+void printProgress( uint prev_prog, uint cur_prog, std::ostream& os );
 
 
 template< typename PairType >
