@@ -115,6 +115,9 @@ void run(std::string& sequence, std::string& prediction)
 //    cout << " " << iPosterior << endl;
 
   }
+  //clean up aSequence, does this do any good? 
+  delete[] aSequence;
+
 }
 
 
