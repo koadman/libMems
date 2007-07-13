@@ -696,14 +696,14 @@ boolean MuscleInterface::CallMuscleFast( vector< string >& aln_matrix, const vec
 {
 	gnSequence seq;
 
-	g_SeqType = SEQTYPE_DNA;	// we're operating on DNA
-	g_uMaxIters = 1;			// and we don't want to refine the alignment...yet
-	g_bStable = true;			// we want output seqs in the same order as input
-	g_bQuiet = true;			// and don't print anything to the console
-	g_SeqWeight1 = SEQWEIGHT_ClustalW;	// not sure what weighting scheme works best for DNA
+	g_SeqType.get() = SEQTYPE_DNA;	// we're operating on DNA
+	g_uMaxIters.get() = 1;			// and we don't want to refine the alignment...yet
+	g_bStable.get() = true;			// we want output seqs in the same order as input
+	g_bQuiet.get() = true;			// and don't print anything to the console
+	g_SeqWeight1.get() = SEQWEIGHT_ClustalW;	// not sure what weighting scheme works best for DNA
 
-	SetMaxIters(g_uMaxIters);
-	SetSeqWeightMethod(g_SeqWeight1);
+	SetMaxIters(g_uMaxIters.get());
+	SetSeqWeightMethod(g_SeqWeight1.get());
 
 	// now construct a SeqVect containing input sequences
 	SeqVect sv;
