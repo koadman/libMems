@@ -1,5 +1,5 @@
 /*
- *    This file is part of HMMoC 0.5, a hidden Markov model compiler.
+ *    This file is part of HMMoC 1.0, a hidden Markov model compiler.
  *    Copyright (C) 2006 by Gerton Lunter, Oxford University.
  *
  *    HMMoC is free software; you can redistribute it and/or modify
@@ -22,6 +22,8 @@
  *
  * Gerton Lunter, 1 Oct 2006
  *
+ * Modified for GCC 4.0.2 and Microsoft Visual Studio 2005 by Aaron Darling, 2007
+ *
  */
 
 #ifndef __dptable_h_
@@ -33,6 +35,7 @@
 
 
 #ifdef __GNUC__
+ #define HAVE_HASH_MAP
  #if __GNUC__ < 3
   #include <hash_map.h>
   namespace Sgi { using ::hash_map; }; // inherit globals
@@ -44,13 +47,13 @@
    namespace Sgi = ::__gnu_cxx;       // GCC 3.1 and later
   #endif
  #endif
- #define HAVE_HASH_MAP
-#else      // ...  there are other compilers, right?
+#else      // ...there are other compilers, right?
 #ifdef _MSC_VER
 // visual studio 2005 has no hash map.  older versions did.
 #else
- namespace Sgi = std;
- #define HAVE_HASH_MAP
+// default for all other compilers
+#define HAVE_HASH_MAP
+namespace Sgi = std;
 #endif
 #endif
 

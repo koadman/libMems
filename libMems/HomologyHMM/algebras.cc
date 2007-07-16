@@ -1,5 +1,5 @@
 /*
- *    This file is part of HMMoC 0.5, a hidden Markov model compiler.
+ *    This file is part of HMMoC 1.0, a hidden Markov model compiler.
  *    Copyright (C) 2006 by Gerton Lunter, Oxford University.
  *
  *    HMMoC is free software; you can redistribute it and/or modify

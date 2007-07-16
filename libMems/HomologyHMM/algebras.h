@@ -1,5 +1,5 @@
 /*
- *    This file is part of HMMoC 0.5, a hidden Markov model compiler.
+ *    This file is part of HMMoC 1.0, a hidden Markov model compiler.
  *    Copyright (C) 2006 by Gerton Lunter, Oxford University.
  *
  *    HMMoC is free software; you can redistribute it and/or modify
@@ -40,9 +40,9 @@ using namespace std;
 typedef float BFMantissa;
 const BFMantissa cBFloatRange = 20282409603651670423947251286016.0;  // 2.03e+31; 2^104
 const BFMantissa cBFloatRangeInv = 1.0/cBFloatRange;
-// aed 6/7/7: need to typecast to avoid compiler warnings about imprecise FP representations
-const BFMantissa cBFloatRangeSqrt    = (BFMantissa)1.0e+18;           // Value between square root of the exponent, and the exponent
-const BFMantissa cBFloatRangeInvSqrt = (BFMantissa)1.0e-18;           // Square of this should still be representable, with full mantissa!
+// Aaron E. Darling 6/7/7: need to typecast to avoid compiler warnings about imprecise FP representations
+const BFMantissa cBFloatRangeSqrt    = (BFMantissa)1.0e+18;          // Value between square root of the exponent, and the exponent
+const BFMantissa cBFloatRangeInvSqrt = (BFMantissa)1.0e-18;          // Square of this should still be representable, with full mantissa!
 const BFMantissa logcBFloatRange     = log(cBFloatRange);
 const int cBFloatDigits              = 7;                 // Number of significant digits for printing (7 for floats, 16 for doubles?)
 const int cBFloatInfinity            = 1000000000;        // Tiniest number representable is cBFloatRangeInv ^ BFloatInfinity
@@ -363,11 +363,58 @@ struct BFloatMethods
   static inline void pmulaccdouble( BFloat& iX, double iY) { bfloat_pr_double_product_accum(iX,iY); }
   static inline void pdivacc( BFloat& iX, BFloat iY) { bfloat_pr_quotient_accum(iX,iY); }
   static inline void psumacc( BFloat& iX, BFloat iY) { bfloat_pr_sum_accum(iX,iY); }
-  static inline void pdiffacc( BFloat& iX, BFloat iY) { cerr << "Bfloat pdifacc: Not implemented." << endl; }
+  static inline void pdiffacc( BFloat& iX, BFloat iY) { cerr << "Bfloat pdiffacc: Not implemented." << endl; }
   static inline bool less( BFloat iX, BFloat iY) { return bfloat_less(iX,iY); }
   static inline bool equal( BFloat iX, BFloat iY) { return bfloat_equal(iX,iY); }
   static inline bool lessequal( BFloat iX, BFloat iY) { return bfloat_lessequal(iX,iY); }
   static inline ostream& print( ostream& iOut, BFloat iX ) { return bfloat_print( iOut, iX ); }
+};
+
+
+
+
+//
+// Simple log-space numbers - don't use, except possibly for Viterbi
+//
+class Logspace {
+  double x;
+ public:
+  Logspace( double x ) : x(x) {}
+  Logspace() {}
+  operator double&(){ return x; }
+  void clear() {x=-1.0e+300;}
+};
+
+inline Logspace logspace_addsmall( Logspace iX, Logspace iY ) {
+  if (iX - iY > 36.7) return iX;
+  return iX + log(1.0+exp(iY-iX));
+}
+
+inline Logspace logspace_add( Logspace iX, Logspace iY ) {
+  if (iX>iY) return logspace_addsmall(iX,iY); else return logspace_addsmall(iY,iX);
+}
+
+struct LogspaceMethods
+{
+  typedef Logspace Value;
+  static inline double to_prob (Value iX) { return exp(iX); }
+  static inline Value from_prob (double iP) { return Value(log(iP)); }
+  static inline Value pmul( Value iX, Value iY) { return iX+iY; }
+  static inline Value pmuldouble( Value iX, double iY) { return iX+log(iY); }
+  static inline Value pdiv( Value iX, Value iY) { return iX-iY; }
+  static inline Value psum( Value iX, Value iY) { return logspace_add(iX,iY); }
+  static inline Value pdiff( Value iX, Value iY) { cerr << "Logspace pdiff: Not implemented." << endl; return 0.0; }
+  static inline Value doubleexp( double iX) { return iX; }
+  static inline double doublelog( Value iX) { return iX; }
+  static inline void pmulacc( Value& iX, Value iY) { iX+=iY; }
+  static inline void pmulaccdouble( Value& iX, double iY) { iX+=log(iY); }
+  static inline void pdivacc( Value& iX, Value iY) { iX -= iY; }
+  static inline void psumacc( Value& iX, Value iY) { iX = logspace_add(iX,iY); }
+  static inline void pdiffacc( Value& iX, Value iY) { cerr << "Logspace pdiffacc: Not implemented." << endl; }
+  static inline bool less( Value iX, Value iY) { return iX<iY; }
+  static inline bool equal( Value iX, Value iY) { return iX==iY; }
+  static inline bool lessequal( Value iX, Value iY) { return iX<=iY; }
+  static inline ostream& print( ostream& iOut, Value iX ) { return bfloat_print( iOut, bfloat_doubleexp(iX) ); }
 };
 
 
@@ -505,5 +552,6 @@ public:
 
 #define bfloat Algebra<BFloatMethods>
 
+#define logspace Algebra<LogspaceMethods>
 
 #endif
