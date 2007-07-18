@@ -44,13 +44,6 @@ public:
 };
 
 
-struct AlnProgressTracker
-{
-	gnSeqI total_len;
-	gnSeqI cur_leftend;
-	double prev_progress;
-};
-
 
 double getDefaultBreakpointPenalty( std::vector< genome::gnSequence* >& sequences );
 

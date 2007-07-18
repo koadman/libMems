@@ -772,6 +772,12 @@ double greedySearch( SearchScorer& spbs )
 	return spbs.score();
 }
 
+struct AlnProgressTracker
+{
+	gnSeqI total_len;
+	gnSeqI cur_leftend;
+	double prev_progress;
+};
 
 
 }	// namespace mems

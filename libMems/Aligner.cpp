@@ -1435,7 +1435,7 @@ void Aligner::Recursion( MatchList& r_list, Match* r_begin, Match* r_end, boolea
 }
 
 // compute the gapped alignments between anchors in an LCB
-void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, MatchList& mlist, Interval& iv )
+void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, MatchList& mlist, Interval& iv, AlnProgressTracker& apt )
 {
 	// check whether this function can do anything useful...
 	if( !collinear_genomes && mlist.size() < 2 ){
@@ -1445,6 +1445,7 @@ void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, Match
 	size_t galI = 0;
 	vector<GappedAlignment*> gapped_alns(mlist.size()+1, NULL);
 	vector<int> success(gapped_alns.size(), 0);
+	gnSeqI progress_base = apt.cur_leftend;
 #pragma omp parallel for
 	for( int mI = 0; mI < mlist.size()-1; mI++ )
 	{
@@ -1455,7 +1456,22 @@ void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, Match
 		bool align_success = gal->Align( *(gapped_alns[mI]), mlist[mI], mlist[mI+1], mlist.seq_table );
 		if(align_success)
 			success[mI] = 1;
+		if(mI % 50 == 0 && mI > 0)
+		{
+			// update and print progress
+			int done = 0;
+			for( int i = 0; i < gapped_alns.size(); i++ )
+				if(gapped_alns[i] != NULL)
+					done++;
+#pragma omp critical
+{
+			double cur_progress = ((double)(progress_base+done) / (double)apt.total_len)*100.0;
+			printProgress(apt.prev_progress, cur_progress, cout);
+			apt.prev_progress = cur_progress;
+}
+		}
 	}
+	apt.cur_leftend += mlist.size()-1;
 
 	// merge the alignments and anchors back together
 	vector<AbstractMatch*> merged(mlist.size()*2 + 1);
@@ -2385,6 +2401,12 @@ void Aligner::align( MatchList& mlist, IntervalList& interval_list, double LCB_m
 	if( gapped_alignment && recursive )
 		cout << "\nMaking final gapped alignment...\n";
 	interval_list.clear();
+	AlnProgressTracker apt;
+	apt.cur_leftend = 0;
+	apt.prev_progress = 0;
+	apt.total_len = 0;
+	for( uint lcbI = 0; lcbI < LCB_list.size(); lcbI++ )
+		apt.total_len += LCB_list[lcbI].size()-1;
 	for( uint lcbI = 0; lcbI < LCB_list.size(); lcbI++ ){
 		Interval new_iv;
 		interval_list.push_back( new_iv );
@@ -2393,7 +2415,7 @@ void Aligner::align( MatchList& mlist, IntervalList& interval_list, double LCB_m
 			iv.SetMatches( LCB_list[lcbI] );
 		}else{
 //			AlignLCB( LCB_list[ lcbI ], iv );
-			AlignLCBInParallel( collinear_genomes, gal, LCB_list[ lcbI ], iv );
+			AlignLCBInParallel( collinear_genomes, gal, LCB_list[ lcbI ], iv, apt );
 		}
 	}
 	
