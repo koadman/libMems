@@ -83,6 +83,71 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="..\lib"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="4"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				PreprocessorDefinitions="WIN32;WIN64;_DEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				BrowseInformation="1"
+				WarningLevel="2"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/mems64d.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\lib"
 			IntermediateDirectory="Release"
@@ -130,6 +195,73 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile="$(OutDir)/mems.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="..\lib"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="4"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				WholeProgramOptimization="true"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				PreprocessorDefinitions="WIN32;WIN64;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="2"
+				OpenMP="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="2"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/mems64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -212,137 +344,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
-			OutputDirectory="..\lib"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				UsePrecompiledHeader="0"
-				BrowseInformation="1"
-				WarningLevel="2"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/mems64d.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|x64"
-			OutputDirectory="..\lib"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="3"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../../libGenome;../../wxWindows-2.4.2/lib/base;../../wxWindows-2.4.2/include;../;../../libClustalW/;..\..\boost\boost_1_34_0\"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
-				RuntimeLibrary="0"
-				EnableEnhancedInstructionSet="1"
-				UsePrecompiledHeader="0"
-				WarningLevel="2"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/mems64.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="FastDebug|x64"
 			OutputDirectory="..\lib"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
@@ -369,8 +370,8 @@
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="../../libGenome;../../wxWindows-2.4.2/lib/base;../../wxWindows-2.4.2/include;../;../../libClustalW/;..\..\boost\boost_1_34_0\"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				PreprocessorDefinitions="WIN32;WIN64;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="0"
@@ -616,6 +617,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\libMems\LCB.h"
+					>
+				</File>
+				<File
 					RelativePath="..\libMems\MuscleInterface.h"
 					>
 				</File>
@@ -652,6 +657,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\libMems\GreedyBreakpointElimination.h"
+					>
+				</File>
+				<File
 					RelativePath="..\libMems\PairwiseMatchAdapter.h"
 					>
 				</File>
@@ -669,6 +678,10 @@
 				</File>
 				<File
 					RelativePath="..\libMems\SubstitutionMatrix.h"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\SuperInterval.h"
 					>
 				</File>
 				<File
@@ -880,11 +893,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\libMems\GreedyBreakpointElimination.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\libMems\PairwiseMatchFinder.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\libMems\ProgressiveAligner.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\SuperInterval.cpp"
 					>
 				</File>
 			</Filter>
