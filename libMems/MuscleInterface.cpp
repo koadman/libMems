@@ -450,7 +450,9 @@ try{
 			continue;	// skip this sequence if it's either too big or too small
 		}
 		seqs.push_back( seqI );
-
+// the gnSequence pointers are shared across threads and have a common ifstream
+#pragma omp critical
+{
 		// extract sequence data
 		if( r_end == NULL || r_end->Start( seqI ) > 0 ){
 			starts.push_back( gap_start );
@@ -462,13 +464,14 @@ try{
 			rc_filter->ReverseFilter( cur_seq_data );
 			seq_data.push_back( cur_seq_data );
 		}
+}
 	}
 
 	if( seqs.size() <= 1 )
 		create_ok = false;
 
 	if( create_ok ){
-		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
+//		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
 		vector< string > aln_matrix;
 		if( !CallMuscleFast( aln_matrix, seq_data ) ){
 			cout << "Muscle was unable to align:\n";
@@ -580,6 +583,9 @@ try{
 			std::cout << "A" << std::endl;
 			diff = 1;
 		}
+// the gnSequence pointers are shared across threads and have a common ifstream
+#pragma omp critical
+{
 		if( r_end == NULL || r_end->Start( seqI ) > 0 ){
 			starts.push_back( gap_start );
 			//std::cout << seq_table[ 0 ]->ToString( diff , gap_start ) << std::endl;
@@ -596,13 +602,14 @@ try{
 			seq_data.push_back( cur_seq_data );
 			//std::cout << cur_seq_data << std::endl;
 		}
+}
 	}
 
 	if( seqs.size() <= 1 )
 		create_ok = false;
 
 	if( create_ok ){
-		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
+//		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
 		vector< string > aln_matrix;
 		if( !CallMuscleFast( aln_matrix, seq_data ) ){
 			cout << "Muscle was unable to align:\n";
@@ -694,8 +701,6 @@ boolean MuscleInterface::CallMuscle( vector< string >& aln_matrix, const vector<
 // version 2 of this code: attempt to call muscle without performing costly disk I/O!!
 boolean MuscleInterface::CallMuscleFast( vector< string >& aln_matrix, const vector< string >& seq_table )
 {
-	gnSequence seq;
-
 	g_SeqType.get() = SEQTYPE_DNA;	// we're operating on DNA
 	g_uMaxIters.get() = 1;			// and we don't want to refine the alignment...yet
 	g_bStable.get() = true;			// we want output seqs in the same order as input
