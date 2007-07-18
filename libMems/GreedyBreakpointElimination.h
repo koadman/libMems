@@ -550,6 +550,230 @@ private:
 };
 
 
+
+
+template< class BreakpointScorerType >
+int64 greedyBreakpointElimination_v4( std::vector< mems::LCB >& adjacencies, 
+			std::vector< double >& scores, BreakpointScorerType& bp_scorer, std::ostream* status_out, 
+			size_t g1_tag, size_t g2_tag )
+{
+	// repeatedly remove the low weight LCBs until the minimum weight criteria is satisfied
+	uint lcb_count = adjacencies.size();
+	double total_initial_lcb_weight = 0;
+	for( size_t wI = 0; wI < scores.size(); wI++ )
+		total_initial_lcb_weight += scores[wI];
+	double total_current_lcb_weight = total_initial_lcb_weight;
+
+	if( adjacencies.size() == 0 )
+		return 0;	// nothing can be done
+	uint seq_count = adjacencies[0].left_end.size();
+	
+	double prev_score = bp_scorer.score();
+	uint report_frequency = 10;
+	uint moves_made = 0;
+
+	size_t move_count = bp_scorer.getMoveCount();
+	std::vector< std::pair< double, size_t > > move_heap( move_count * 2 );
+	size_t heap_end = move_count;
+	for( size_t moveI = 0; moveI < move_count; ++moveI )
+	{
+		move_heap[moveI].first = bp_scorer(moveI);
+		move_heap[moveI].second = moveI;
+	}
+
+#ifdef LCB_WEIGHT_LOSS_PLOT
+	std::vector< double >::iterator min_iter = std::min_element(scores.begin(), scores.end());
+	double mins = *min_iter;
+	if( status_out != NULL )
+	{
+		(*status_out) << g1_tag << '\t' << g2_tag << '\t' << lcb_count << '\t' << 1 - (total_current_lcb_weight / total_initial_lcb_weight) << '\t' << mins << endl;
+	}
+#endif
+
+	// make a heap of moves ordered by score
+	// repeatedly:
+	// 1) pop the highest scoring move off the heap
+	// 2) attempt to apply the move
+	// 3) add any new moves to the heap
+	// 4) stop when the highest scoring move no longer increases the score
+	MoveScoreHeapComparator mshc;
+	std::make_heap( move_heap.begin(), move_heap.end(), mshc );
+	while( heap_end > 0 )
+	{
+		std::pop_heap( move_heap.begin(), move_heap.begin()+heap_end, mshc );
+		heap_end--;
+		std::pair< double, size_t > best_move = move_heap[ heap_end ];
+#ifdef LCB_WEIGHT_LOSS_PLOT
+		if( total_current_lcb_weight == scores[best_move.second] )
+			break;	// don't remove the last LCB
+#else
+		if( (best_move.first < 0 ) ||
+			total_current_lcb_weight == scores[best_move.second] )
+			break;	// can't improve score
+#endif
+
+		std::vector< std::pair< double, size_t > > new_moves;
+		bool success = bp_scorer.isValid(best_move.second, best_move.first);
+		if( !success )
+			continue;
+		bp_scorer.remove(best_move.second, new_moves);
+
+		
+		for( size_t newI = 0; newI < new_moves.size(); newI++ )
+		{
+			if( heap_end < move_heap.size() )
+			{
+				heap_end++;
+				move_heap[heap_end-1] = new_moves[newI];
+				std::push_heap( move_heap.begin(), move_heap.begin()+heap_end, mshc );
+			}else{
+				// just push the rest on all at once
+				size_t prev_size = move_heap.size();
+				move_heap.insert( move_heap.end(), new_moves.begin()+newI, new_moves.end() );
+				for( size_t newdI = 0; newdI < new_moves.size()-newI; newdI++ )
+					std::push_heap( move_heap.begin(), move_heap.begin()+prev_size+newdI+1, mshc );
+				heap_end = move_heap.size();
+				break;
+			}
+		}
+
+		total_current_lcb_weight -= scores[best_move.second];
+		std::vector< std::pair< uint, uint > > id_remaps;
+		std::vector< uint > impact_list;
+		lcb_count -= RemoveLCBandCoalesce( best_move.second, adjacencies[0].left_end.size(), adjacencies, scores, id_remaps, impact_list );
+#ifdef LCB_WEIGHT_LOSS_PLOT
+		mins = scores[best_move.second];
+		if( status_out != NULL )
+		{
+			(*status_out) << g1_tag << '\t' << g2_tag << '\t' << lcb_count << '\t' << 1 - (total_current_lcb_weight / total_initial_lcb_weight) << '\t' << mins << endl;
+		}
+#endif
+		double cur_score = bp_scorer.score();
+		prev_score = cur_score;
+		moves_made++;
+#ifndef LCB_WEIGHT_LOSS_PLOT
+		if( status_out != NULL && moves_made % report_frequency == 0 )
+			(*status_out) << "move: " << moves_made << " alignment score " << cur_score << endl;
+#endif
+	}
+
+	return 0;
+}
+
+class MoveScoreHeapComparator
+{
+public:
+	bool operator()( const std::pair< double, size_t >& a, const std::pair< double, size_t >& b ) const
+	{
+		return a.first < b.first;	// want to order by > instead of <
+	}
+};
+
+
+/** finds the best anchoring, returns the anchoring score */
+template< class SearchScorer >
+double greedySearch( SearchScorer& spbs )
+{
+	double prev_score = spbs.score();
+	uint report_frequency = 10;
+	uint moves_made = 0;
+	if( debug_aligner )
+		spbs.validate();
+	size_t move_count = spbs.getMoveCount();
+	std::vector< double > current_moves( spbs.getMoveCount() );
+	// use double the size for the move heap to avoid an almost instant reallocation
+	// when a new move gets pushed onto the heap
+	size_t heap_end = spbs.getMoveCount();
+	std::vector< std::pair< double, size_t > > move_heap( spbs.getMoveCount() * 2 );
+	std::vector< std::pair< double, size_t > > new_moves( spbs.getMaxNewMoveCount() + 10 );
+	for( size_t moveI = 0; moveI < move_count; ++moveI )
+	{
+		std::pair< double, size_t > p( 0, moveI );
+		double scorediff = spbs(p) - prev_score;
+		p.first = scorediff;
+		move_heap[moveI] = p;
+		current_moves[moveI] = p.first;
+	}
+
+	if( debug_aligner )
+		spbs.validate();
+	// make a heap of moves ordered by score
+	// repeatedly:
+	// 1) pop the highest scoring move off the heap
+	// 2) attempt to apply the move
+	// 3) add any new moves to the heap
+	// 4) stop when the highest scoring move no longer increases the score
+	MoveScoreHeapComparator mshc;
+	std::make_heap( move_heap.begin(), move_heap.begin() + heap_end, mshc );
+	double successful = 0;
+	double invalids = 0;
+	int progress = 0;
+	int prev_progress = -1;
+	while( heap_end > 0 )
+	{
+		std::pop_heap( move_heap.begin(), move_heap.begin()+heap_end, mshc );
+		std::pair< double, size_t > best_move = move_heap[--heap_end];
+		if( best_move.first < 0 )
+			break;	// can't improve score
+
+		if( best_move.first != current_moves[best_move.second] )
+			continue;
+
+		if( !spbs.isValid(best_move) )
+		{
+			invalids++;
+			continue;
+		}
+
+		size_t new_move_count = 0;
+		bool success = spbs.remove(best_move, new_moves, new_move_count);
+		if( !success )
+		{
+			cerr << "numerical instability?  need to investigate this...\n";
+//			genome::breakHere();
+			invalids++;
+			continue;
+		}
+
+		successful++;
+		if( debug_aligner )
+			spbs.validate();
+
+		current_moves[ best_move.second ] = -(std::numeric_limits<double>::max)();
+		for( size_t newI = 0; newI < new_move_count; newI++ )
+			current_moves[ new_moves[newI].second ] = new_moves[newI].first;
+
+		for( size_t newI = 0; newI < new_move_count; newI++ )
+		{
+			if( heap_end < move_heap.size() )
+			{
+				heap_end++;
+				move_heap[heap_end-1] = new_moves[newI];
+				std::push_heap( move_heap.begin(), move_heap.begin()+heap_end, mshc );
+			}else{
+				// just push the rest on all at once
+				move_heap.resize( (std::min)((size_t)(heap_end * 1.6), heap_end + new_move_count) );
+				std::copy( new_moves.begin() + newI, new_moves.begin() + new_move_count, move_heap.begin()+heap_end );
+				for( size_t newdI = 0; newdI < new_move_count-newI; newdI++ )
+					std::push_heap( move_heap.begin(), move_heap.begin()+heap_end+newdI+1, mshc );
+				heap_end = move_heap.size();
+				break;
+			}
+		}
+
+		moves_made++;
+		prev_progress = progress;
+		progress = (100 * moves_made) / move_count;
+		printProgress( prev_progress, progress, cout );
+//		if( moves_made % report_frequency == 0 )
+//			cout << "move: " << moves_made << " alignment score " << cur_score << " success ratio " << successful / invalids << endl;
+	}
+
+	return spbs.score();
+}
+
+
+
 }	// namespace mems
 
 #endif // __greedyBreakpointElimination_h__
