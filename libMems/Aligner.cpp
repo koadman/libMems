@@ -66,17 +66,6 @@ boolean validateLCB( MatchList& lcb ){
 	return !complain;
 }
 
-
-class MoveScoreHeapComparator
-{
-public:
-	bool operator()( const pair< double, size_t >& a, const pair< double, size_t >& b )
-	{
-		return a.first < b.first;	// want to order by > instead of <
-	}
-};
-
-
 /**
  * Delete overlapping regions in favor of the larger match.
  * This code isn't perfect, it can delete too many base pairs in some cases
@@ -1446,6 +1435,64 @@ void Aligner::Recursion( MatchList& r_list, Match* r_begin, Match* r_end, boolea
 }
 
 // compute the gapped alignments between anchors in an LCB
+void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, MatchList& mlist, Interval& iv )
+{
+	// check whether this function can do anything useful...
+	if( !collinear_genomes && mlist.size() < 2 ){
+		iv.SetMatches( mlist );
+		return;
+	}
+	size_t galI = 0;
+	vector<GappedAlignment*> gapped_alns(mlist.size()+1, NULL);
+	vector<int> success(gapped_alns.size(), 0);
+#pragma omp parallel for
+	for( int mI = 0; mI < mlist.size()-1; mI++ )
+	{
+		// align the region between mI and mI+1
+		GappedAlignment ga(mlist.seq_table.size(),0);
+		gapped_alns[mI] = ga.Copy();
+
+		bool align_success = gal->Align( *(gapped_alns[mI]), mlist[mI], mlist[mI+1], mlist.seq_table );
+		if(align_success)
+			success[mI] = 1;
+	}
+
+	// merge the alignments and anchors back together
+	vector<AbstractMatch*> merged(mlist.size()*2 + 1);
+	size_t mlistI = 0;
+	size_t gappedI = 0;
+	bool turn = true;
+	size_t mJ = 0;
+
+	// check if genomes are collinear and get the start and end alignments if necessary
+	if(collinear_genomes)
+	{
+		GappedAlignment ga_tmp(mlist.seq_table.size(),0);
+		GappedAlignment* ga = ga_tmp.Copy();
+		bool align_success = gal->Align( *ga, NULL, mlist[0], mlist.seq_table );
+		if(align_success)
+			merged[mJ++] = ga;
+		gapped_alns[mlist.size()] = ga_tmp.Copy();
+		align_success = gal->Align( *(gapped_alns[mlist.size()]), mlist.back(), NULL, mlist.seq_table );
+		if(align_success)
+			success[mlist.size()] = 1;
+	}
+	for( ; mJ < merged.size() && mlistI < mlist.size();  )
+	{
+		if(turn)
+			merged[mJ++] = mlist[mlistI++];
+		else if(success[gappedI])
+			merged[mJ++] = gapped_alns[gappedI++];
+		else
+			gappedI++;
+		turn = !turn;
+	}
+	merged.resize(mJ);
+
+	iv.SetMatches(merged);
+}
+
+// compute the gapped alignments between anchors in an LCB
 void Aligner::AlignLCB( MatchList& mlist, Interval& iv ){
 	// check whether this function can do anything useful...
 	if( !collinear_genomes && mlist.size() < 2 ){
@@ -2345,7 +2392,8 @@ void Aligner::align( MatchList& mlist, IntervalList& interval_list, double LCB_m
 		if( !gapped_alignment || !recursive ){
 			iv.SetMatches( LCB_list[lcbI] );
 		}else{
-			AlignLCB( LCB_list[ lcbI ], iv );
+//			AlignLCB( LCB_list[ lcbI ], iv );
+			AlignLCBInParallel( collinear_genomes, gal, LCB_list[ lcbI ], iv );
 		}
 	}
 	
