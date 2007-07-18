@@ -20,8 +20,18 @@
 #include "libMems/GappedAligner.h"
 
 // auto include the MUSCLE library
-#ifdef WIN32
+#ifdef WIN64
+#ifdef NDEBUG
+#pragma comment(lib, "MUSCLE64.lib")
+#else
+#pragma comment(lib, "MUSCLE64d.lib")
+#endif
+#else if defined(WIN32)
+#ifdef NDEBUG
 #pragma comment(lib, "MUSCLE.lib")
+#else
+#pragma comment(lib, "MUSCLEd.lib")
+#endif
 #endif
 
 namespace mems {
