@@ -43,12 +43,15 @@ public:
 		data.clear();
 	};
 	void Purge(){
+#pragma omp critical
+{
 		for( unsigned dataI = 0; dataI < data.size(); dataI++ )
 			delete[] data[ dataI ];
 		data.clear();
 		free_list.clear();
 		tail_free = 0;
 		n_elems = 0;
+}
 	}
 
 protected:
@@ -76,51 +79,57 @@ SlotAllocator< T >& SlotAllocator< T >::GetSlotAllocator(){
 template< class T >
 inline
 T* SlotAllocator< T >::Allocate(){
+	T* t_ptr = NULL;
+#pragma omp critical
+{
 	if( free_list.begin() != free_list.end() ){
-		T* t_ptr = *free_list.begin();
+		t_ptr = *free_list.begin();
 		free_list.pop_front();
-		return t_ptr;
 	}else if( tail_free > 0 ){
 		int T_index = n_elems - tail_free--;
-		return &(data[ data.size() - 1 ][ T_index ]);
-	}
+		t_ptr = &(data[ data.size() - 1 ][ T_index ]);
+	}else{
 
-	// Last resort:
-	// increase the size of the data array
-	unsigned new_size = (unsigned)(n_elems * POOL_GROWTH_RATE);
-	if( new_size == 0 )
-		new_size++;
-	T* new_data = NULL;
-	while( true ){
-		try{
-			new_data = new T[ new_size ];
-			break;
-		}catch(...){
-			new_size = new_size / 2;
-			if( new_size == 0 )
+		// Last resort:
+		// increase the size of the data array
+		unsigned new_size = (unsigned)(n_elems * POOL_GROWTH_RATE);
+		if( new_size == 0 )
+			new_size++;
+		T* new_data = NULL;
+		while( true ){
+			try{
+				new_data = new T[ new_size ];
 				break;
+			}catch(...){
+				new_size = new_size / 2;
+				if( new_size == 0 )
+					break;
+			}
 		}
+		if( new_data == NULL || new_size == 0 ){
+			throw std::out_of_range( "SlotAllocator::Allocate(): Unable to allocate more memory" );
+		}
+		data.push_back( new_data );
+		tail_free = new_size - 1;
+		t_ptr = & data[ data.size() - 1 ][ 0 ];
+		n_elems = new_size;
 	}
-	if( new_data == NULL || new_size == 0 ){
-		throw std::out_of_range( "SlotAllocator::Allocate(): Unable to allocate more memory" );
-	}
-	data.push_back( new_data );
-	tail_free = new_size - 1;
-	T* new_ptr = & data[ data.size() - 1 ][ 0 ];
-	n_elems = new_size;
-	return new_ptr;
+}
+	return t_ptr;
 }
 
 template< class T >
 inline
 void SlotAllocator< T >::Free( T* t ){
-
+#pragma omp critical
+{
 	// for debugging double free
 /*	std::list<T*>::iterator iter = free_list.begin();
 	for(; iter != free_list.end(); iter++ )
 		if( *iter == t )
 			cerr << "ERROR DOUBLE FREE\n";
 */	free_list.push_front( t );
+}
 }
 
 }
