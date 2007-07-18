@@ -95,6 +95,7 @@ public:
 	bool ProfileAlign( const GappedAlignment& ga1, const GappedAlignment& ga2, GappedAlignment& aln, bool anchored = true );
 	boolean CallMuscle( std::vector< std::string >& aln_matrix, const std::vector< std::string >& seq_table );
 	boolean CallMuscleFast( std::vector< std::string >& aln_matrix, const std::vector< std::string >& seq_table );
+	bool RefineFast( GappedAlignment& ga, size_t windowsize );
 protected:
 	std::string muscle_path;
 	std::string muscle_arguments;

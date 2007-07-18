@@ -20,6 +20,10 @@
 #include "libMUSCLE/msa.h"
 #include "libMUSCLE/seq.h"
 #include "libMUSCLE/seqvect.h"
+#include "libMUSCLE/tree.h"
+#include "libMUSCLE/clust.h"
+#include "libMUSCLE/profile.h"
+#include "libMUSCLE/clustsetmsa.h"
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/case_conv.hpp"
 
@@ -775,6 +779,74 @@ bool MuscleInterface::Refine( GappedAlignment& ga, size_t windowsize )
 	}
 	return success;
 }
+
+bool MuscleInterface::RefineFast( GappedAlignment& ga, size_t windowsize )
+{
+	const vector< string >& seq_table = GetAlignment( ga, vector< gnSequence* >() );
+	vector< string > aln_table;
+	for( uint seqI = 0; seqI < ga.SeqCount(); seqI++ )
+	{
+		if( ga.LeftEnd(seqI) != NO_MATCH )
+		{
+			aln_table.push_back( seq_table[seqI] );
+		}
+	}
+
+	g_SeqType.get() = SEQTYPE_DNA;	// we're operating on DNA
+	g_uMaxIters.get() = 1;			// and we don't want to refine the alignment...yet
+	g_bStable.get() = true;			// we want output seqs in the same order as input
+	g_bQuiet.get() = true;			// and don't print anything to the console
+	g_SeqWeight1.get() = SEQWEIGHT_ClustalW;	// not sure what weighting scheme works best for DNA
+
+	SetMaxIters(g_uMaxIters.get());
+	SetSeqWeightMethod(g_SeqWeight1.get());
+
+	MSA::SetIdCount(seq_table.size());
+
+	// create an MSA
+	MSA msa;
+	msa.SetSize(seq_table.size(), seq_table[0].size());
+	for( uint seqI = 0; seqI < seq_table.size(); seqI++ )
+	{
+		stringstream ss;
+		ss << "seq" << seqI;
+		msa.SetSeqName(seqI, ss.str().c_str());
+		msa.SetSeqId(seqI,seqI);
+		for(size_t i = 0; i < seq_table[seqI].size(); i++)
+			msa.SetChar(seqI, i, seq_table[seqI][i]);
+	}
+
+	msa.FixAlpha();
+	SetPPScore(PPSCORE_SPN);
+	SetMuscleInputMSA(msa);
+
+	Tree GuideTree;
+	TreeFromMSA(msa, GuideTree, g_Cluster2.get(), g_Distance2.get(), g_Root2.get());
+	SetMuscleTree(GuideTree);
+
+	if (g_bAnchors.get())
+		RefineVert(msa, GuideTree, g_uMaxIters.get());
+	else
+		RefineHoriz(msa, GuideTree, g_uMaxIters.get(), false, false);
+
+	ValidateMuscleIds(msa);
+	ValidateMuscleIds(GuideTree);
+
+	// now extract the alignment
+	vector< string > aln_matrix;
+	aln_matrix.resize(msa.GetSeqCount());
+	for( size_t seqI = 0; seqI < msa.GetSeqCount(); seqI++ )
+	{
+		unsigned indie = msa.GetSeqIndex(seqI);
+		const char* buf = msa.GetSeqBuffer(indie);
+		string curseq(buf, msa.GetColCount());
+		swap(aln_matrix[seqI],curseq);
+	}
+
+	ga.SetAlignment( aln_matrix );
+	return true;
+}
+
 
 void stripGapColumns( std::vector< std::string >& aln )
 {
