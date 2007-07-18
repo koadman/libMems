@@ -12,13 +12,11 @@
 
 
 #include "libMems/ProgressiveAligner.h"
-#include "libMems/greedyBreakpointElimination.h"
+#include "libMems/GreedyBreakpointElimination.h"
 #include "libMems/Aligner.h"
-#include "libMems/MemSubsets.h"
 #include "libMems/Islands.h"
 #include "libMems/DNAFileSML.h"
 #include "libMems/MuscleInterface.h"	// it's the default gapped aligner
-#include "libGenome/gnRAWSource.h"
 #include "libMems/gnAlignedSequences.h"
 #include "libMems/ClustalInterface.h"
 #include "libMems/CompactGappedAlignment.h"
