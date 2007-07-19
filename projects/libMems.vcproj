@@ -243,7 +243,7 @@
 				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;WIN64;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
-				EnableEnhancedInstructionSet="2"
+				EnableEnhancedInstructionSet="0"
 				OpenMP="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="2"
