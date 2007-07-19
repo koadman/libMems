@@ -32,6 +32,7 @@
 
 // this gets defined in muscle.cpp, but not declared in any headers
 extern void MUSCLE(SeqVect &v, MSA &msaOut);
+extern void RefineW(const MSA &msaIn, MSA &msaOut);
 
 using namespace std;
 using namespace genome;
@@ -780,6 +781,21 @@ bool MuscleInterface::Refine( GappedAlignment& ga, size_t windowsize )
 	return success;
 }
 
+void msaFromSeqTable(MSA& msa, const vector< string >& seq_table, unsigned id_base = 0)
+{
+	msa.SetSize(seq_table.size(), seq_table[0].size());
+	for( uint seqI = 0; seqI < seq_table.size(); seqI++ )
+	{
+		stringstream ss;
+		ss << "seq" << seqI;
+		msa.SetSeqName(seqI, ss.str().c_str());
+		msa.SetSeqId(seqI,seqI+id_base);
+		for(size_t i = 0; i < seq_table[seqI].size(); i++)
+			msa.SetChar(seqI, i, seq_table[seqI][i]);
+	}
+}
+
+
 bool MuscleInterface::RefineFast( GappedAlignment& ga, size_t windowsize )
 {
 	const vector< string >& seq_table = GetAlignment( ga, vector< gnSequence* >() );
@@ -798,6 +814,9 @@ bool MuscleInterface::RefineFast( GappedAlignment& ga, size_t windowsize )
 	g_bQuiet.get() = true;			// and don't print anything to the console
 	g_SeqWeight1.get() = SEQWEIGHT_ClustalW;	// not sure what weighting scheme works best for DNA
 
+	g_uRefineWindow.get() = windowsize;
+	g_uWindowTo.get() = 0;
+
 	SetMaxIters(g_uMaxIters.get());
 	SetSeqWeightMethod(g_SeqWeight1.get());
 
@@ -805,17 +824,9 @@ bool MuscleInterface::RefineFast( GappedAlignment& ga, size_t windowsize )
 
 	// create an MSA
 	MSA msa;
-	msa.SetSize(seq_table.size(), seq_table[0].size());
-	for( uint seqI = 0; seqI < seq_table.size(); seqI++ )
-	{
-		stringstream ss;
-		ss << "seq" << seqI;
-		msa.SetSeqName(seqI, ss.str().c_str());
-		msa.SetSeqId(seqI,seqI);
-		for(size_t i = 0; i < seq_table[seqI].size(); i++)
-			msa.SetChar(seqI, i, seq_table[seqI][i]);
-	}
+	msaFromSeqTable(msa, seq_table);
 
+	SetAlpha(ALPHA_DNA);
 	msa.FixAlpha();
 	SetPPScore(PPSCORE_SPN);
 	SetMuscleInputMSA(msa);
@@ -824,22 +835,33 @@ bool MuscleInterface::RefineFast( GappedAlignment& ga, size_t windowsize )
 	TreeFromMSA(msa, GuideTree, g_Cluster2.get(), g_Distance2.get(), g_Root2.get());
 	SetMuscleTree(GuideTree);
 
-	if (g_bAnchors.get())
-		RefineVert(msa, GuideTree, g_uMaxIters.get());
-	else
-		RefineHoriz(msa, GuideTree, g_uMaxIters.get(), false, false);
+	MSA msaOut;
+	MSA* finalMsa;
 
-	ValidateMuscleIds(msa);
+	if(windowsize == 0)
+	{
+		if (g_bAnchors.get())
+			RefineVert(msa, GuideTree, g_uMaxIters.get());
+		else
+			RefineHoriz(msa, GuideTree, g_uMaxIters.get(), false, false);
+		finalMsa = &msa;
+	}else{
+		RefineW(msa, msaOut);
+		finalMsa = &msaOut;
+	}
+
+
+	ValidateMuscleIds(*finalMsa);
 	ValidateMuscleIds(GuideTree);
 
 	// now extract the alignment
 	vector< string > aln_matrix;
-	aln_matrix.resize(msa.GetSeqCount());
-	for( size_t seqI = 0; seqI < msa.GetSeqCount(); seqI++ )
+	aln_matrix.resize(finalMsa->GetSeqCount());
+	for( size_t seqI = 0; seqI < finalMsa->GetSeqCount(); seqI++ )
 	{
-		unsigned indie = msa.GetSeqIndex(seqI);
-		const char* buf = msa.GetSeqBuffer(indie);
-		string curseq(buf, msa.GetColCount());
+		unsigned indie = finalMsa->GetSeqIndex(seqI);
+		const char* buf = finalMsa->GetSeqBuffer(indie);
+		string curseq(buf, finalMsa->GetColCount());
 		swap(aln_matrix[seqI],curseq);
 	}
 
@@ -990,6 +1012,101 @@ bool MuscleInterface::ProfileAlign( const GappedAlignment& ga1, const GappedAlig
 				aln.SetLength(ga2.Length(seqI), seqI);
 			}
 		return true;
+	}catch( gnException& gne ){
+	}catch( exception& e ){
+	}catch(...){
+	}
+	return false;
+}
+
+
+bool MuscleInterface::ProfileAlignFast( const GappedAlignment& ga1, const GappedAlignment& ga2, GappedAlignment& aln, bool anchored )
+{
+	try{
+		const vector< string >& aln1 = GetAlignment( ga1, vector< gnSequence* >() );
+		const vector< string >& aln2 = GetAlignment( ga2, vector< gnSequence* >() );
+		vector< uint > order;
+		vector< string > aln11( ga1.Multiplicity() );
+		vector< string > aln22( ga2.Multiplicity() );
+		size_t curI = 0;
+		for( uint seqI = 0; seqI < aln1.size(); seqI++ )
+		{
+			if( ga1.LeftEnd(seqI) != NO_MATCH )
+			{
+				aln11[curI++] = aln1[seqI];
+				order.push_back(seqI);
+			}
+		}
+		curI = 0;
+		for( uint seqI = 0; seqI < aln2.size(); seqI++ )
+		{
+			if( ga2.LeftEnd(seqI) != NO_MATCH )
+			{
+				aln22[curI++] = aln2[seqI];
+				order.push_back(seqI);
+			}
+		}
+// strip the gap columns only if we're doing unanchored PP alignment
+		if( !anchored )
+		{
+			stripGapColumns(aln11);
+			stripGapColumns(aln22);
+		}
+
+		g_SeqType.get() = SEQTYPE_DNA;	// we're operating on DNA
+		g_uMaxIters.get() = 1;			// and we don't want to refine the alignment...yet
+		g_bStable.get() = true;			// we want output seqs in the same order as input
+		g_bQuiet.get() = true;			// and don't print anything to the console
+		g_SeqWeight1.get() = SEQWEIGHT_ClustalW;	// not sure what weighting scheme works best for DNA
+
+		SetMaxIters(g_uMaxIters.get());
+		SetSeqWeightMethod(g_SeqWeight1.get());
+
+		MSA::SetIdCount(order.size());
+
+		MSA msa1;
+		MSA msa2;
+		MSA msaOut;
+		msaFromSeqTable(msa1, aln11);
+		msaFromSeqTable(msa2, aln22, msa1.GetSeqCount());
+
+		SetAlpha(ALPHA_DNA);
+		msa1.FixAlpha();
+		msa2.FixAlpha();
+		SetPPScore(PPSCORE_SPN);
+
+		if(anchored)
+		{
+			AnchoredProfileProfile(msa1, msa2, msaOut);
+		}else{
+			ProfileProfile(msa1, msa2, msaOut);
+		}
+
+		// get the output
+		vector< string > aln_matrix( msaOut.GetSeqCount() );
+		for( size_t seqI = 0; seqI < msaOut.GetSeqCount(); seqI++ )
+		{
+			unsigned indie = msaOut.GetSeqIndex(seqI);
+			const char* buf = msaOut.GetSeqBuffer(indie);
+			string curseq(buf, msaOut.GetColCount());
+			swap(aln_matrix[order[seqI]],curseq);
+		}
+
+		aln.SetAlignment( aln_matrix );
+		for( uint seqI = 0; seqI < ga1.SeqCount(); seqI++ )
+			if( ga1.LeftEnd(seqI) != NO_MATCH )
+			{
+				aln.SetLeftEnd(seqI, ga1.LeftEnd(seqI));
+				aln.SetLength(ga1.Length(seqI), seqI);
+			}
+		for( uint seqI = 0; seqI < ga2.SeqCount(); seqI++ )
+			if( ga2.LeftEnd(seqI) != NO_MATCH )
+			{
+				aln.SetLeftEnd(seqI, ga2.LeftEnd(seqI));
+				aln.SetLength(ga2.Length(seqI), seqI);
+			}
+		return true;
+
 	}catch( gnException& gne ){
 	}catch( exception& e ){
 	}catch(...){
