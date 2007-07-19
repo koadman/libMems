@@ -313,7 +313,7 @@ void FileSML::dmCreate(const gnSequence& seq, const uint64 seed){
 void FileSML::Create(const gnSequence& seq, const uint64 seed){
 
 	vector<bmer> sml_array;
-	boolean is_spaced_seed = header.seed_length != header.seed_weight;
+	bool is_spaced_seed = getSeedWeight(seed) != getSeedLength(seed);
 	OpenForWriting( true );
 
 	try{
