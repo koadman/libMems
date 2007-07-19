@@ -1466,7 +1466,7 @@ void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, Match
 #pragma omp critical
 {
 			double cur_progress = ((double)(progress_base+done) / (double)apt.total_len)*100.0;
-			printProgress(apt.prev_progress, cur_progress, cout);
+			printProgress((uint)apt.prev_progress, (uint)cur_progress, cout);
 			apt.prev_progress = cur_progress;
 }
 		}

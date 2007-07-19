@@ -1114,7 +1114,7 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 
 		// print a progress message
 		double cur_progress = ((double)apt.cur_leftend / (double)apt.total_len)*100.0;
-		printProgress(apt.prev_progress, cur_progress, cout);
+		printProgress((uint)apt.prev_progress, (uint)cur_progress, cout);
 		apt.prev_progress = cur_progress;
 		}catch(...)
 		{
@@ -1179,7 +1179,7 @@ void ProgressiveAligner::doGappedAlignment( node_id_t ancestor, bool profile_aln
 
 		// print a progress message
 		double cur_progress = ((double)apt.cur_leftend / (double)apt.total_len)*100.0;
-		printProgress(apt.prev_progress, cur_progress, cout);
+		printProgress((uint)apt.prev_progress, (uint)cur_progress, cout);
 		apt.prev_progress = cur_progress;
 	}
 	printMemUsage();
