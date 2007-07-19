@@ -13,7 +13,7 @@
 #include <libMems/SeedOccurrenceList.h>
 #include <libMems/IntervalList.h>
 #include <libMems/LCB.h>
-
+#include <libMems/Islands.h>
 namespace mems {
 
 /**
@@ -80,6 +80,14 @@ double GetPairwiseAnchorScore(
 		const mems::PairwiseScoringScheme& subst_scoring, mems::SeedOccurrenceList& sol_1, 
 		mems::SeedOccurrenceList& sol_2, bool penalize_gaps = false );
 
+class MoveScoreHeapComparator
+{
+public:
+	bool operator()( const std::pair< double, size_t >& a, const std::pair< double, size_t >& b ) const
+	{
+		return a.first < b.first;	// want to order by > instead of <
+	}
+};
 
 /**
  * Computes all pairwise LCBs from a set of tracking matches
@@ -714,22 +722,14 @@ int64 greedyBreakpointElimination_v4( std::vector< mems::LCB >& adjacencies,
 		moves_made++;
 #ifndef LCB_WEIGHT_LOSS_PLOT
 		if( status_out != NULL && moves_made % report_frequency == 0 )
-			(*status_out) << "move: " << moves_made << " alignment score " << cur_score << endl;
+			(*status_out) << "move: " << moves_made << " alignment score " << cur_score << std::endl;
 #endif
 	}
 
 	return 0;
 }
 
-class MoveScoreHeapComparator
-{
-public:
-	bool operator()( const std::pair< double, size_t >& a, const std::pair< double, size_t >& b ) const
-	{
-		return a.first < b.first;	// want to order by > instead of <
-	}
-};
-
+extern bool debug_aligner;
 
 /** finds the best anchoring, returns the anchoring score */
 template< class SearchScorer >
@@ -790,7 +790,7 @@ double greedySearch( SearchScorer& spbs )
 		bool success = spbs.remove(best_move, new_moves, new_move_count);
 		if( !success )
 		{
-			cerr << "numerical instability?  need to investigate this...\n";
+			std::cerr << "numerical instability?  need to investigate this...\n";
 //			genome::breakHere();
 			invalids++;
 			continue;
@@ -825,7 +825,7 @@ double greedySearch( SearchScorer& spbs )
 		moves_made++;
 		prev_progress = progress;
 		progress = (100 * moves_made) / move_count;
-		printProgress( prev_progress, progress, cout );
+		printProgress( prev_progress, progress, std::cout );
 //		if( moves_made % report_frequency == 0 )
 //			cout << "move: " << moves_made << " alignment score " << cur_score << " success ratio " << successful / invalids << endl;
 	}
