@@ -103,4 +103,5 @@ public:
 
 }
 
-#endif	__PairwiseMatchAdapter_h__  
+#endif	// __PairwiseMatchAdapter_h__  
+
