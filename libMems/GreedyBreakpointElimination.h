@@ -13,7 +13,7 @@
 #include <libMems/SeedOccurrenceList.h>
 #include <libMems/IntervalList.h>
 #include <libMems/LCB.h>
-#include <libMems/Islands.h>
+
 namespace mems {
 
 /**
@@ -391,6 +391,10 @@ void filterMatches_v2( std::vector< mems::LCB >& adjacencies, std::vector< Match
 
 }
 
+// predeclared to avoid need to include Islands.h
+const score_t INV_SCORE = (std::numeric_limits<score_t>::max)();
+void computeMatchScores( const std::string& seq1, const std::string& seq2, const PairwiseScoringScheme& scoring, std::vector<score_t>& scores );
+void computeGapScores( const std::string& seq1, const std::string& seq2, const PairwiseScoringScheme& scoring, std::vector<score_t>& scores );
 
 
 template< class MatchVector >
@@ -428,7 +432,7 @@ double GetPairwiseAnchorScore( MatchVector& lcb,
 				mems::SeedOccurrenceList::frequency_type uni1 = sol_1.getFrequency(m->LeftEnd(0) + merI - 1);
 				mems::SeedOccurrenceList::frequency_type uni2 = sol_2.getFrequency(m->LeftEnd(1) + merJ - 1);
 				// scale by the uniqueness product, which approximates the number of ways to match up non-unique k-mers
-				scores[colI] /= uni1 * uni2;
+				scores[colI] /= (score_t)(uni1 * uni2);
 			}
 			if(et[0][colI] != '-')
 				merI++;
@@ -439,7 +443,7 @@ double GetPairwiseAnchorScore( MatchVector& lcb,
 
 		double m_score = 0;
 		for( size_t i = 0; i < scores.size(); ++i )
-			if( scores[i] != INVALID_SCORE )
+			if( scores[i] != INV_SCORE )
 				m_score += scores[i];
 
 		if( !( m_score > -1000000000 && m_score < 1000000000 ) )
