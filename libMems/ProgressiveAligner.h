@@ -16,7 +16,7 @@
 #include "libMems/SuperInterval.h"
 #include "libMems/Aligner.h"
 #include "libMems/PhyloTree.h"
-#include "libMems/greedyBreakpointElimination.h"
+#include "libMems/GreedyBreakpointElimination.h"
 #include "libMems/CompactGappedAlignment.h"
 #include "libMems/Islands.h"
 #include <boost/type_traits/remove_pointer.hpp>
@@ -29,7 +29,7 @@ namespace mems
 {
 
 /** controls whether copious debugging tests and output gets written to screen */
-static bool debug_aligner = false;
+extern bool debug_aligner;
 
 
 /** A class that stores alignment-related information a node in a phylogenetic tree */
