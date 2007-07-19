@@ -26,7 +26,7 @@
 #else
 #pragma comment(lib, "MUSCLE64d.lib")
 #endif
-#else if defined(WIN32)
+#elif defined(WIN32)
 #ifdef NDEBUG
 #pragma comment(lib, "MUSCLE.lib")
 #else
