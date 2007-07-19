@@ -385,6 +385,67 @@ void filterMatches_v2( std::vector< mems::LCB >& adjacencies, std::vector< Match
 
 
 
+template< class MatchVector >
+double GetPairwiseAnchorScore( MatchVector& lcb, 
+							  std::vector< genome::gnSequence* >& seq_table, 
+							  const mems::PairwiseScoringScheme& subst_scoring, 
+							  mems::SeedOccurrenceList& sol_1, 
+							  mems::SeedOccurrenceList& sol_2, 
+							  bool penalize_gaps )
+{
+	double lcb_score = 0;
+	typename MatchVector::iterator match_iter = lcb.begin();
+	for( ; match_iter != lcb.end(); ++match_iter )
+	{
+		typedef typename MatchVector::value_type MatchPtrType;
+		MatchPtrType m = *match_iter;
+		std::vector< score_t > scores(m->AlignmentLength(), 0);
+		std::vector< std::string > et;
+		mems::GetAlignment(*m, seq_table, et);
+
+		// get substitution/gap score
+		mems::computeMatchScores( et[0], et[1], subst_scoring, scores );
+		if( penalize_gaps )
+			mems::computeGapScores( et[0], et[1], subst_scoring, scores );
+
+		// scale match scores by uniqueness
+		size_t merI = 0;
+		size_t merJ = 0;
+		double uni_count = 0;
+		double uni_score = 0;
+		for( size_t colI = 0; colI < m->AlignmentLength(); ++colI )
+		{
+			if(et[0][colI] != '-' && et[1][colI] != '-' )
+			{
+				mems::SeedOccurrenceList::frequency_type uni1 = sol_1.getFrequency(m->LeftEnd(0) + merI - 1);
+				mems::SeedOccurrenceList::frequency_type uni2 = sol_2.getFrequency(m->LeftEnd(1) + merJ - 1);
+				// scale by the uniqueness product, which approximates the number of ways to match up non-unique k-mers
+				scores[colI] /= uni1 * uni2;
+			}
+			if(et[0][colI] != '-')
+				merI++;
+			if(et[1][colI] != '-')
+				merJ++;
+		}
+
+
+		double m_score = 0;
+		for( size_t i = 0; i < scores.size(); ++i )
+			if( scores[i] != INVALID_SCORE )
+				m_score += scores[i];
+
+		if( !( m_score > -1000000000 && m_score < 1000000000 ) )
+		{
+			std::cerr << "scoring error\n";
+			genome::breakHere();
+		}
+		lcb_score += m_score;
+	}
+	
+
+	return lcb_score;
+}
+
 
 
 class EvenFasterSumOfPairsBreakpointScorer
