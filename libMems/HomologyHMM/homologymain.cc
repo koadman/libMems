@@ -74,37 +74,12 @@ void run(std::string& sequence, std::string& prediction)
   HomologyDPTable *pViterbiDP, *pFWDP, *pBWDP;
   HomologyBaumWelch bw;
 
-//  cout << "Calculating Viterbi probability..." << endl;
-//  bfloat iVitProb = Viterbi_recurse(&pViterbiDP, iPar, aSequence, iPathLength );
-//  cout << "Viterbi: "<<iVitProb<<endl;
-
-//  cout << "Calculating Forward probability..." << endl;
   bfloat iFWProb = Forward(&pFWDP, iPar, aSequence, iPathLength );
-//  cout << "Forward: "<<iFWProb<<endl;
-
-//  cout << "Calculating Backward probability..." << endl;
   bfloat iBWProb = Backward(bw, pFWDP, &pBWDP, iPar, aSequence, iPathLength );
-//  cout << "Backward:"<<iBWProb<<endl;
-//  cout << "Calculating Viterbi path..." << endl;
-  
-//  Path& iViterbiPath = Viterbi_trace(pViterbiDP, iPar, aSequence, iPathLength );
-/*  
-  cout << "Baum Welch emission counts:"<<endl;
-
-  cout << "\tHomologous\tUnrelated" << endl;
-  for (int i=0; i<8; i++) {
-    cout << i << ":\t"  
-	 << bw.emissionBaumWelchCount1[i][ bw.emissionIndex("emitHomologous") ] << "\t" 
-	 << bw.emissionBaumWelchCount1[i][ bw.emissionIndex("emitUnrelated") ] << endl;
-  }
-*/
-  // Compare the true and Viterbi paths, and print the posterior probability of being in the homologous state
-//  int iVHomologous = pViterbiDP->getId("homologous");
 
   prediction.resize(iPathLength);
   for (int i=0; i<iPathLength; i++) {
 
-//    cout << " Viterbi:";
     double iPosterior = pFWDP->getProb("homologous",i+1)*pBWDP->getProb("homologous",i+1)/iFWProb;
 //    if (iViterbiPath.toState(i) == iVHomologous) {
     if (iPosterior >= 0.5) {
@@ -117,6 +92,8 @@ void run(std::string& sequence, std::string& prediction)
   }
   //clean up aSequence, does this do any good? 
   delete[] aSequence;
+  delete pFWDP;
+  delete pBWDP;
 
 }
 
