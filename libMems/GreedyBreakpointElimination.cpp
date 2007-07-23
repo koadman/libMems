@@ -148,7 +148,7 @@ template< class LcbVector >
 uint RemoveLCBandCoalesce( size_t lcbI, uint seq_count, LcbVector& adjacencies, std::vector< double >& scores, std::vector< std::pair< uint, uint > >& id_remaps, std::vector< uint >& impact_list )
 {
 	uint removed_count = 0;
-	vector< uint > imp_tmp(seq_count * 10, LCB_UNASSIGNED);
+	vector< uint > imp_tmp(seq_count * (2 + seq_count * 4), LCB_UNASSIGNED);
 	swap(impact_list, imp_tmp);
 	size_t impactI = 0;
 	id_remaps.clear();
