@@ -90,6 +90,10 @@ AC_SUBST(DEPS_CFLAGS)
 
 dnl Check for OpenMP
 AX_OPENMP()
+AC_SUBST(OPENMP_CFLAGS)
+dnl OpenMP checker only defines for C when compiling both C and C++
+OPENMP_CXXFLAGS=$OPENMP_CFLAGS
+AC_SUBST(OPENMP_CXXFLAGS)
 
 dnl ensure portability for OS X with these checks
 AC_CHECK_HEADERS(sys/types.h)
