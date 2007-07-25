@@ -786,8 +786,7 @@ void GenericInterval<GappedBaseImpl>::addUnalignedRegions()
 		else
 			AddGapMatches( new_matches, new_matches.rbegin(), new_matches.rend(), seqI, this->LeftEnd(seqI), this->RightEnd(seqI), this->Orientation(seqI), this->SeqCount() );
 	}
-	matches.clear();
-	matches.insert( matches.end(), new_matches.begin(), new_matches.end() );
+	swap(matches, new_matches);
 }
 
 template<class GappedBaseImpl>
