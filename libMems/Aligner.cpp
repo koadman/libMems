@@ -199,7 +199,7 @@ cur_min_coverage(-1)
 {}
 
 Aligner::Aligner( const Aligner& al ) :
-gap_mh( al.gap_mh ),
+//gap_mh( al.gap_mh ),
 nway_mh( al.nway_mh ),
 seq_count( al.seq_count ),
 debug( al.debug),
@@ -1261,7 +1261,7 @@ void Aligner::Recursion( MatchList& r_list, Match* r_begin, Match* r_end, boolea
 		if( nway_only )
 			nway_mh.Clear();
 		else
-			gap_mh.Clear();
+			gap_mh.get().Clear();
 
 		multimap< uint, uint > mer_sizes;
 		// calculate potential mer sizes for searches
@@ -1318,8 +1318,8 @@ void Aligner::Recursion( MatchList& r_list, Match* r_begin, Match* r_end, boolea
 				nway_mh.ClearSequences();
 				nway_mh.FindMatches( cur_mems );
 			}else{
-				gap_mh.ClearSequences();
-				gap_mh.FindMatches( cur_mems );
+				gap_mh.get().ClearSequences();
+				gap_mh.get().FindMatches( cur_mems );
 			}
 			for( size_t mI = 0; mI < cur_mems.size(); ++mI )
 				cur_mems[mI]->Free();
@@ -1328,7 +1328,7 @@ void Aligner::Recursion( MatchList& r_list, Match* r_begin, Match* r_end, boolea
 		if( nway_only )
 			nway_mh.GetMatchList( gap_list );
 		else
-			gap_mh.GetMatchList( gap_list );
+			gap_mh.get().GetMatchList( gap_list );
 		
 	//	SubsetInclusionRemover sir;
 	//	sir.EliminateLinkedInclusions( gap_list );

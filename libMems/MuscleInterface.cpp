@@ -891,6 +891,12 @@ void stripGapColumns( std::vector< std::string >& aln )
 		aln[gap_seq].resize(cur_col);
 }
 
+void stripGaps( std::string& str )
+{
+	std::string::iterator striter = std::remove(str.begin(), str.end(), '-');
+	str.resize(striter - str.begin());
+}
+
 bool MuscleInterface::ProfileAlign( const GappedAlignment& ga1, const GappedAlignment& ga2, GappedAlignment& aln, bool anchored )
 {
 	try{
@@ -1083,13 +1089,26 @@ bool MuscleInterface::ProfileAlignFast( const GappedAlignment& ga1, const Gapped
 		}
 
 		// get the output
-		vector< string > aln_matrix( msaOut.GetSeqCount() );
+		vector< string > aln_matrix( aln1.size() );
 		for( size_t seqI = 0; seqI < msaOut.GetSeqCount(); seqI++ )
 		{
 			unsigned indie = msaOut.GetSeqIndex(seqI);
 			const char* buf = msaOut.GetSeqBuffer(indie);
 			string curseq(buf, msaOut.GetColCount());
-			swap(aln_matrix[order[seqI]],curseq);
+			swap(aln_matrix[order[indie]],curseq);
+
+			// debugging, check that sequences came out in the same order they went in!
+			string inseq = aln1[order[indie]];
+			string outseq = aln_matrix[order[indie]];
+			stripGaps(inseq);
+			stripGaps(outseq);
+			if(inseq != outseq)
+			{
+				unsigned indie = msaOut.GetSeqIndex(seqI);
+				cerr << "bad indie " << indie << endl;
+				genome::breakHere();
+			}
+
 		}
 
 		aln.SetAlignment( aln_matrix );

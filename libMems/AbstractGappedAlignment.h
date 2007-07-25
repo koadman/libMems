@@ -80,7 +80,11 @@ void GetAlignment( const AbstractMatch& ga, const std::vector< genome::gnSequenc
 		alignment[seqI] = std::string( aln_mat[0].size(), '-' );
 		if( ga.LeftEnd(seqI) == NO_MATCH )
 			continue;
-		std::string cur_seq = seq_table[seqI]->ToString( ga.Length(seqI), ga.LeftEnd(seqI) );
+		std::string cur_seq;
+#pragma omp critical
+{
+		cur_seq = seq_table[seqI]->ToString( ga.Length(seqI), ga.LeftEnd(seqI) );
+}
 		if( ga.Orientation(seqI) == AbstractMatch::reverse )
 			comp_filter->ReverseFilter(cur_seq);
 		std::size_t cI = 0; 

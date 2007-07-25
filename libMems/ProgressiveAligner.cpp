@@ -631,7 +631,7 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 
 		gnSeqI avg_len = (gap_list.seq_table[0]->length() + gap_list.seq_table[1]->length())/2;
 		uint search_seed_size = getDefaultSeedWeight( avg_len );
-		gap_mh.Clear();
+		gap_mh.get().Clear();
 
 		//
 		//	Create sorted mer lists for the intervening gap region
@@ -653,8 +653,8 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		//
 		//	Find all matches in the gap region
 		//
-		gap_mh.ClearSequences();
-		gap_mh.FindMatches( gap_list );
+		gap_mh.get().ClearSequences();
+		gap_mh.get().FindMatches( gap_list );
 		
 		EliminateOverlaps_v2( gap_list );
 		
@@ -719,112 +719,115 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 {
 	matches = Matrix<MatchList>(node1_seqs.size(),node2_seqs.size());
 
-	vector<node_id_t>::const_iterator n1_iter = node1_seqs.begin();
 	std::vector< bitset_t > aln_matrix;
 	iv.GetAlignment(aln_matrix);
 	Match tmp(2);
+	vector<pair<size_t,size_t>> node_pairs(node1_seqs.size() * node2_seqs.size());
+	int nni = 0;
 	for( size_t n1 = 0; n1 < node1_seqs.size(); n1++ )
-	{
-		if( n1 > 0 )
-			++n1_iter;
-		vector<node_id_t>::const_iterator n2_iter = node2_seqs.begin();
 		for( size_t n2 = 0; n2 < node2_seqs.size(); n2++ )
+			node_pairs[nni++] = make_pair(n1,n2);
+
+#pragma omp parallel for
+	for(int ni = 0; ni < node_pairs.size(); ni++)
+	{
+		size_t n1 = node_pairs[ni].first;
+		size_t n2 = node_pairs[ni].second;
+		vector<node_id_t>::const_iterator n1_iter = node1_seqs.begin() + n1;
+		vector<node_id_t>::const_iterator n2_iter = node1_seqs.begin() + n2;
+		
+		uint seqI = node_sequence_map[*n1_iter];
+		uint seqJ = node_sequence_map[*n2_iter];
+		MatchList& mlist = matches(n1, n2);
+		std::vector< search_cache_t >& cache = search_cache_db(n1, n2);
+		std::vector< search_cache_t >& new_cache = new_cache_db(n1, n2);
+		mlist.seq_table.push_back( alignment_tree[*n1_iter].sequence );
+		mlist.seq_table.push_back( alignment_tree[*n2_iter].sequence );
+
+		gnSeqI charI = 0;
+		gnSeqI charJ = 0;
+		gnSeqI prev_charI = 0;
+		gnSeqI prev_charJ = 0;
+		bool in_gap = false;
+		for( uint colI = 0; colI <= iv.AlignmentLength(); colI++ )
 		{
-			if( n2 > 0 )
-				++n2_iter;
-			uint seqI = node_sequence_map[*n1_iter];
-			uint seqJ = node_sequence_map[*n2_iter];
-			MatchList& mlist = matches(n1, n2);
-			std::vector< search_cache_t >& cache = search_cache_db(n1, n2);
-			std::vector< search_cache_t >& new_cache = new_cache_db(n1, n2);
-			mlist.seq_table.push_back( alignment_tree[*n1_iter].sequence );
-			mlist.seq_table.push_back( alignment_tree[*n2_iter].sequence );
-
-			gnSeqI charI = 0;
-			gnSeqI charJ = 0;
-			gnSeqI prev_charI = 0;
-			gnSeqI prev_charJ = 0;
-			bool in_gap = false;
-			for( uint colI = 0; colI <= iv.AlignmentLength(); colI++ )
+			if( colI == iv.AlignmentLength() || 
+				(aln_matrix[seqI].test(colI) && aln_matrix[seqJ].test(colI)) )
 			{
-				if( colI == iv.AlignmentLength() || 
-					(aln_matrix[seqI].test(colI) && aln_matrix[seqJ].test(colI)) )
+				if( in_gap && 
+					charI - prev_charI > min_recursive_gap_length &&
+					charJ - prev_charJ > min_recursive_gap_length )
 				{
-					if( in_gap && 
-						charI - prev_charI > min_recursive_gap_length &&
-						charJ - prev_charJ > min_recursive_gap_length )
-					{
 
-						Match* l_match = NULL;
-						l_match = tmp.Copy();
+					Match* l_match = NULL;
+					l_match = tmp.Copy();
+					if(iv.Orientation(seqI) == AbstractMatch::forward)
+						l_match->SetLeftEnd(0, iv.LeftEnd(seqI)+prev_charI);
+					else
+					{
+						l_match->SetLeftEnd(0, iv.RightEnd(seqI)-prev_charI);
+						l_match->SetOrientation(0, AbstractMatch::reverse );
+					}
+					if(iv.Orientation(seqJ) == AbstractMatch::forward)
+						l_match->SetLeftEnd(1, iv.LeftEnd(seqJ)+prev_charJ);
+					else
+					{
+						l_match->SetLeftEnd(1, iv.RightEnd(seqJ)-prev_charJ);
+						l_match->SetOrientation(1, AbstractMatch::reverse );
+					}
+					l_match->SetLength(0);
+
+					Match* r_match = NULL;
+					if( charJ != iv.RightEnd(seqJ) && charI != iv.RightEnd(seqI) )
+					{
+						r_match = tmp.Copy();
 						if(iv.Orientation(seqI) == AbstractMatch::forward)
-							l_match->SetLeftEnd(0, iv.LeftEnd(seqI)+prev_charI);
+							r_match->SetLeftEnd(0, iv.LeftEnd(seqI)+charI);
 						else
 						{
-							l_match->SetLeftEnd(0, iv.RightEnd(seqI)-prev_charI);
-							l_match->SetOrientation(0, AbstractMatch::reverse );
+							r_match->SetLeftEnd(0, iv.RightEnd(seqI)-charI);
+							r_match->SetOrientation(0, AbstractMatch::reverse );
 						}
 						if(iv.Orientation(seqJ) == AbstractMatch::forward)
-							l_match->SetLeftEnd(1, iv.LeftEnd(seqJ)+prev_charJ);
+							r_match->SetLeftEnd(1, iv.LeftEnd(seqJ)+charJ);
 						else
 						{
-							l_match->SetLeftEnd(1, iv.RightEnd(seqJ)-prev_charJ);
-							l_match->SetOrientation(1, AbstractMatch::reverse );
+							r_match->SetLeftEnd(1, iv.RightEnd(seqJ)-charJ);
+							r_match->SetOrientation(1, AbstractMatch::reverse );
 						}
-						l_match->SetLength(0);
-
-						Match* r_match = NULL;
-						if( charJ != iv.RightEnd(seqJ) && charI != iv.RightEnd(seqI) )
-						{
-							r_match = tmp.Copy();
-							if(iv.Orientation(seqI) == AbstractMatch::forward)
-								r_match->SetLeftEnd(0, iv.LeftEnd(seqI)+charI);
-							else
-							{
-								r_match->SetLeftEnd(0, iv.RightEnd(seqI)-charI);
-								r_match->SetOrientation(0, AbstractMatch::reverse );
-							}
-							if(iv.Orientation(seqJ) == AbstractMatch::forward)
-								r_match->SetLeftEnd(1, iv.LeftEnd(seqJ)+charJ);
-							else
-							{
-								r_match->SetLeftEnd(1, iv.RightEnd(seqJ)-charJ);
-								r_match->SetOrientation(1, AbstractMatch::reverse );
-							}
-							r_match->SetLength(0);
-						}
-
-						if( iv.Orientation(seqI) == AbstractMatch::reverse )
-						{
-							swap(l_match,r_match);
-							if( l_match != NULL ) l_match->Invert();
-							if( r_match != NULL ) r_match->Invert();
-						}
-
-						// check whether the current cache already has the searched region
-						search_cache_t cacheval = make_pair( l_match, r_match );
-						std::vector< search_cache_t >::iterator cache_entry = std::upper_bound( cache.begin(), cache.end(), cacheval, mems::cache_comparator );
-						if( cache_entry == cache.end() || 
-							(mems::cache_comparator( cacheval, *cache_entry ) || mems::cache_comparator( *cache_entry, cacheval )) )
-						{
-							// search this region
-							pairwiseAnchorSearch(mlist, l_match, r_match);
-						}
-						new_cache.push_back( cacheval );
+						r_match->SetLength(0);
 					}
-					prev_charI = charI;
-					prev_charJ = charJ;
-					in_gap = false;
+
+					if( iv.Orientation(seqI) == AbstractMatch::reverse )
+					{
+						swap(l_match,r_match);
+						if( l_match != NULL ) l_match->Invert();
+						if( r_match != NULL ) r_match->Invert();
+					}
+
+					// check whether the current cache already has the searched region
+					search_cache_t cacheval = make_pair( l_match, r_match );
+					std::vector< search_cache_t >::iterator cache_entry = std::upper_bound( cache.begin(), cache.end(), cacheval, mems::cache_comparator );
+					if( cache_entry == cache.end() || 
+						(mems::cache_comparator( cacheval, *cache_entry ) || mems::cache_comparator( *cache_entry, cacheval )) )
+					{
+						// search this region
+						pairwiseAnchorSearch(mlist, l_match, r_match);
+					}
+					new_cache.push_back( cacheval );
 				}
-				else
-					in_gap = true;
-				if( colI < iv.AlignmentLength() )
-				{
-					if( aln_matrix[seqI].test(colI) )
-						++charI;
-					if( aln_matrix[seqJ].test(colI) )
-						++charJ;
-				}
+				prev_charI = charI;
+				prev_charJ = charJ;
+				in_gap = false;
+			}
+			else
+				in_gap = true;
+			if( colI < iv.AlignmentLength() )
+			{
+				if( aln_matrix[seqI].test(colI) )
+					++charI;
+				if( aln_matrix[seqJ].test(colI) )
+					++charJ;
 			}
 		}
 	}
@@ -1086,7 +1089,7 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 
 	vector<GappedAlignment*> gal_vec(gal_list.begin(), gal_list.end());
 	const size_t gal_count = gal_vec.size();
-#pragma omp parallel for
+//#pragma omp parallel for
 	for( int galI = 0; galI < gal_count; galI++ )
 	{
 		gnSeqI cur_aln_len = gal_vec[galI]->AlignmentLength();
@@ -1097,16 +1100,20 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 			GappedAlignment ga2;
 			splitGappedAlignment( *(gal_vec[galI]), ga1, ga2, seqs1, seqs2 );
 			if( ga1.Multiplicity() > 0 && ga2.Multiplicity() > 0 )
-				mi.ProfileAlignFast( ga1, ga2, *(gal_vec[galI]), true );
+				mi.ProfileAlign( ga1, ga2, *(gal_vec[galI]), true );
+//				mi.ProfileAlignFast( ga1, ga2, *(gal_vec[galI]), true );
 		}else
 		{
 			int density = IsDenseEnough( gal_vec[galI] );
 			if( density == 0 )
-				mi.RefineFast( *(gal_vec[galI]) );
+				mi.Refine( *(gal_vec[galI]) );
+//				mi.RefineFast( *(gal_vec[galI]) );
 			else if( density == 1 )
-				mi.RefineFast( *(gal_vec[galI]), 500 );
+				mi.Refine( *(gal_vec[galI]), 500 );
+//				mi.RefineFast( *(gal_vec[galI]), 500 );
 			else
-				mi.RefineFast( *(gal_vec[galI]), 200 );
+				mi.Refine( *(gal_vec[galI]), 200 );
+//				mi.RefineFast( *(gal_vec[galI]), 200 );
 		}
 #pragma omp critical
 {
@@ -1118,47 +1125,6 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 	}
 	gal_list.clear();
 	gal_list.insert(gal_list.end(), gal_vec.begin(), gal_vec.end());
-
-/*
-//#pragma omp parallel
-	for( gal_iter = gal_list.begin(); gal_iter != gal_list.end(); ++gal_iter )
-	{
-//#pragma omp single nowait
-//		{
-		try{
-		apt.cur_leftend += (*gal_iter)->AlignmentLength();
-		if( profile_aln && !(*gap_iter) )
-		{
-			GappedAlignment ga1;
-			GappedAlignment ga2;
-			splitGappedAlignment( **gal_iter, ga1, ga2, seqs1, seqs2 );
-			if( ga1.Multiplicity() > 0 && ga2.Multiplicity() > 0 )
-				mi.ProfileAlignFast( ga1, ga2, **gal_iter, true );
-		}else
-		{
-			int density = IsDenseEnough( *gal_iter );
-			if( density == 0 )
-				mi.RefineFast( **gal_iter );
-			else if( density == 1 )
-				mi.RefineFast( **gal_iter, 500 );
-			else
-				mi.RefineFast( **gal_iter, 200 );
-		}
-
-		new_len += (*gal_iter)->AlignmentLength();
-		++gap_iter;
-
-		// print a progress message
-		double cur_progress = ((double)apt.cur_leftend / (double)apt.total_len)*100.0;
-		printProgress((uint)apt.prev_progress, (uint)cur_progress, cout);
-		apt.prev_progress = cur_progress;
-		}catch(...)
-		{
-			cerr << "Unhandled exception in parallel zone!!\n";
-		}
-//		}	// end omp single nowait
-	}
-*/
 
 	// put humpty dumpty back together
 	vector< string > aln_matrix( gal.SeqCount(), string( new_len, '-' ) );
@@ -3273,56 +3239,62 @@ void ProgressiveAligner::CreatePairwiseBPDistance( boost::multi_array<double, 2>
 	ofstream pair_bp_out( pair_bp_ofname.str().c_str() );
 #endif
 
+	vector< pair<uint, uint> > seq_pairs( (seq_count * (seq_count-1))/2 );
+	int ii = 0;
 	for( uint seqI = 0; seqI < seq_count; seqI++ )
-	{
 		for( uint seqJ = seqI + 1; seqJ < seq_count; seqJ++ )
-		{
-			vector<uint>::iterator n1 = find( node_sequence_map.begin(), node_sequence_map.end(), seqI );
-			vector<uint>::iterator n2 = find( node_sequence_map.begin(), node_sequence_map.end(), seqJ );
-			vector<node_id_t> n1_seqs( 1, n1-node_sequence_map.begin() );
-			vector<node_id_t> n2_seqs( 1, n2-node_sequence_map.begin() );
-			Matrix<MatchList> mml;
-			getPairwiseMatches(n1_seqs, n2_seqs, mml);
-			MatchList& ml = mml(0,0);
+			seq_pairs[ii++] = make_pair(seqI,seqJ);
 
-			// eliminate overlaps as they correspond to inconsistently or
-			// multiply aligned regions
-			EliminateOverlaps_v2( ml );
-			ml.MultiplicityFilter(2);
+#pragma omp parallel for
+	for(int i = 0; i < seq_pairs.size(); i++)
+	{
+		uint seqI = seq_pairs[i].first;
+		uint seqJ = seq_pairs[i].second;
+		vector<uint>::iterator n1 = find( node_sequence_map.begin(), node_sequence_map.end(), seqI );
+		vector<uint>::iterator n2 = find( node_sequence_map.begin(), node_sequence_map.end(), seqJ );
+		vector<node_id_t> n1_seqs( 1, n1-node_sequence_map.begin() );
+		vector<node_id_t> n2_seqs( 1, n2-node_sequence_map.begin() );
+		Matrix<MatchList> mml;
+		getPairwiseMatches(n1_seqs, n2_seqs, mml);
+		MatchList& ml = mml(0,0);
 
-			// do greedy b.p. elimination on the matches
-			vector< MatchList > LCB_list;
-			vector< LCB > adjacencies;
-			vector< gnSeqI > breakpoints;
-			IdentifyBreakpoints( ml, breakpoints );
-			ComputeLCBs_v2( ml, breakpoints, LCB_list );
-			vector< double > lcb_scores( LCB_list.size() );
-			for( size_t lcbI = 0; lcbI < LCB_list.size(); ++lcbI )
-				lcb_scores[lcbI] = GetPairwiseAnchorScore( LCB_list[lcbI], ml.seq_table, this->subst_scoring, sol_list[seqI], sol_list[seqJ] );
+		// eliminate overlaps as they correspond to inconsistently or
+		// multiply aligned regions
+		EliminateOverlaps_v2( ml );
+		ml.MultiplicityFilter(2);
 
-			computeLCBAdjacencies_v3( LCB_list, lcb_scores, adjacencies );
+		// do greedy b.p. elimination on the matches
+		vector< MatchList > LCB_list;
+		vector< LCB > adjacencies;
+		vector< gnSeqI > breakpoints;
+		IdentifyBreakpoints( ml, breakpoints );
+		ComputeLCBs_v2( ml, breakpoints, LCB_list );
+		vector< double > lcb_scores( LCB_list.size() );
+		for( size_t lcbI = 0; lcbI < LCB_list.size(); ++lcbI )
+			lcb_scores[lcbI] = GetPairwiseAnchorScore( LCB_list[lcbI], ml.seq_table, this->subst_scoring, sol_list[seqI], sol_list[seqJ] );
 
-			// want to discard all low-weight LCBs
-			// to arrive at a set of reliable LCBs
-			GreedyRemovalScorer wbs( adjacencies, bp_dist_estimate_score );
+		computeLCBAdjacencies_v3( LCB_list, lcb_scores, adjacencies );
+
+		// want to discard all low-weight LCBs
+		// to arrive at a set of reliable LCBs
+		GreedyRemovalScorer wbs( adjacencies, bp_dist_estimate_score );
 #ifdef LCB_WEIGHT_LOSS_PLOT
-			cur_min_coverage = greedyBreakpointElimination_v4( adjacencies, lcb_scores, wbs, &pair_bp_out, seqI, seqJ );
-			pair_bp_out.flush();
+		cur_min_coverage = greedyBreakpointElimination_v4( adjacencies, lcb_scores, wbs, &pair_bp_out, seqI, seqJ );
+		pair_bp_out.flush();
 #else
-			cur_min_coverage = greedyBreakpointElimination_v4( adjacencies, lcb_scores, wbs, NULL );
+		cur_min_coverage = greedyBreakpointElimination_v4( adjacencies, lcb_scores, wbs, NULL );
 #endif
-			MatchList deleted_matches;
-			filterMatches_v2( adjacencies, LCB_list, lcb_scores, deleted_matches );
-			cout << "Pair (" << seqI << "," << seqJ << ") has " << LCB_list.size() << " well-supported breakpoints\n";
-			
-			// now set the distance entry
-			bp_distmat[seqI][seqJ] = LCB_list.size();
-			bp_distmat[seqJ][seqI] = LCB_list.size();
+		MatchList deleted_matches;
+		filterMatches_v2( adjacencies, LCB_list, lcb_scores, deleted_matches );
+		cout << "Pair (" << seqI << "," << seqJ << ") has " << LCB_list.size() << " well-supported breakpoints\n";
+		
+		// now set the distance entry
+		bp_distmat[seqI][seqJ] = LCB_list.size();
+		bp_distmat[seqJ][seqI] = LCB_list.size();
 
-			// free the matches
-			for( size_t dI = 0; dI < ml.size(); dI++ )
-				ml[dI]->Free();
-		}
+		// free the matches
+		for( size_t dI = 0; dI < ml.size(); dI++ )
+			ml[dI]->Free();
 	}
 	// normalize to [0,1]
 	double bp_max = 0;
@@ -3760,7 +3732,8 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 		// need sol lists for scoring
 		cout << "Constructing seed occurrence lists\n";
 		sol_list.resize(seq_count);
-		for( uint seqI = 0; seqI < seq_count; seqI++ )
+#pragma omp parallel for
+		for( int seqI = 0; seqI < seq_count; seqI++ )
 			sol_list[seqI].construct(*(original_ml.sml_table[seqI]));
 	}
 	if( !collinear_genomes && use_weight_scaling )

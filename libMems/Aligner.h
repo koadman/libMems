@@ -26,6 +26,7 @@
 #include "libMems/GreedyBreakpointElimination.h"
 #include <list>
 #include "libMems/LCB.h"
+#include "libMUSCLE/threadstorage.h"
 
 namespace mems {
 
@@ -197,7 +198,7 @@ public:
 	void SetPermutationOutput( std::string& permutation_filename, int64 permutation_weight );
 	void WritePermutation( std::vector< LCB >& adjacencies, std::string out_filename );
 protected:
-	MemHash gap_mh;			/**< Used during recursive alignment */
+	TLS<MemHash> gap_mh;			/**< Used during recursive alignment */
 	MaskedMemHash nway_mh;	/**< Used during recursive alignment to find nway matches only */
 	uint32 seq_count;		/**< The number of sequences this aligner is working with */
 	boolean debug;			/**< Flag for debugging output */
