@@ -22,7 +22,7 @@
 // auto include the MUSCLE library
 #ifdef WIN64
 #ifdef NDEBUG
-#pragma comment(lib, "MUSCLE64fd.lib")
+#pragma comment(lib, "MUSCLE64.lib")
 #else
 #pragma comment(lib, "MUSCLE64d.lib")
 #endif
