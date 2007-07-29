@@ -24,6 +24,7 @@
 #include "libMems/PairwiseMatchFinder.h"
 #include "libMems/TreeUtilities.h"
 #include "libMems/PairwiseMatchAdapter.h"
+#include "libMems/DistanceMatrix.h"
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/tuple/tuple.hpp>

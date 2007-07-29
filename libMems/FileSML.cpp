@@ -1,9 +1,9 @@
 /*******************************************************************************
  * $Id: FileSML.cpp,v 1.22 2004/04/26 21:13:58 darling Exp $
- * This file is copyright 2002-2004 Aaron Darling.  All rights reserved.
+ * This file is copyright 2002-2007 Aaron Darling and authors listed in the AUTHORS file.
  * Please see the file called COPYING for licensing, copying, and modification
- * rights.  Redistribution of this file, in whole or in part is prohibited
- * without express permission.
+ * Please see the file called COPYING for licensing details.
+ * **************
  ******************************************************************************/
 
 

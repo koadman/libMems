@@ -1,9 +1,9 @@
 /*******************************************************************************
  * $Id: SortedMerList.h,v 1.13 2004/02/27 23:08:55 darling Exp $
- * This file is copyright 2002-2004 Aaron Darling.  All rights reserved.
- * Please see the file called COPYING for licensing, copying, and modification
- * rights.  Redistribution of this file, in whole or in part is prohibited
- * without express permission.
+ * This file is copyright 2002-2007 Aaron Darling and authors listed in the AUTHORS file.
+ * This file is licensed under the GPL.
+ * Please see the file called COPYING for licensing details.
+ * **************
  ******************************************************************************/
 
 #ifndef _SortedMerList_h_

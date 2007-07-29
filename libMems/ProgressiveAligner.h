@@ -1,9 +1,9 @@
 /*******************************************************************************
  * $Id: ProgressiveAligner.h,v 1.23 2004/04/19 23:10:13 darling Exp $
- * This file is copyright 2002-2004 Aaron Darling.  All rights reserved.
- * Please see the file called COPYING for licensing, copying, and modification
- * rights.  Redistribution of this file, in whole or in part is prohibited
- * without express permission.
+ * This file is copyright 2002-2007 Aaron Darling and authors listed in the AUTHORS file.
+ * This file is licensed under the GPL.
+ * Please see the file called COPYING for licensing details.
+ * **************
  ******************************************************************************/
 
 #ifndef _ProgressiveAligner_h_
