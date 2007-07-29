@@ -1,9 +1,9 @@
 /*******************************************************************************
  * $Id: Aligner.h,v 1.23 2004/04/19 23:10:13 darling Exp $
- * This file is copyright 2002-2004 Aaron Darling.  All rights reserved.
- * Please see the file called COPYING for licensing, copying, and modification
- * rights.  Redistribution of this file, in whole or in part is prohibited
- * without express permission.
+ * This file is copyright 2002-2007 Aaron Darling and authors listed in the AUTHORS file.
+ * This file is licensed under the GPL.
+ * Please see the file called COPYING for licensing details.
+ * **************
  ******************************************************************************/
 
 #ifndef _Aligner_h_
@@ -186,6 +186,8 @@ public:
 	 */
 	void SetMinRecursionGapLength( gnSeqI min_r_gap );
 
+	void SetMaxExtensionIterations( uint ext_iters ){ this->max_extension_iters = ext_iters; }
+
 	void SearchWithinLCB( MatchList& mlist, std::vector< search_cache_t >& new_cache );
 	void RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, std::vector< MatchList >& LCB_list, boolean entire_genome, std::ostream* status_out = NULL );
 
@@ -205,6 +207,8 @@ protected:
 	
 	double LCB_minimum_density;
 	double LCB_minimum_range;
+
+	uint max_extension_iters;	/**< maximum number of attempts at LCB extension */
 	
 	int64 cur_min_coverage;	/**< Tracks the minimum weight of the least weight LCB */
 	

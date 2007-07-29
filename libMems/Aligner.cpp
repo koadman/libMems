@@ -1,9 +1,9 @@
 /*******************************************************************************
  * $Id: Aligner.cpp,v 1.47 2004/04/19 23:10:30 darling Exp $
- * This file is copyright 2002-2004 Aaron Darling.  All rights reserved.
+ * This file is copyright 2002-2007 Aaron Darling and authors listed in the AUTHORS file.
  * Please see the file called COPYING for licensing, copying, and modification
- * rights.  Redistribution of this file, in whole or in part is prohibited
- * without express permission.
+ * Please see the file called COPYING for licensing details.
+ * **************
  ******************************************************************************/
 
 #include "libMems/Aligner.h"
@@ -13,6 +13,7 @@
 #include "libMems/MuscleInterface.h"	// it's the default gapped aligner
 #include "libMems/ClustalInterface.h"
 #include "libGenome/gnRAWSource.h"
+#include "libMems/DistanceMatrix.h"
 
 #include <map>
 #include <fstream>	// for debugging
@@ -195,7 +196,8 @@ min_recursive_gap_length(default_min_r_gap_size),
 collinear_genomes(false),
 gal(&(MuscleInterface::getMuscleInterface())),
 permutation_weight(-1),
-cur_min_coverage(-1)
+cur_min_coverage(-1),
+max_extension_iters(4)
 {}
 
 Aligner::Aligner( const Aligner& al ) :
@@ -210,7 +212,8 @@ min_recursive_gap_length( al.min_recursive_gap_length ),
 collinear_genomes( al.collinear_genomes ),
 gal( al.gal ),
 permutation_weight( al.permutation_weight ),
-permutation_filename( al.permutation_filename )
+permutation_filename( al.permutation_filename ),
+max_extension_iters( al.max_extension_iters )
 {}
 
 Aligner& Aligner::operator=( const Aligner& al )
@@ -231,6 +234,8 @@ Aligner& Aligner::operator=( const Aligner& al )
 
 	permutation_weight = al.permutation_weight;
 	permutation_filename = al.permutation_filename;
+
+	max_extension_iters = al.max_extension_iters;
 
 	return *this;
 }
@@ -2118,6 +2123,7 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 
 	computeLCBAdjacencies_v2( LCB_list, weights, adjacencies );
 
+	int cur_extension_round = 0;
 	int64 total_weight = 0;
 	int64 prev_total_weight = 0;
 	weightI = 0;
@@ -2131,7 +2137,10 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 		int64 prev_extension_weight = total_weight;
 
 		// only search outside existing LCBs on the whole-genome scale to save time
-		if( entire_genome && extend_lcbs && total_weight != 0 ){
+		if( entire_genome && extend_lcbs && total_weight != 0 &&
+			cur_extension_round < this->max_extension_iters )
+		{
+			cur_extension_round++;
 			if( status_out )
 				*status_out << "Performing LCB extension\n";
 			vector< vector< int64 > > cur_iv_regions;
@@ -2167,15 +2176,6 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 			swap( prev_iv_regions, cur_iv_regions );
 		}
 		
-/*		if( total_weight != 0 )
-		{
-			AaronsLCB( mlist, breakpoints );
-			if( status_out )
-				*status_out << "The " << mlist.size() << " matches comprise " << LCB_list.size() << " LCBs\n";
-			// organize the LCBs into different MatchList instances (inside of LCB_list)
-			ComputeLCBs( mlist, breakpoints, LCB_list, weights );
-		}
-*/
 		// now search within LCBs
 		if( currently_recursing && total_weight != 0 ){
 			vector< search_cache_t > new_cache;
