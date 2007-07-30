@@ -723,7 +723,8 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 	std::vector< bitset_t > aln_matrix;
 	iv.GetAlignment(aln_matrix);
 	Match tmp(2);
-	vector<pair<size_t,size_t>> node_pairs(node1_seqs.size() * node2_seqs.size());
+	const size_t sizer = node1_seqs.size() * node2_seqs.size();
+	std::vector< std::pair<size_t,size_t> > node_pairs(sizer);
 	int nni = 0;
 	for( size_t n1 = 0; n1 < node1_seqs.size(); n1++ )
 		for( size_t n2 = 0; n2 < node2_seqs.size(); n2++ )
