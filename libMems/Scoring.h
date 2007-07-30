@@ -29,6 +29,7 @@ void computeGapScores( const std::string& seq1, const std::string& seq2, const P
 
 
 //tjt: function to compute the consensus column score, consensus sequence, and cumulative consensus score from an alignment 
+inline
 void computeConsensusScore( const std::vector<std::string>& alignment, const PairwiseScoringScheme& pss, 
 						   std::vector<score_t>& scores, std::string& consensus, score_t& score )
 {
@@ -115,6 +116,7 @@ void computeConsensusScore( const std::vector<std::string>& alignment, const Pai
 	}
 }
 
+inline
 void computeMatchScores( const std::string& seq1, const std::string& seq2, 
 						const PairwiseScoringScheme& scoring, std::vector<score_t>& scores )
 {
@@ -136,6 +138,7 @@ void computeMatchScores( const std::string& seq1, const std::string& seq2,
 	}
 }
 
+inline
 void computeGapScores( const std::string& seq1, const std::string& seq2, const PairwiseScoringScheme& scoring, 
 					  std::vector<score_t>& scores )
 {
@@ -291,6 +294,7 @@ void computeGapScores( const std::string& seq1, const std::string& seq2, const P
 	}
 }
 
+inline
 void computeSPScore( const std::vector<string>& alignment, const PairwiseScoringScheme& pss, 
 					std::vector<score_t>& scores, score_t& score )
 {

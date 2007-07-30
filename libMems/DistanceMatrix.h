@@ -261,12 +261,13 @@ void SingleCopyDistanceMatrix( MatchVector& iv_list, std::vector< genome::gnSequ
 	TransformDistanceIdentity(distance);
 }
 
-
+inline
 void DistanceMatrix( const MatchList& mlist, NumericMatrix<double>& distance ){
 	IdentityMatrix(mlist, mlist.seq_table, distance );
 	TransformDistanceIdentity( distance );
 }
 
+inline
 void TransformDistanceIdentity( NumericMatrix<double>& identity ){
 	for( int i = 0; i < identity.cols(); i++ ){
 		for( int j = 0; j < identity.rows(); j++ ){
@@ -275,6 +276,7 @@ void TransformDistanceIdentity( NumericMatrix<double>& identity ){
 	}
 }
 
+inline
 void DistanceMatrix( uint seq_count, const std::vector< std::pair< uint64, uint64 > >& detail_list, NumericMatrix<double>& distance ){
 	distance = NumericMatrix<double>( seq_count, seq_count );
 	distance.init( 0 );
