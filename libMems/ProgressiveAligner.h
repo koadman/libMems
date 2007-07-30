@@ -384,14 +384,14 @@ uint64 SimpleGetLCBCoverage( MatchVector& lcb ){
 		{
 			if( (*match_iter)->LeftEnd(seqI) != mems::NO_MATCH )
 			{
-				maxlen += (*match_iter)->Length(seqI);
+				maxlen += (double)(*match_iter)->Length(seqI);
 				if( (*match_iter)->Length(seqI) > minlen )
-					minlen = (*match_iter)->Length(seqI);
+					minlen = (double)(*match_iter)->Length(seqI);
 			}
 		}
 		double score = exp( ((*match_iter)->AlignmentLength() - minlen) / (maxlen - minlen) );
 		score *= maxlen;
-		coverage += score;
+		coverage += (uint64)score;
 	}
 	return coverage;
 }
