@@ -1140,7 +1140,9 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 			GappedAlignment ga2;
 			splitGappedAlignment( **gal_iter, ga1, ga2, seqs1, seqs2 );
 			if( ga1.Multiplicity() > 0 && ga2.Multiplicity() > 0 )
+			{
 				mi.ProfileAlignFast( ga1, ga2, **gal_iter, true );
+			}
 		}else
 		{
 			int density = IsDenseEnough( *gal_iter );

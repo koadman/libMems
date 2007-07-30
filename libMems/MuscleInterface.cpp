@@ -1098,7 +1098,7 @@ bool MuscleInterface::ProfileAlignFast( const GappedAlignment& ga1, const Gapped
 			swap(aln_matrix[order[indie]],curseq);
 
 			// debugging, check that sequences came out in the same order they went in!
-			string inseq = aln1[order[indie]];
+/*			string inseq = aln1[order[indie]];
 			string outseq = aln_matrix[order[indie]];
 			stripGaps(inseq);
 			stripGaps(outseq);
@@ -1108,8 +1108,12 @@ bool MuscleInterface::ProfileAlignFast( const GappedAlignment& ga1, const Gapped
 				cerr << "bad indie " << indie << endl;
 				genome::breakHere();
 			}
-
+*/
 		}
+		// fill empty seqs with gaps
+		for( size_t seqI = 0; seqI < aln_matrix.size(); seqI++ )
+			if(aln_matrix[seqI].size() == 0)
+				aln_matrix[seqI].resize(msaOut.GetColCount(), '-');
 
 		aln.SetAlignment( aln_matrix );
 		for( uint seqI = 0; seqI < ga1.SeqCount(); seqI++ )
