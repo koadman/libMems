@@ -33,13 +33,13 @@ public:
 			}
 			// set seed frequencies
 			for( size_t i = seed_start; i < seedI; ++i )
-				count[mer_vec[i].position] = cur_seed_count;
+				count[mer_vec[i].position] = (frequency_type)cur_seed_count;
 			seed_start = seedI;
 			cur_seed_count = 1;
 		}
 		// set seed frequencies for the last few
 		for( size_t i = seed_start; i < seedI && i < mer_vec.size(); ++i )
-			count[mer_vec[i].position] = cur_seed_count < resolution_limit ? cur_seed_count : resolution_limit;
+			count[mer_vec[i].position] = (frequency_type)(cur_seed_count < resolution_limit ? cur_seed_count : resolution_limit);
 		// hack: fudge the last few values on the end of the sequence
 		for( ; seedI < count.size(); ++seedI )
 			count[seedI]=1;
