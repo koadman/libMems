@@ -68,7 +68,7 @@ void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* 
  * Applies pairwise transitive homology statistics to detect backbone in a genome alignment
  * Unaligns any regions found to be non-homologous, returns coordinates of the homologous segments in bb_list
  */
-void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
+void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, double pGoHomo, double pGoUnrelated, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
 
 /**
  * Writes a backbone column file.  This file type gets used by the Mauve GUI.

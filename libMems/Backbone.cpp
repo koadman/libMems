@@ -298,7 +298,7 @@ void translateToPairwiseGenomeHSS( const hss_array_t& hss_array, pairwise_genome
 }
 
 
-void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlignment<>* >& iv_ptrs, vector< CompactGappedAlignment<>* >& iv_orig_ptrs, const PairwiseScoringScheme& subst_scoring, score_t score_threshold, pairwise_genome_hss_t& hss_cols )
+void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlignment<>* >& iv_ptrs, vector< CompactGappedAlignment<>* >& iv_orig_ptrs, const PairwiseScoringScheme& subst_scoring, score_t score_threshold, pairwise_genome_hss_t& hss_cols, double pGoHomo, double pGoUnrelated )
 {
 	uint seq_count = iv_list.seq_table.size();
 	// make pairwise projections of intervals and find LCBs...
@@ -332,7 +332,7 @@ void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlign
 			vector< CompactGappedAlignment<>* > hss_list;
 			// now find islands
 			hss_array_t hss_array;
-			findHssHomologyHMM( pair_cgas, pair_ivs.seq_table, subst_scoring, hss_array, true, true );
+			findHssHomologyHMM( pair_cgas, pair_ivs.seq_table, subst_scoring, hss_array, pGoHomo, pGoUnrelated, true, true );
 //			hss_array_t homo_array;
 //			HssColsToIslandCols( iv_list, seq_table, hss_array, homo_array );
 			HssArrayToCga(pair_cgas, pair_ivs.seq_table, hss_array, hss_list);
@@ -885,7 +885,7 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	vector< CompactGappedAlignment<>* > iv_orig_ptrs(iv_ptrs);
 	hss_array_t island_array, hss_array;
 
-	findHssHomologyHMM( mlist, seq_table, subst_scoring, island_array, left_homologous, right_homologous );
+	findHssHomologyHMM( mlist, seq_table, subst_scoring, island_array, 0.004, 0.004, left_homologous, right_homologous );
 //	findHssRandomWalk( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
 	// experimental:
 //	findHssRandomWalk_v2( mlist, seq_table, subst_scoring, score_threshold, island_array, left_homologous, right_homologous );
@@ -928,7 +928,7 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 }
 
 
-void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold )
+void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, double pGoHomo, double pGoUnrelated, score_t score_threshold )
 {
 	// collapse any intervals that are trivially collinear
 	collapseCollinear( iv_list );
@@ -949,7 +949,7 @@ void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, co
 	}
 	vector< CompactGappedAlignment<>* > iv_orig_ptrs(iv_ptrs);
 
-	makeAllPairwiseGenomeHSS( iv_list, iv_ptrs, iv_orig_ptrs, subst_scoring, score_threshold, hss_cols );
+	makeAllPairwiseGenomeHSS( iv_list, iv_ptrs, iv_orig_ptrs, subst_scoring, score_threshold, hss_cols, pGoHomo, pGoUnrelated);
 
 	backbone_list_t ula_list;
 
