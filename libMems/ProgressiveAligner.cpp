@@ -1088,42 +1088,6 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 	gnSeqI new_len = 0;
 
 	gap_iter = gap_iv.begin();
-/*
-	vector<GappedAlignment*> gal_vec(gal_list.begin(), gal_list.end());
-	const size_t gal_count = gal_vec.size();
-//#pragma omp parallel for
-	for( int galI = 0; galI < gal_count; galI++ )
-	{
-		gnSeqI cur_aln_len = gal_vec[galI]->AlignmentLength();
-
-		if( profile_aln && !gap_iv[galI] )
-		{
-			GappedAlignment ga1;
-			GappedAlignment ga2;
-			splitGappedAlignment( *(gal_vec[galI]), ga1, ga2, seqs1, seqs2 );
-			if( ga1.Multiplicity() > 0 && ga2.Multiplicity() > 0 )
-				mi.ProfileAlignFast( ga1, ga2, *(gal_vec[galI]), true );
-		}else
-		{
-			int density = IsDenseEnough( gal_vec[galI] );
-			if( density == 0 )
-				mi.RefineFast( *(gal_vec[galI]) );
-			else if( density == 1 )
-				mi.RefineFast( *(gal_vec[galI]), 500 );
-			else
-				mi.RefineFast( *(gal_vec[galI]), 200 );
-		}
-#pragma omp critical
-{
-			apt.cur_leftend += cur_aln_len;
-			double cur_progress = ((double)apt.cur_leftend / (double)apt.total_len)*100.0;
-			printProgress((uint)apt.prev_progress, (uint)cur_progress, cout);
-			apt.prev_progress = cur_progress;
-}
-	}
-	gal_list.clear();
-	gal_list.insert(gal_list.end(), gal_vec.begin(), gal_vec.end());
-*/
 
 	const size_t gal_count = gal_list.size();
 #pragma omp parallel for
@@ -1133,7 +1097,10 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 		for(uint a = 0; a < galI; a++)
 			my_g_iter++;
 		vector<bool>::iterator my_b_iter = gap_iv.begin();
+#pragma omp critical
+{
 		apt.cur_leftend += (*my_g_iter)->AlignmentLength();
+}
 		if( profile_aln && !(*my_b_iter) )
 		{
 			GappedAlignment ga1;
@@ -1164,40 +1131,6 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 }
 	}
 	gal_iter = gal_list.end();
-
-/*
-	for( gal_iter = gal_list.begin(); gal_iter != gal_list.end(); ++gal_iter )
-	{
-		apt.cur_leftend += (*gal_iter)->AlignmentLength();
-		if( profile_aln && !(*gap_iter) )
-		{
-			GappedAlignment ga1;
-			GappedAlignment ga2;
-			splitGappedAlignment( **gal_iter, ga1, ga2, seqs1, seqs2 );
-			if( ga1.Multiplicity() > 0 && ga2.Multiplicity() > 0 )
-			{
-				mi.ProfileAlignFast( ga1, ga2, **gal_iter, true );
-			}
-		}else
-		{
-			int density = IsDenseEnough( *gal_iter );
-			if( density == 0 )
-				mi.RefineFast( **gal_iter );
-			else if( density == 1 )
-				mi.RefineFast( **gal_iter, 500 );
-			else
-				mi.RefineFast( **gal_iter, 200 );
-		}
-
-		new_len += (*gal_iter)->AlignmentLength();
-		++gap_iter;
-
-		// print a progress message
-		double cur_progress = ((double)apt.cur_leftend / (double)apt.total_len)*100.0;
-		printProgress((uint)apt.prev_progress, (uint)cur_progress, cout);
-		apt.prev_progress = cur_progress;
-	}
-*/
 
 	// put humpty dumpty back together
 	vector< string > aln_matrix( gal.SeqCount(), string( new_len, '-' ) );
