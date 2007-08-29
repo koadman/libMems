@@ -20,7 +20,7 @@
 #include "homology.h"
 
 
-void run(std::string& sequence, std::string& prediction) 
+void run(std::string& sequence, std::string& prediction, double goUnrelated, double goHomologous) 
 {
 
   // The parameters of the model
@@ -30,8 +30,8 @@ void run(std::string& sequence, std::string& prediction)
 //  iPar.iGoUnrelated = 0.00000001;     // probability of going from Homologous to the Unrelated state
 //  iPar.iGoHomologous = 0.000001;        // probability of going from Unrelated to the Homologous state
 //  iPar.iGoStop = 0.0000001;       // probability of going from either to the End state
-  iPar.iGoUnrelated = 0.004;     // probability of going from Homologous to the Unrelated state
-  iPar.iGoHomologous = 0.004;        // probability of going from Unrelated to the Homologous state
+  iPar.iGoUnrelated = goUnrelated;     // probability of going from Homologous to the Unrelated state
+  iPar.iGoHomologous = goHomologous;        // probability of going from Unrelated to the Homologous state
   iPar.iGoStopFromHomologous = 0.00001;       // probability of going to the End state
   iPar.iGoStopFromUnrelated = 0.00001;
   iPar.iStartHomologous = 0.5;	// probability of starting in the homologous state.  
