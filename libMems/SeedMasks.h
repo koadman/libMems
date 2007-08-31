@@ -20,8 +20,9 @@
 #endif
 #include "libGenome/gnDefs.h"
 
-/* Seed patterns taken from: Kwok Pui Choi, Fanfan Zeng, and Louxin Zhang 
- * "Good spaced seeds for homology search" Bioinformatics 2004(20): 1053-1059
+/* Seed patterns taken from: AE Darling, T Treangen, L Zhang, C Kuiken, X Messeguer, NT Perna
+ * "Procrastination leads to efficient match filtration for local multiple alignment" 
+ * Lecture Notes in Bioinformatics 4175:126-137 Springer-Verlag 2006
  */
 
 /**
@@ -168,6 +169,47 @@ uint32** seedMasks(){
 		0,0xaeb3f,		//0b11111100110101110101100111111,
 		0,0x7eb76bf,	//0b111111010110111011010111111,
 	};
+	// default to solid seeds for weight 22+
+	static uint32 seed_masks_22[] =
+	{
+		0,0x003fffff,
+	};
+	static uint32 seed_masks_23[] =
+	{
+		0,0x007fffff,
+	};
+	static uint32 seed_masks_24[] =
+	{
+		0,0x00ffffff,
+	};
+	static uint32 seed_masks_25[] =
+	{
+		0,0x01ffffff,
+	};
+	static uint32 seed_masks_26[] =
+	{
+		0,0x03ffffff,
+	};
+	static uint32 seed_masks_27[] =
+	{
+		0,0x07ffffff,
+	};
+	static uint32 seed_masks_28[] =
+	{
+		0,0x0fffffff,
+	};
+	static uint32 seed_masks_29[] =
+	{
+		0,0x1fffffff,
+	};
+	static uint32 seed_masks_30[] =
+	{
+		0,0x3fffffff,
+	};
+	static uint32 seed_masks_31[] =
+	{
+		0,0x7fffffff,
+	};
 
 	static uint32 no_seeds[] = 
 	{
@@ -198,6 +240,16 @@ uint32** seedMasks(){
 	seed_masks_19,
 	seed_masks_20,
 	seed_masks_21,
+	seed_masks_22,
+	seed_masks_23,
+	seed_masks_24,
+	seed_masks_25,
+	seed_masks_26,
+	seed_masks_27,
+	seed_masks_28,
+	seed_masks_29,
+	seed_masks_30,
+	seed_masks_31,
 	};
 	
 	return seed_masks;
@@ -246,6 +298,8 @@ int64 getSeed( int weight, int seed_rank ){
 		return getSolidSeed( weight );
 
 	masks = seedMasks();
+	if(weight > 31)
+		return getSolidSeed(32);
 	high = masks[ weight ][ seed_rank*2 ];
 	low = masks[ weight ][ seed_rank*2 + 1 ];
 	
