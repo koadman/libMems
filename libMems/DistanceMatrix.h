@@ -209,10 +209,14 @@ void SingleCopyDistanceMatrix( MatchVector& iv_list, std::vector< genome::gnSequ
 			pair_comp[seqI][seqJ].second.resize( seq_table[seqJ]->length(), false );
 		}
 	}
-	for( size_t ivI = 0; ivI < iv_list.size(); ++ivI )
+#pragma omp parallel for
+	for( int ivI = 0; ivI < iv_list.size(); ++ivI )
 	{
 		std::vector< bitset_t > aln_table;
+#pragma omp critical
+{
 		iv_list[ivI]->GetAlignment(aln_table);
+}
 		for( uint seqI = 0; seqI < seq_count; ++seqI )
 		{
 			for( uint seqJ = seqI+1; seqJ < seq_count; ++seqJ )
