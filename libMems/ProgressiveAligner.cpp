@@ -3663,6 +3663,7 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 	mlist.clear();
 	mlist = original_ml;
 	cout << "Starting with " << mlist.size() << " multi-matches\n";
+	cout << "Computing genome content distance matrix...\n";
 
 //
 // Step 2) Compute a phylogenetic guide tree using the pairwise matches
