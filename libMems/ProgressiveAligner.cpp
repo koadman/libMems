@@ -736,7 +736,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		size_t n1 = node_pairs[ni].first;
 		size_t n2 = node_pairs[ni].second;
 		vector<node_id_t>::const_iterator n1_iter = node1_seqs.begin() + n1;
-		vector<node_id_t>::const_iterator n2_iter = node1_seqs.begin() + n2;
+		vector<node_id_t>::const_iterator n2_iter = node2_seqs.begin() + n2;
 		
 		uint seqI = node_sequence_map[*n1_iter];
 		uint seqJ = node_sequence_map[*n2_iter];
