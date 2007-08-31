@@ -175,43 +175,6 @@ boolean MemHash::EnumerateMatches( IdmerList& match_list )
 	return true;
 }
 
-/*
-boolean MemHash::EnumerateMatches( IdmerList& match_list ){
-
-	match_list.sort(&idmer_id_lessthan);
-	IdmerList::iterator iter = match_list.begin();
-	IdmerList::iterator iter2 = match_list.begin();
-	IdmerList hash_list;
-	++iter2;
-	int32 cur_tolerance = m_enumeration_tolerance - 1;
-	uint32 cur_count = 0;	//the number of mers from a particular sequence
-	hash_list.push_back(*iter);
-	for(; iter2 != match_list.end(); ++iter){
-		if(iter->id != iter2->id){
-			hash_list.push_back(*iter2);
-			cur_tolerance = m_enumeration_tolerance - 1;
-			cur_count = 0;
-		}else{
-			if(cur_tolerance > 0){
-				hash_list.push_back(*iter2);
-				cur_tolerance--;
-			}
-			++cur_count;
-		}
-		++iter2;
-		if(cur_count > m_repeat_tolerance)
-			return true;
-	}
-	if(hash_list.size() > 1){
-		if(m_enumeration_tolerance == 1)
-			return HashMatch(hash_list);
-		else
-			return MatchFinder::EnumerateMatches( hash_list );
-	}
-	return true;
-}
-*/
-
 //why have separate hash tables? dunno.  no reason.  what was i thinking
 // at that coffeehouse in portland when i wrote this crappy code?
 // MemHashEntries use GENETICIST coordinates.  They start at 1, not 0.
