@@ -383,6 +383,8 @@ void GenericInterval<GappedBaseImpl>::Marble( gnSeqI size )
 {
 	if( this->SeqCount() > 2 )
 		throw "I can't handle that many at once\n";
+	if( this->Multiplicity() < 2 )
+		return;	// can't marble unless there are at least two seqs
 
 	// first break up all the pieces
 	std::list<AbstractMatch*> mlist;
