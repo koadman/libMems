@@ -32,13 +32,13 @@ namespace mems
 extern bool debug_aligner;
 
 
-/** A class that stores alignment-related information a node in a phylogenetic tree */
+/** A class that stores alignment-related information as a node in a phylogenetic tree */
 class AlignmentTreeNode : public TreeNode
 {
 public:
-	std::vector< SuperInterval > ordering;
-	std::vector< boolean > parents_aligned;
-	std::vector< boolean > children_aligned;
+	std::vector< SuperInterval > ordering;	/**< A total ordering on alignments of sequence contained by leafs below this node */
+	std::vector< boolean > parents_aligned;		/**< have parents been aligned? */
+	std::vector< boolean > children_aligned;	/**< have children been aligned? */
 	genome::gnSequence* sequence;	/**< The sequence associated with this node, NULL for ancestral nodes */
 	bool refined;	/**< true if iterative refinement has been applied to the alignment at this node */
 };
@@ -48,7 +48,7 @@ public:
 double getDefaultBreakpointPenalty( std::vector< genome::gnSequence* >& sequences );
 
 /**
- * Extends the Aligner class to compute alignments in parallel using MPI
+ * Computes multiple genome alignments using a progressive alignment algorithm
  */
 class ProgressiveAligner : public mems::Aligner
 {
