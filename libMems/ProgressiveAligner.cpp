@@ -814,7 +814,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						(mems::cache_comparator( cacheval, *cache_entry ) || mems::cache_comparator( *cache_entry, cacheval )) )
 					{
 						// search this region
-						pairwiseAnchorSearch(mlist, l_match, r_match);
+							pairwiseAnchorSearch(mlist, l_match, r_match);
 					}
 					new_cache.push_back( cacheval );
 				}
@@ -2031,7 +2031,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 					if( tracking_matches[tmI].node_match->LeftEnd(ssI) != NO_MATCH )
 						used_components++;
 			}
-			size_t total_components = tracking_matches.size() * tracking_matches[0].node_match->SeqCount();
+			size_t total_components = tracking_matches.size() == 0 ? 0 : tracking_matches.size() * tracking_matches[0].node_match->SeqCount();
 			cout << "There are " << used_components << " / " << total_components << " components used\n";
 
 			vector<node_id_t> node1_descendants;
