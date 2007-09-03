@@ -376,46 +376,12 @@ static char colmap[5][5] = {
 	{'7','7','7','7','7'},  // -
 };
 
-inline
-void getColmap()
-{
-/*
-	static bool initialized = false;
-	if(initialized)
-		return;
-
-	colmap[0][0] = '1';
-	colmap[3][3] = '1';
-	colmap[1][1] = '2';
-	colmap[2][2] = '2';
-	colmap[0][1] = '3';
-	colmap[1][0] = '3';
-	colmap[2][3] = '3';
-	colmap[3][2] = '3';
-	colmap[0][2] = '4';
-	colmap[2][0] = '4';
-	colmap[1][3] = '4';
-	colmap[3][1] = '4';
-	colmap[0][3] = '5';
-	colmap[3][0] = '5';
-	colmap[1][2] = '6';
-	colmap[2][1] = '6';
-	for( int i = 0; i < 4; i++ )
-	{
-		colmap[i][4] = '7';
-		colmap[4][i] = '7';
-	}
-	colmap[4][4] = 0;	// undefined state
-	initialized = true;
-*/
-}
 
 inline
 void findHssHomologyHMM( std::vector< std::string >& aln_table, hss_list_t& hss_list, uint seqI, uint seqJ, double pGoHomo, double pGoUnrelated,
 						boolean left_homologous, boolean right_homologous )
 {
 	static char* charmap = getCharmap();
-	getColmap();	// ensure its been initialized
 
 	// encode the alignment as column states
 	std::string column_states(aln_table[0].size(),'q');
