@@ -54,9 +54,6 @@ public:
 	 * and are not deallocated when this class is destroyed.  They should
 	 * be manually destroyed when no longer in use.
 	 *
-	 * @param mfa_filename	The name of the Multi-FastA file to read in.  Each 
-	 *						sequence entry will be treated as a separate sequence to 
-	 *						be aligned.
 	 * @param mer_size		The seed size to use when constructing the sorted mer lists
 	 * @param log_stream	An output stream to log messages to.  If NULL no logging is done
 	 * @param load_smls		Specifies whether sorted mer lists should be created 
