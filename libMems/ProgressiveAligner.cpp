@@ -807,16 +807,22 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						if( r_match != NULL ) r_match->Invert();
 					}
 
+// workaround for a mysterious linux-specific crash
+#ifdef WIN32
 					// check whether the current cache already has the searched region
 					search_cache_t cacheval = make_pair( l_match, r_match );
 					std::vector< search_cache_t >::iterator cache_entry = std::upper_bound( cache.begin(), cache.end(), cacheval, mems::cache_comparator );
 					if( cache_entry == cache.end() || 
 						(mems::cache_comparator( cacheval, *cache_entry ) || mems::cache_comparator( *cache_entry, cacheval )) )
 					{
+#endif
 						// search this region
 							pairwiseAnchorSearch(mlist, l_match, r_match);
+// workaround for a mysterious linux-specific crash
+#ifdef WIN32
 					}
 					new_cache.push_back( cacheval );
+#endif
 				}
 				prev_charI = charI;
 				prev_charJ = charJ;
@@ -2381,7 +2387,8 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 					pairwise_matches(seqI, seqJ).insert( pairwise_matches(seqI, seqJ).end(), matches(seqI, seqJ).begin(), matches(seqI, seqJ).end() );
 		}
 		
-
+// workaround for a mysterious linux-specific crash
+#ifdef WIN32
 		for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		{
 			for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
@@ -2408,6 +2415,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 					cout << seqI << "," << seqJ << " has an additional " << pairwise_matches(seqI,seqJ).size() << " matches\n";
 			}
 		}
+#endif
 
 		// restore backed up tree since we only want the final set of ancestral
 		// breakpoints applied to the descendants
@@ -2417,6 +2425,8 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 
 	}	// end while(true)
 
+// workaround for a mysterious linux-specific crash
+#ifdef WIN32
 	// delete the search cache
 	for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
@@ -2427,6 +2437,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 				if( search_cache_db(seqI,seqJ)[mI].second != NULL )
 					search_cache_db(seqI,seqJ)[mI].second->Free();
 			}
+#endif
 
 	printMemUsage();
 
