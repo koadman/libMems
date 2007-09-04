@@ -1096,7 +1096,7 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 	gap_iter = gap_iv.begin();
 
 	const size_t gal_count = gal_list.size();
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
 	for( int galI = 0; galI < gal_count; galI++ )
 	{
 		list<GappedAlignment*>::iterator my_g_iter = gal_list.begin();
