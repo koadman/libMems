@@ -661,7 +661,7 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		
 		// for anchor accuracy, throw out any anchors that are shorter than the minimum
 		// anchor length after EliminateOverlaps()
-		gap_list.LengthFilter( MIN_ANCHOR_LENGTH );
+		gap_list.LengthFilter( MIN_ANCHOR_LENGTH + 3 );
 
 		if( gap_list.size() > 0 )
 		{
@@ -1458,6 +1458,27 @@ void multFilter( MatchVector& matches, uint mult = 2 )
 	}
 	matches.erase(matches.begin()+cur, matches.end());
 }
+
+template< typename MatchVector >
+void alignedNtCountFilter( MatchVector& matches, uint length )
+{
+	// require at least some number of aligned pairs in the anchor
+	size_t cur = 0;
+	for( size_t mI = 0; mI < matches.size(); ++mI )
+	{
+		size_t len_sum = 0;
+		for( size_t seqI = 0; seqI < matches[mI]->SeqCount(); seqI++ )
+			if(matches[mI]->LeftEnd(seqI) != NO_MATCH)
+				len_sum += matches[mI]->Length(seqI);
+
+		if( len_sum - length > matches[mI]->AlignmentLength() )
+			matches[cur++] = matches[mI];
+		else
+			matches[mI]->Free();
+	}
+	matches.erase(matches.begin()+cur, matches.end());
+}
+
 
 bool debugging_cltm = false;
 void ProgressiveAligner::constructLcbTrackingMatches( 
@@ -3737,11 +3758,22 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 	if( !collinear_genomes )
 	{
 		// need sol lists for scoring
-		cout << "Constructing seed occurrence lists\n";
 		sol_list.resize(seq_count);
+		// temporarily create a weight 11 SML
+		MatchList w11_mlist;
+		w11_mlist.seq_filename = original_ml.seq_filename;
+		w11_mlist.seq_table = original_ml.seq_table;
+		cout << "Creating weight 11 SMLs for repeat detection\n";
+		w11_mlist.CreateMemorySMLs( 11, NULL );
+
+		cout << "Constructing seed occurrence lists for repeat detection\n";
 #pragma omp parallel for
 		for( int seqI = 0; seqI < seq_count; seqI++ )
-			sol_list[seqI].construct(*(original_ml.sml_table[seqI]));
+		{
+			sol_list[seqI].construct(*(w11_mlist.sml_table[seqI]));
+			delete w11_mlist.sml_table[seqI];
+		}
+		w11_mlist.sml_table.clear();
 	}
 	if( !collinear_genomes && use_weight_scaling )
 	{
