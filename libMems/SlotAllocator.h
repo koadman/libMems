@@ -16,6 +16,7 @@
 #include <vector>
 #include <list>
 #include <stdexcept>
+#include <iostream>
 
 namespace mems {
 
@@ -59,7 +60,7 @@ protected:
 	unsigned tail_free;
 	unsigned n_elems;	/**< number of T in the most recently allocated block */
 
-	std::list< T* > free_list;
+	std::vector< T* > free_list;
 
 private:
 	SlotAllocator(){ tail_free = 0; n_elems = 0; };
@@ -83,8 +84,8 @@ T* SlotAllocator< T >::Allocate(){
 #pragma omp critical
 {
 	if( free_list.begin() != free_list.end() ){
-		t_ptr = *free_list.begin();
-		free_list.pop_front();
+		t_ptr = free_list.back();
+		free_list.pop_back();
 	}else if( tail_free > 0 ){
 		int T_index = n_elems - tail_free--;
 		t_ptr = &(data[ data.size() - 1 ][ T_index ]);
@@ -124,11 +125,10 @@ void SlotAllocator< T >::Free( T* t ){
 #pragma omp critical
 {
 	// for debugging double free
-/*	std::list<T*>::iterator iter = free_list.begin();
-	for(; iter != free_list.end(); iter++ )
-		if( *iter == t )
-			cerr << "ERROR DOUBLE FREE\n";
-*/	free_list.push_front( t );
+/*	for(size_t i = 0; i < free_list.size(); i++ )
+		if( free_list[i] == t )
+			std::cerr << "ERROR DOUBLE FREE\n";
+*/	free_list.push_back( t );
 }
 }
 
