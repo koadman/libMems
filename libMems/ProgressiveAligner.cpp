@@ -606,7 +606,31 @@ void ProgressiveAligner::recursiveApplyAncestralBreakpoints( node_id_t ancestor 
 }
 
 
-void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin, Match* r_end )
+boolean getInterveningCoordinates( const AbstractMatch* iv, Match* r_begin, Match* r_end, uint seqI, int64& gap_lend, int64& gap_rend ){
+	// skip this sequence if it's undefined
+	if( (r_end != NULL && r_end->Start( seqI ) == NO_MATCH) ||
+		(r_begin != NULL && r_begin->Start( seqI ) == NO_MATCH) ){
+		gap_lend = 0;
+		gap_rend = 0;
+		return true;
+	}
+			
+	// determine the size of the gap
+	gap_rend = r_end != NULL ? r_end->Start( seqI ) : iv->RightEnd( seqI ) + 1;
+	gap_lend = r_begin != NULL ? r_begin->End( seqI ) + 1 : iv->LeftEnd( seqI );
+	if( gap_rend < 0 || gap_lend < 0 ){
+		gap_rend = r_begin != NULL ? -r_begin->Start( seqI ) : iv->RightEnd( seqI ) + 1;
+		gap_lend = r_end != NULL ? -r_end->Start( seqI ) + r_end->Length() : 1;
+	}
+	if( gap_rend <= 0 || gap_lend <= 0 ){
+		// if either is still < 0 then there's a problem...
+		genome::ErrorMsg( "Error constructing intervening coordinates" );
+	}
+	return true;
+}
+
+
+void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin, Match* r_end, const AbstractMatch* iv )
 {
 	try
 	{
@@ -620,7 +644,8 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		{
 			int64 gap_end = 0;
 			int64 gap_start = 0;
-			getInterveningCoordinates( r_list.seq_table, r_begin, r_end, seqI, gap_start, gap_end );
+			getInterveningCoordinates( iv, r_begin, r_end, seqI, gap_start, gap_end );
+//			getInterveningCoordinates( r_list.seq_table, r_begin, r_end, seqI, gap_start, gap_end );
 			int64 diff = gap_end - gap_start;
 			diff = 0 < diff ? diff : 0;
 
@@ -817,7 +842,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 					{
 #endif
 						// search this region
-							pairwiseAnchorSearch(mlist, l_match, r_match);
+							pairwiseAnchorSearch(mlist, l_match, r_match, &iv);
 // workaround for a mysterious linux-specific crash
 #ifdef WIN32
 					}
@@ -1954,6 +1979,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 	vector< node_id_t > node2_seqs;	/**< the node id's of extant sequences below node 2 */
 	getAlignedChildren( node1, node1_seqs );
 	getAlignedChildren( node2, node2_seqs );
+
 	uint seqI, seqJ;
 	gnSeqI prev_ancestral_seq_len = (std::numeric_limits<gnSeqI>::max)();
 

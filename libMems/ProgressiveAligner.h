@@ -140,7 +140,7 @@ public:
 		const std::vector<node_id_t>& node2_seqs, const GappedAlignmentType& iv, 
 		Matrix<mems::MatchList>& matches, Matrix< std::vector< mems::search_cache_t > >& search_cache_db, 
 		Matrix< std::vector< mems::search_cache_t > >& new_cache_db );
-	void pairwiseAnchorSearch( mems::MatchList& r_list, mems::Match* r_begin, mems::Match* r_end );
+	void pairwiseAnchorSearch( mems::MatchList& r_list, mems::Match* r_begin, mems::Match* r_end, const mems::AbstractMatch* iv );
 
 	void translateGappedCoordinates( std::vector<mems::AbstractMatch*>& ml, uint seqI, node_id_t extant, node_id_t ancestor );
 
