@@ -400,14 +400,8 @@ void GenericInterval<GappedBaseImpl>::Marble( gnSeqI size )
 			if( (*m_iter)->LeftEnd(seqI) != NO_MATCH )
 				break;
 		AbstractMatch* left_iv = (*m_iter)->Copy();
-//		if( (*m_iter)->Orientation(seqI) == AbstractMatch::forward )
-//		{
-			left_iv->CropEnd( left_iv->AlignmentLength() - size );
-			(*m_iter)->CropStart( size );
-//		}else{
-//			(*m_iter)->CropEnd( (*m_iter)->AlignmentLength() - size );
-//			left_iv->CropStart( size );
-//		}
+		left_iv->CropEnd( left_iv->AlignmentLength() - size );
+		(*m_iter)->CropStart( size );
 		m_iter = mlist.insert( m_iter, left_iv );
 	}
 	matches.clear();
