@@ -681,9 +681,9 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		//
 		gap_mh.get().ClearSequences();
 		gap_mh.get().FindMatches( gap_list );
-		
+
 		EliminateOverlaps_v2( gap_list );
-		
+
 		// for anchor accuracy, throw out any anchors that are shorter than the minimum
 		// anchor length after EliminateOverlaps()
 		gap_list.LengthFilter( MIN_ANCHOR_LENGTH + 3 );
@@ -723,7 +723,6 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 				++mum_iter;
 			}
 		}
-
 		// delete sequences and smls
 		for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ )
 			delete gap_list.seq_table[ seqI ];
@@ -755,7 +754,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		for( size_t n2 = 0; n2 < node2_seqs.size(); n2++ )
 			node_pairs[nni++] = make_pair(n1,n2);
 
-#pragma omp parallel for
+//#pragma omp parallel for
 	for(int ni = 0; ni < node_pairs.size(); ni++)
 	{
 		size_t n1 = node_pairs[ni].first;
@@ -831,9 +830,8 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						if( l_match != NULL ) l_match->Invert();
 						if( r_match != NULL ) r_match->Invert();
 					}
-
 // workaround for a mysterious linux-specific crash
-#ifdef WIN32
+#ifdef NO_CACHE
 					// check whether the current cache already has the searched region
 					search_cache_t cacheval = make_pair( l_match, r_match );
 					std::vector< search_cache_t >::iterator cache_entry = std::upper_bound( cache.begin(), cache.end(), cacheval, mems::cache_comparator );
@@ -844,7 +842,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						// search this region
 							pairwiseAnchorSearch(mlist, l_match, r_match, &iv);
 // workaround for a mysterious linux-specific crash
-#ifdef WIN32
+#ifdef NO_CACHE
 					}
 					new_cache.push_back( cacheval );
 #endif
@@ -2414,23 +2412,26 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		}
 		
 // workaround for a mysterious linux-specific crash
-#ifdef WIN32
+#ifdef NO_CACHE
 		for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		{
 			for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
 			{
-				// delete the previous search cache
-				swap( search_cache_db(seqI, seqJ), new_cache_db(seqI, seqJ) );
-				for( size_t mI = 0; mI < new_cache_db(seqI,seqJ).size(); mI++ )
+				for( size_t mI = 0; mI < search_cache_db(seqI,seqJ).size(); mI++ )
 				{
-					if( new_cache_db(seqI,seqJ)[mI].first != NULL )
-						new_cache_db(seqI,seqJ)[mI].first->Free();
-					if( new_cache_db(seqI,seqJ)[mI].second != NULL )
-						new_cache_db(seqI,seqJ)[mI].second->Free();
+					if( search_cache_db(seqI,seqJ)[mI].first != NULL )
+						search_cache_db(seqI,seqJ)[mI].first->Free();
+					if( search_cache_db(seqI,seqJ)[mI].second != NULL )
+						search_cache_db(seqI,seqJ)[mI].second->Free();
 				}
-				new_cache_db(seqI,seqJ).clear();
+				search_cache_db(seqI,seqJ).clear();
 				try{
-					std::sort( search_cache_db(seqI, seqJ).begin(), search_cache_db(seqI, seqJ).end(), cache_comparator );
+					if(new_cache_db(seqI, seqJ).size() > 0)
+					{
+						search_cache_db(seqI,seqJ).insert( search_cache_db(seqI,seqJ).end(), new_cache_db(seqI, seqJ).begin(), new_cache_db(seqI, seqJ).end() );
+						new_cache_db(seqI, seqJ).clear();
+						std::sort( search_cache_db(seqI, seqJ).begin(), search_cache_db(seqI, seqJ).end(), cache_comparator );
+					}
 				}catch(...){
 					cerr << "Error sorting.\n";
 					cerr << "Cache has " << search_cache_db(seqI, seqJ).size() << " elements\n\n\n";
@@ -2452,7 +2453,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 	}	// end while(true)
 
 // workaround for a mysterious linux-specific crash
-#ifdef WIN32
+#ifdef NO_CACHE
 	// delete the search cache
 	for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
