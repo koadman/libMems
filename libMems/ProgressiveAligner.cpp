@@ -606,7 +606,7 @@ void ProgressiveAligner::recursiveApplyAncestralBreakpoints( node_id_t ancestor 
 }
 
 
-boolean getInterveningCoordinates( const AbstractMatch* iv, Match* r_begin, Match* r_end, uint seqI, int64& gap_lend, int64& gap_rend ){
+boolean getInterveningCoordinates( const AbstractMatch* iv, uint oseqI, uint oseqJ, Match* r_begin, Match* r_end, uint seqI, int64& gap_lend, int64& gap_rend ){
 	// skip this sequence if it's undefined
 	if( (r_end != NULL && r_end->Start( seqI ) == NO_MATCH) ||
 		(r_begin != NULL && r_begin->Start( seqI ) == NO_MATCH) ){
@@ -616,10 +616,10 @@ boolean getInterveningCoordinates( const AbstractMatch* iv, Match* r_begin, Matc
 	}
 			
 	// determine the size of the gap
-	gap_rend = r_end != NULL ? r_end->Start( seqI ) : iv->RightEnd( seqI ) + 1;
-	gap_lend = r_begin != NULL ? r_begin->End( seqI ) + 1 : iv->LeftEnd( seqI );
+	gap_rend = r_end != NULL ? r_end->Start( seqI ) : iv->RightEnd( oseqI ) + 1;
+	gap_lend = r_begin != NULL ? r_begin->End( seqI ) + 1 : iv->LeftEnd( oseqI );
 	if( gap_rend < 0 || gap_lend < 0 ){
-		gap_rend = r_begin != NULL ? -r_begin->Start( seqI ) : iv->RightEnd( seqI ) + 1;
+		gap_rend = r_begin != NULL ? -r_begin->Start( seqI ) : iv->RightEnd( oseqI ) + 1;
 		gap_lend = r_end != NULL ? -r_end->Start( seqI ) + r_end->Length() : 1;
 	}
 	if( gap_rend <= 0 || gap_lend <= 0 ){
@@ -630,7 +630,7 @@ boolean getInterveningCoordinates( const AbstractMatch* iv, Match* r_begin, Matc
 }
 
 
-void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin, Match* r_end, const AbstractMatch* iv )
+void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin, Match* r_end, const AbstractMatch* iv, uint oseqI, uint oseqJ )
 {
 	try
 	{
@@ -644,8 +644,7 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		{
 			int64 gap_end = 0;
 			int64 gap_start = 0;
-			getInterveningCoordinates( iv, r_begin, r_end, seqI, gap_start, gap_end );
-//			getInterveningCoordinates( r_list.seq_table, r_begin, r_end, seqI, gap_start, gap_end );
+			getInterveningCoordinates( iv, oseqI, oseqJ, r_begin, r_end, seqI, gap_start, gap_end);
 			int64 diff = gap_end - gap_start;
 			diff = 0 < diff ? diff : 0;
 
@@ -840,7 +839,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 					{
 #endif
 						// search this region
-							pairwiseAnchorSearch(mlist, l_match, r_match, &iv);
+							pairwiseAnchorSearch(mlist, l_match, r_match, &iv, seqI, seqJ);
 // workaround for a mysterious linux-specific crash
 #ifdef NO_CACHE
 					}
