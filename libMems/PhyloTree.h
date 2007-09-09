@@ -13,7 +13,10 @@
 
 //typedef unsigned int node_id_t;
 typedef size_t node_id_t;
-struct TreeNode {
+class TreeNode 
+{
+public:
+	TreeNode() : distance(0) {};
 	std::string name;	/**< node name */
 	double distance;	/**< distance to parent */
 	std::vector< node_id_t > parents;	/**< if parents.size() == 0 this is a root node */

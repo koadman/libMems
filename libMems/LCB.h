@@ -15,6 +15,7 @@ namespace mems {
  */
 class LCB{
 public:
+	LCB() : lcb_id(0), weight(0), to_be_deleted(false) {};
 	std::vector< int64 > left_end;	/**< The left end position of the LCB in each sequence */
 	std::vector< int64 > right_end;  /**< The right end position of the LCB in each sequence */
 	std::vector< uint > left_adjacency;	/**< 'Pointers' (actually IDs) to the LCBs on the left in each sequence */
