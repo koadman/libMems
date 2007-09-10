@@ -632,8 +632,8 @@ boolean getInterveningCoordinates( const AbstractMatch* iv, uint oseqI, uint ose
 
 void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin, Match* r_end, const AbstractMatch* iv, uint oseqI, uint oseqJ )
 {
-	try
-	{
+//	try
+//	{
 		uint seqI = 0;
 		MatchList gap_list;
 		vector< int64 > starts;
@@ -646,10 +646,14 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 			int64 gap_start = 0;
 			getInterveningCoordinates( iv, oseqI, oseqJ, r_begin, r_end, seqI, gap_start, gap_end);
 			int64 diff = gap_end - gap_start;
-			diff = 0 < diff ? diff : 0;
+			diff = diff > 0 ? diff - 1 : 0;
 
 			starts.push_back( gap_start );
-			gnSequence* new_seq = new gnSequence( r_list.seq_table[ seqI ]->subseq( gap_start, diff ) );
+			gnSequence* new_seq = NULL;
+			if(diff > 0 && gap_start < r_list.seq_table[ seqI ]->length())
+				new_seq = new gnSequence( r_list.seq_table[ seqI ]->subseq( gap_start, diff ) );
+			else
+				new_seq = new gnSequence();
 			gap_list.seq_table.push_back( new_seq );
 			gap_list.sml_table.push_back( new DNAMemorySML() );
 		}
@@ -727,7 +731,7 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 			delete gap_list.seq_table[ seqI ];
 		for( uint seqI = 0; seqI < gap_list.sml_table.size(); seqI++ )
 			delete gap_list.sml_table[ seqI ];
-			
+/*			
 	}catch( gnException& gne ){
 		cerr << gne << endl;
 	}catch( exception& e ){
@@ -735,6 +739,7 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 	}catch(...){
 		cerr << "When I say 'ohhh' you say 'shit'!\n";
 	}
+*/
 }
 
 
@@ -830,7 +835,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						if( r_match != NULL ) r_match->Invert();
 					}
 // workaround for a mysterious linux-specific crash
-#ifdef NO_CACHE
+#ifndef NO_CACHE
 					// check whether the current cache already has the searched region
 					search_cache_t cacheval = make_pair( l_match, r_match );
 					std::vector< search_cache_t >::iterator cache_entry = std::upper_bound( cache.begin(), cache.end(), cacheval, mems::cache_comparator );
@@ -841,9 +846,12 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						// search this region
 							pairwiseAnchorSearch(mlist, l_match, r_match, &iv, seqI, seqJ);
 // workaround for a mysterious linux-specific crash
-#ifdef NO_CACHE
+#ifndef NO_CACHE
 					}
 					new_cache.push_back( cacheval );
+#else
+					l_match->Free();
+					r_match->Free();
 #endif
 				}
 				prev_charI = charI;
@@ -2411,7 +2419,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		}
 		
 // workaround for a mysterious linux-specific crash
-#ifdef NO_CACHE
+#ifndef NO_CACHE
 		for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		{
 			for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
@@ -2452,7 +2460,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 	}	// end while(true)
 
 // workaround for a mysterious linux-specific crash
-#ifdef NO_CACHE
+#ifndef NO_CACHE
 	// delete the search cache
 	for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
