@@ -878,6 +878,7 @@ void addUnalignedRegions( IntervalListType& iv_list)
 	{
 		Interval iv( new_ivs.begin() + newI, new_ivs.begin() + newI + 1 );
 		iv_list[prev_size + newI] = iv;
+		new_ivs[newI]->Free();
 	}
 }
 
