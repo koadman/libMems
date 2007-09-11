@@ -2944,7 +2944,7 @@ void findMidpoint( PhyloTree< AlignmentTreeNode >& alignment_tree, node_id_t& n1
 	}
 
 	// find the most distant pair of nodes
-	int max_dist = 0;
+	int max_dist = (std::numeric_limits<int>::min)();
 	for (int i = 0; i < V; ++i) {
 		for (int j = 0; j < V; ++j) {
 			if( D[i][j] > max_dist )
