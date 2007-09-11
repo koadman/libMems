@@ -606,7 +606,7 @@ void ProgressiveAligner::recursiveApplyAncestralBreakpoints( node_id_t ancestor 
 }
 
 
-boolean getInterveningCoordinates( const AbstractMatch* iv, uint oseqI, uint oseqJ, Match* r_begin, Match* r_end, uint seqI, int64& gap_lend, int64& gap_rend ){
+boolean getInterveningCoordinates( const AbstractMatch* iv, uint oseqI, Match* r_begin, Match* r_end, uint seqI, int64& gap_lend, int64& gap_rend ){
 	// skip this sequence if it's undefined
 	if( (r_end != NULL && r_end->Start( seqI ) == NO_MATCH) ||
 		(r_begin != NULL && r_begin->Start( seqI ) == NO_MATCH) ){
@@ -644,13 +644,13 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		{
 			int64 gap_end = 0;
 			int64 gap_start = 0;
-			getInterveningCoordinates( iv, oseqI, oseqJ, r_begin, r_end, seqI, gap_start, gap_end);
+			getInterveningCoordinates( iv, (seqI == 0 ? oseqI : oseqJ), r_begin, r_end, seqI, gap_start, gap_end);
 			int64 diff = gap_end - gap_start;
 			diff = diff > 0 ? diff - 1 : 0;
 
 			starts.push_back( gap_start );
 			gnSequence* new_seq = NULL;
-			if(diff > 0 && gap_start < r_list.seq_table[ seqI ]->length())
+			if(diff > 0 && gap_start + diff - 1 <= r_list.seq_table[ seqI ]->length())
 				new_seq = new gnSequence( r_list.seq_table[ seqI ]->subseq( gap_start, diff ) );
 			else
 				new_seq = new gnSequence();
