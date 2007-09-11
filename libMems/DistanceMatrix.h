@@ -254,6 +254,7 @@ void SingleCopyDistanceMatrix( MatchVector& iv_list, std::vector< genome::gnSequ
 	}
 	for( uint seqI = 0; seqI < seq_count; ++seqI )
 	{
+		distance(seqI,seqI) = 1;
 		for( uint seqJ = seqI+1; seqJ < seq_count; ++seqJ )
 		{
 			double pI = ((double)pair_comp[seqI][seqJ].first.count())/((double)pair_comp[seqI][seqJ].first.size());
