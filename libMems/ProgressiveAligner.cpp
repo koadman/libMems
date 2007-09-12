@@ -632,114 +632,103 @@ boolean getInterveningCoordinates( const AbstractMatch* iv, uint oseqI, Match* r
 
 void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin, Match* r_end, const AbstractMatch* iv, uint oseqI, uint oseqJ )
 {
-//	try
-//	{
-		uint seqI = 0;
-		MatchList gap_list;
-		vector< int64 > starts;
-	// 
-	//	Get the sequence in the intervening gaps between these two matches
+	uint seqI = 0;
+	MatchList gap_list;
+	vector< int64 > starts;
+// 
+//	Get the sequence in the intervening gaps between these two matches
+//
+	for( seqI = 0; seqI < 2; seqI++ )
+	{
+		int64 gap_end = 0;
+		int64 gap_start = 0;
+		getInterveningCoordinates( iv, (seqI == 0 ? oseqI : oseqJ), r_begin, r_end, seqI, gap_start, gap_end);
+		int64 diff = gap_end - gap_start;
+		diff = diff > 0 ? diff - 1 : 0;
+
+		starts.push_back( gap_start );
+		gnSequence* new_seq = NULL;
+		if(diff > 0 && gap_start + diff - 1 <= r_list.seq_table[ seqI ]->length())
+			new_seq = new gnSequence( r_list.seq_table[ seqI ]->subseq( gap_start, diff ) );
+		else
+			new_seq = new gnSequence();
+		gap_list.seq_table.push_back( new_seq );
+		gap_list.sml_table.push_back( new DNAMemorySML() );
+	}
+
+	gnSeqI avg_len = (gap_list.seq_table[0]->length() + gap_list.seq_table[1]->length())/2;
+	uint search_seed_size = getDefaultSeedWeight( avg_len );
+	gap_mh.get().Clear();
+
 	//
-		for( seqI = 0; seqI < 2; seqI++ )
-		{
-			int64 gap_end = 0;
-			int64 gap_start = 0;
-			getInterveningCoordinates( iv, (seqI == 0 ? oseqI : oseqJ), r_begin, r_end, seqI, gap_start, gap_end);
-			int64 diff = gap_end - gap_start;
-			diff = diff > 0 ? diff - 1 : 0;
-
-			starts.push_back( gap_start );
-			gnSequence* new_seq = NULL;
-			if(diff > 0 && gap_start + diff - 1 <= r_list.seq_table[ seqI ]->length())
-				new_seq = new gnSequence( r_list.seq_table[ seqI ]->subseq( gap_start, diff ) );
-			else
-				new_seq = new gnSequence();
-			gap_list.seq_table.push_back( new_seq );
-			gap_list.sml_table.push_back( new DNAMemorySML() );
-		}
-
-		gnSeqI avg_len = (gap_list.seq_table[0]->length() + gap_list.seq_table[1]->length())/2;
-		uint search_seed_size = getDefaultSeedWeight( avg_len );
-		gap_mh.get().Clear();
-
-		//
-		//	Create sorted mer lists for the intervening gap region
-		//
-		uint64 default_seed = getSeed( search_seed_size );
-		if( search_seed_size < MIN_DNA_SEED_WEIGHT )
-		{
-			for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ )
-				delete gap_list.seq_table[ seqI ];
-			for( uint seqI = 0; seqI < gap_list.sml_table.size(); seqI++ )
-				delete gap_list.sml_table[ seqI ];
-			return;
-		}
-		for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ ){
-			gap_list.sml_table[ seqI ]->Clear();
-			gap_list.sml_table[ seqI ]->Create( *(gap_list.seq_table[ seqI ]), default_seed );
-		}
-
-		//
-		//	Find all matches in the gap region
-		//
-		gap_mh.get().ClearSequences();
-		gap_mh.get().FindMatches( gap_list );
-
-		EliminateOverlaps_v2( gap_list );
-
-		// for anchor accuracy, throw out any anchors that are shorter than the minimum
-		// anchor length after EliminateOverlaps()
-		gap_list.LengthFilter( MIN_ANCHOR_LENGTH + 3 );
-
-		if( gap_list.size() > 0 )
-		{
-			// shift all the matches that were found
-			vector< Match* >::iterator mum_iter = gap_list.begin();
-			for( ; mum_iter != gap_list.end(); ){
-				boolean add_ok = true;
-				for( uint seqI = 0; seqI < (*mum_iter)->SeqCount(); seqI++ ){
-					int64 gap_start;
-					if( (*mum_iter)->Start( seqI ) < 0 ){
-						gap_start = r_begin != NULL ? -r_begin->End( seqI ) : 0;
-						if( gap_start > 0 )
-							gap_start = r_end != NULL ? r_end->Start( seqI ) - r_end->Length() + 1 : 0;
-						else if( r_begin )
-							add_ok = false;
-						(*mum_iter)->SetStart( seqI, (*mum_iter)->Start( seqI ) + gap_start );
-					}else{
-						// insert them all before mem_iter
-						gap_start = r_begin != NULL ? r_begin->End( seqI ) : 0;
-						if( gap_start < 0 ){
-							gap_start = r_end != NULL ? r_end->Start( seqI ) - r_end->Length() + 1 : 0;
-							add_ok = false;
-						}
-						(*mum_iter)->SetStart( seqI, (*mum_iter)->Start( seqI ) + gap_start );
-					}
-				}
-				if( add_ok )
-					r_list.push_back( *mum_iter );
-				else{
-					(*mum_iter)->UnlinkSelf();
-					(*mum_iter)->Free();
-					(*mum_iter) = NULL;
-				}
-				++mum_iter;
-			}
-		}
-		// delete sequences and smls
+	//	Create sorted mer lists for the intervening gap region
+	//
+	uint64 default_seed = getSeed( search_seed_size );
+	if( search_seed_size < MIN_DNA_SEED_WEIGHT )
+	{
 		for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ )
 			delete gap_list.seq_table[ seqI ];
 		for( uint seqI = 0; seqI < gap_list.sml_table.size(); seqI++ )
 			delete gap_list.sml_table[ seqI ];
-/*			
-	}catch( gnException& gne ){
-		cerr << gne << endl;
-	}catch( exception& e ){
-		cerr << e.what() << endl;
-	}catch(...){
-		cerr << "When I say 'ohhh' you say 'shit'!\n";
+		return;
 	}
-*/
+	for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ ){
+		gap_list.sml_table[ seqI ]->Clear();
+		gap_list.sml_table[ seqI ]->Create( *(gap_list.seq_table[ seqI ]), default_seed );
+	}
+
+	//
+	//	Find all matches in the gap region
+	//
+	gap_mh.get().ClearSequences();
+	gap_mh.get().FindMatches( gap_list );
+
+	EliminateOverlaps_v2( gap_list );
+
+	// for anchor accuracy, throw out any anchors that are shorter than the minimum
+	// anchor length after EliminateOverlaps()
+	gap_list.LengthFilter( MIN_ANCHOR_LENGTH + 3 );
+
+	if( gap_list.size() > 0 )
+	{
+		// shift all the matches that were found
+		vector< Match* >::iterator mum_iter = gap_list.begin();
+		for( ; mum_iter != gap_list.end(); ){
+			boolean add_ok = true;
+			for( uint seqI = 0; seqI < (*mum_iter)->SeqCount(); seqI++ ){
+				int64 gap_start;
+				if( (*mum_iter)->Start( seqI ) < 0 ){
+					gap_start = r_begin != NULL ? -r_begin->End( seqI ) : 0;
+					if( gap_start > 0 )
+						gap_start = r_end != NULL ? r_end->Start( seqI ) - r_end->Length() + 1 : 0;
+					else if( r_begin )
+						add_ok = false;
+					(*mum_iter)->SetStart( seqI, (*mum_iter)->Start( seqI ) + gap_start );
+				}else{
+					// insert them all before mem_iter
+					gap_start = r_begin != NULL ? r_begin->End( seqI ) : 0;
+					if( gap_start < 0 ){
+						gap_start = r_end != NULL ? r_end->Start( seqI ) - r_end->Length() + 1 : 0;
+						add_ok = false;
+					}
+					(*mum_iter)->SetStart( seqI, (*mum_iter)->Start( seqI ) + gap_start );
+				}
+			}
+			if( add_ok )
+				r_list.push_back( *mum_iter );
+			else{
+				(*mum_iter)->UnlinkSelf();
+				(*mum_iter)->Free();
+				(*mum_iter) = NULL;
+			}
+			++mum_iter;
+		}
+	}
+	// delete sequences and smls
+	for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ )
+		delete gap_list.seq_table[ seqI ];
+	for( uint seqI = 0; seqI < gap_list.sml_table.size(); seqI++ )
+		delete gap_list.sml_table[ seqI ];
 }
 
 
@@ -758,7 +747,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		for( size_t n2 = 0; n2 < node2_seqs.size(); n2++ )
 			node_pairs[nni++] = make_pair(n1,n2);
 
-//#pragma omp parallel for
+#pragma omp parallel for
 	for(int ni = 0; ni < node_pairs.size(); ni++)
 	{
 		size_t n1 = node_pairs[ni].first;
@@ -834,25 +823,16 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						if( l_match != NULL ) l_match->Invert();
 						if( r_match != NULL ) r_match->Invert();
 					}
-// workaround for a mysterious linux-specific crash
-#ifndef NO_CACHE
 					// check whether the current cache already has the searched region
 					search_cache_t cacheval = make_pair( l_match, r_match );
 					std::vector< search_cache_t >::iterator cache_entry = std::upper_bound( cache.begin(), cache.end(), cacheval, mems::cache_comparator );
 					if( cache_entry == cache.end() || 
 						(mems::cache_comparator( cacheval, *cache_entry ) || mems::cache_comparator( *cache_entry, cacheval )) )
 					{
-#endif
 						// search this region
 							pairwiseAnchorSearch(mlist, l_match, r_match, &iv, seqI, seqJ);
-// workaround for a mysterious linux-specific crash
-#ifndef NO_CACHE
 					}
 					new_cache.push_back( cacheval );
-#else
-					l_match->Free();
-					r_match->Free();
-#endif
 				}
 				prev_charI = charI;
 				prev_charJ = charJ;
@@ -2418,8 +2398,6 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 					pairwise_matches(seqI, seqJ).insert( pairwise_matches(seqI, seqJ).end(), matches(seqI, seqJ).begin(), matches(seqI, seqJ).end() );
 		}
 		
-// workaround for a mysterious linux-specific crash
-#ifndef NO_CACHE
 		for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		{
 			for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
@@ -2432,24 +2410,16 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 						search_cache_db(seqI,seqJ)[mI].second->Free();
 				}
 				search_cache_db(seqI,seqJ).clear();
-				try{
-					if(new_cache_db(seqI, seqJ).size() > 0)
-					{
-						search_cache_db(seqI,seqJ).insert( search_cache_db(seqI,seqJ).end(), new_cache_db(seqI, seqJ).begin(), new_cache_db(seqI, seqJ).end() );
-						new_cache_db(seqI, seqJ).clear();
-						std::sort( search_cache_db(seqI, seqJ).begin(), search_cache_db(seqI, seqJ).end(), cache_comparator );
-					}
-				}catch(...){
-					cerr << "Error sorting.\n";
-					cerr << "Cache has " << search_cache_db(seqI, seqJ).size() << " elements\n\n\n";
-					for( size_t i = 0; i < search_cache_db(seqI, seqJ).size(); ++i )
-						cerr << search_cache_db(seqI, seqJ)[i].first << ",\t" << search_cache_db(seqI, seqJ)[i].second << endl;
+				if(new_cache_db(seqI, seqJ).size() > 0)
+				{
+					search_cache_db(seqI,seqJ).insert( search_cache_db(seqI,seqJ).end(), new_cache_db(seqI, seqJ).begin(), new_cache_db(seqI, seqJ).end() );
+					new_cache_db(seqI, seqJ).clear();
+					std::sort( search_cache_db(seqI, seqJ).begin(), search_cache_db(seqI, seqJ).end(), cache_comparator );
 				}
 				if( pairwise_matches(seqI,seqJ).size() > 0 )
 					cout << seqI << "," << seqJ << " has an additional " << pairwise_matches(seqI,seqJ).size() << " matches\n";
 			}
 		}
-#endif
 
 		// restore backed up tree since we only want the final set of ancestral
 		// breakpoints applied to the descendants
@@ -2459,8 +2429,6 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 
 	}	// end while(true)
 
-// workaround for a mysterious linux-specific crash
-#ifndef NO_CACHE
 	// delete the search cache
 	for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
@@ -2471,7 +2439,6 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 				if( search_cache_db(seqI,seqJ)[mI].second != NULL )
 					search_cache_db(seqI,seqJ)[mI].second->Free();
 			}
-#endif
 
 	printMemUsage();
 
