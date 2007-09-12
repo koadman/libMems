@@ -115,9 +115,8 @@ void getPairwiseLCBs(
 	}
 
 	// free the memory used by pairwise matches
-//	for( size_t mI = 0; mI < pair_matches.size(); ++mI )
-//		pair_matches[mI]->Free();
-	SlotAllocator< PairwiseMatchAdapter >::GetSlotAllocator().Purge();
+	for( size_t mI = 0; mI < pair_matches.size(); ++mI )
+		pair_matches[mI]->Free();
 }
 
 /** creates an appropriately sized matrix for mapping individual TrackingMatches to their containing LCBs */
