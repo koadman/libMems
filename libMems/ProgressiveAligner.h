@@ -258,6 +258,26 @@ void processNewMatch( uint seqI, MatchVector& new_matches, typename MatchVector:
 		new_match = NULL;
 	}
 }
+inline
+bool checkConsistent(const AbstractMatch* a, const AbstractMatch* b)
+{
+	bool consistent_overlap = true;
+	int64 o = (std::numeric_limits<int64>::max)();
+	int64 inter = 0;
+	uint seq_count = a->SeqCount();
+	for( size_t seqI = 0; seqI < seq_count; seqI++ )
+	{
+		if(b->LeftEnd(seqI) == 0 || a->LeftEnd(seqI) == 0)
+			continue;
+		inter++;
+		if(o == (std::numeric_limits<int64>::max)())
+			o = b->Start(seqI) - a->Start(seqI);
+		if(o != b->Start(seqI) - a->Start(seqI))
+			consistent_overlap = false;
+	}
+	consistent_overlap = consistent_overlap && inter > 1;
+	return consistent_overlap;
+}
 
 /**
  * Delete overlapping regions in favor of the larger match.
@@ -308,8 +328,10 @@ void EliminateOverlaps_v2( MatchVector& ml, const std::vector< uint >& seq_ids, 
 				bool mem_iter_smaller = ( ml[ nextI ]->Multiplicity() > ml[ matchI ]->Multiplicity() ) ||
 					( ml[ nextI ]->Multiplicity() == ml[ matchI ]->Multiplicity() && ml[ nextI ]->Length(seqI) > ml[ matchI ]->Length(seqI) );
 
+				bool consistent_overlap = checkConsistent( ml[ matchI ], ml[ nextI ] );
+
 				// delete bases from the smaller match
-				if( eliminate_both || mem_iter_smaller )
+				if( (!consistent_overlap && eliminate_both) || mem_iter_smaller )
 				{
 					// mem_iter is smaller
 					new_match = ml[matchI]->Copy();
@@ -327,7 +349,7 @@ void EliminateOverlaps_v2( MatchVector& ml, const std::vector< uint >& seq_ids, 
 					}
 					processNewMatch( seqI, new_matches, new_match );
 				}
-				if( eliminate_both || !mem_iter_smaller )
+				if( (!consistent_overlap && eliminate_both) || !mem_iter_smaller )
 				{
 					// match_iter is smaller
 					new_match = ml[nextI]->Copy();
