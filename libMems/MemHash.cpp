@@ -100,7 +100,7 @@ void MemHash::Clear()
 	match_log = NULL;
 
 	// WARNING! WARNING! WARNING! this will destroy ALL objects since the allocator has static lifetime!!
-	allocator.Purge();
+//	allocator.Purge();
 }
 
 void MemHash::SetTableSize(uint32 new_table_size){
