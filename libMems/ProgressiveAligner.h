@@ -93,6 +93,9 @@ public:
 	void setLcbScoringScheme( LcbScoringScheme scheme ){ scoring_scheme = scheme; }
 	LcbScoringScheme getLcbScoringScheme(void){ return scoring_scheme; }
 
+	void setUseSeedFamilies( bool use_seed_families ){ this->use_seed_families = use_seed_families; }
+	bool getUseSeedFamilies(void){ return this->use_seed_families; }
+
 	void setUseLcbWeightScaling( bool use_weight_scaling ){ this->use_weight_scaling = use_weight_scaling; }
 	bool getUseLcbWeightScaling(void){ return this->use_weight_scaling; }
 
@@ -199,6 +202,7 @@ protected:
 
 	LcbScoringScheme scoring_scheme;
 	bool use_weight_scaling;
+	bool use_seed_families;
 
 	double bp_dist_scale;
 	double conservation_dist_scale;

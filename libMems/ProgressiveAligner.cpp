@@ -189,7 +189,8 @@ use_weight_scaling(true),
 conservation_dist_scale(.5),
 bp_dist_scale(.5),
 max_gapped_alignment_length(20000),
-bp_dist_estimate_score(-1)
+bp_dist_estimate_score(-1),
+use_seed_families(false)
 {
 	gapped_alignment = true;
 	max_window_size = max_gapped_alignment_length;
@@ -659,29 +660,33 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 	gnSeqI avg_len = (gap_list.seq_table[0]->length() + gap_list.seq_table[1]->length())/2;
 	uint search_seed_size = getDefaultSeedWeight( avg_len );
 	gap_mh.get().Clear();
-
-	//
-	//	Create sorted mer lists for the intervening gap region
-	//
-	uint64 default_seed = getSeed( search_seed_size );
-	if( search_seed_size < MIN_DNA_SEED_WEIGHT )
+	
+	uint seed_count = use_seed_families ? 1 : 3;
+	for( size_t seedI = 0; seedI < seed_count; seedI++ )
 	{
-		for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ )
-			delete gap_list.seq_table[ seqI ];
-		for( uint seqI = 0; seqI < gap_list.sml_table.size(); seqI++ )
-			delete gap_list.sml_table[ seqI ];
-		return;
-	}
-	for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ ){
-		gap_list.sml_table[ seqI ]->Clear();
-		gap_list.sml_table[ seqI ]->Create( *(gap_list.seq_table[ seqI ]), default_seed );
-	}
+		//
+		//	Create sorted mer lists for the intervening gap region
+		//
+		uint64 default_seed = getSeed( search_seed_size, seedI );
+		if( search_seed_size < MIN_DNA_SEED_WEIGHT )
+		{
+			for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ )
+				delete gap_list.seq_table[ seqI ];
+			for( uint seqI = 0; seqI < gap_list.sml_table.size(); seqI++ )
+				delete gap_list.sml_table[ seqI ];
+			return;
+		}
+		for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ ){
+			gap_list.sml_table[ seqI ]->Clear();
+			gap_list.sml_table[ seqI ]->Create( *(gap_list.seq_table[ seqI ]), default_seed );
+		}
 
-	//
-	//	Find all matches in the gap region
-	//
-	gap_mh.get().ClearSequences();
-	gap_mh.get().FindMatches( gap_list );
+		//
+		//	Find all matches in the gap region
+		//
+		gap_mh.get().ClearSequences();
+		gap_mh.get().FindMatches( gap_list );
+	}
 
 	EliminateOverlaps_v2( gap_list );
 
