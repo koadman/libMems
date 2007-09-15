@@ -661,7 +661,7 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 	uint search_seed_size = getDefaultSeedWeight( avg_len );
 	gap_mh.get().Clear();
 	
-	uint seed_count = use_seed_families ? 1 : 3;
+	uint seed_count = use_seed_families ? 3 : 1;
 	for( size_t seedI = 0; seedI < seed_count; seedI++ )
 	{
 		//
