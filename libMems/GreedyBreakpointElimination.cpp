@@ -409,7 +409,9 @@ double EvenFasterSumOfPairsBreakpointScorer::score()
 			score += pairwise_lcb_score[seqI][seqJ];
 			// subtract breakpoint penalty
 			// subtract 1 from number of LCBs so that a single circular LCB doesn't get penalized
-			score -= (bp_penalty * (1-bp_weights[seqI][seqJ]) * (1-conservation_weights[seqI][seqJ]) * (pairwise_lcb_count[seqI][seqJ]-1));
+			double cweights = 1 - conservation_weights[seqI][seqJ];
+			double bweights = 1 - bp_weights[seqI][seqJ];
+			score -= (bp_penalty * cweights * cweights * cweights * bweights * bweights * bweights * (pairwise_lcb_count[seqI][seqJ]-1));
 			if( !(score > -1e200 && score < 1e200) )
 			{
 				genome::breakHere();
