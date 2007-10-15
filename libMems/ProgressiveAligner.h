@@ -36,6 +36,7 @@ extern bool debug_aligner;
 class AlignmentTreeNode : public TreeNode
 {
 public:
+	AlignmentTreeNode() : TreeNode(), refined(false) {};
 	std::vector< SuperInterval > ordering;	/**< A total ordering on alignments of sequence contained by leafs below this node */
 	std::vector< boolean > parents_aligned;		/**< have parents been aligned? */
 	std::vector< boolean > children_aligned;	/**< have children been aligned? */
