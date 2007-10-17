@@ -132,6 +132,14 @@ public:
 		if( a->FirstStart() > b->FirstStart() ){
 			return true;
 		}else if( a->FirstStart() == b->FirstStart() ){
+			// check that the matches hit the same genomes
+			for( size_t i = a->FirstStart(); i < a->SeqCount(); i++ )
+			{
+				if( a->LeftEnd(i) == NO_MATCH && b->LeftEnd(i) != NO_MATCH )
+					return true;
+				else if( a->LeftEnd(i) != NO_MATCH && b->LeftEnd(i) == NO_MATCH )
+					return false;
+			}
 			//offsets are the same, check for containment...
 			if(a->Contains(*b) || b->Contains(*a)){
 				return false;
