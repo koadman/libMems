@@ -388,7 +388,7 @@ void EliminateOverlaps_v2( MatchVector& ml, const std::vector< uint >& seq_ids, 
 }
 
 template <class MatchVector>
-void EliminateOverlaps_v2( MatchVector& ml )
+void EliminateOverlaps_v2( MatchVector& ml, bool eliminate_both = false )
 {
 	if( ml.size() < 2 )
 		return;	// can't eliminate overlaps between fewer than 2 matches
@@ -396,7 +396,7 @@ void EliminateOverlaps_v2( MatchVector& ml )
 	std::vector< uint > seq_ids( seq_count );
 	for( uint i = 0; i < seq_count; ++i )
 		seq_ids[i] = i;
-	EliminateOverlaps_v2( ml, seq_ids );
+	EliminateOverlaps_v2( ml, seq_ids, eliminate_both );
 };
 
 template< class MatchVector >
