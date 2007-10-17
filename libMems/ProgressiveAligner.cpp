@@ -162,13 +162,13 @@ double getDefaultBreakpointPenalty( std::vector< gnSequence* >& sequences )
 		avg_seq_len += (double)sequences[seqI]->length();
 	avg_seq_len /= (double)sequences.size();
 	avg_seq_len = log( avg_seq_len ) / log( 2.0 );
-	return avg_seq_len * 1500;	  // seems to work reasonably well
+	return avg_seq_len * 7000;	  // seems to work reasonably well?
 }
 
 
 double getDefaultBpDistEstimateMinScore( std::vector< gnSequence* >& sequences )
 {
-	return 3.0 * getDefaultBreakpointPenalty(sequences);
+	return 2.0 * getDefaultBreakpointPenalty(sequences);
 }
 
 
@@ -186,8 +186,8 @@ debug(false),
 refine(true),
 scoring_scheme(ExtantSumOfPairsScoring),
 use_weight_scaling(true),
-conservation_dist_scale(.5),
-bp_dist_scale(.5),
+conservation_dist_scale(1),
+bp_dist_scale(.9),
 max_gapped_alignment_length(20000),
 bp_dist_estimate_score(-1),
 use_seed_families(false)
@@ -1949,7 +1949,7 @@ void ProgressiveAligner::getRepresentativeAncestralMatches( const vector< node_i
 			ancestral_matches.insert( ancestral_matches.end(), seq_matches[seqI][seqJ].begin(), seq_matches[seqI][seqJ].end() );
 		}
 
-	EliminateOverlaps_v2( ancestral_matches );
+	EliminateOverlaps_v2( ancestral_matches, true );
 }
 
 
@@ -2149,37 +2149,11 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 			// are penalized as the sum of /participating/ descendants.  a descendant is participating
 			// if it has some matching region defined within the LCB and if removal of that matching region
 			// eliminates a breakpoint in the pairwise comparison
-/*
-			if( node1 == 0 && node2 == 1 )
-			{
-				for( size_t mI = 0; mI < tracking_matches.size(); ++mI )
-				{
-//					if( tracking_matches[mI].original_match->LeftEnd(0) > 220000 && 
-//						tracking_matches[mI].original_match->LeftEnd(0) < 310000 )
-
-					{
-						cout << "match (" << tracking_matches[mI].original_match->LeftEnd(0) << ", " << tracking_matches[mI].original_match->RightEnd(0) << ")\t";
-						cout << "(" << tracking_matches[mI].original_match->LeftEnd(1) << ", " << tracking_matches[mI].original_match->RightEnd(1) << ")\n";
-						cout << "match " << mI << " score: " << tracking_matches[mI].score[0][0] << endl;
-					}
-				}
-				cerr << "debugme!\n";
-				for( size_t adjI = 0; adjI < pairwise_adj_mat[0][0].size(); ++adjI )
-				{
-					cout << "LCB " << adjI << " weight: " << pairwise_adj_mat[0][0][adjI].weight << endl;
-					cout << "Boundaries in seq 0: " << pairwise_adj_mat[0][0][adjI].left_end[0] << ", " << pairwise_adj_mat[0][0][adjI].right_end[0] << endl;
-					cout << "Boundaries in seq 1: " << pairwise_adj_mat[0][0][adjI].left_end[1] << ", " << pairwise_adj_mat[0][0][adjI].right_end[1] << endl;
-				}
-				cerr << "debugme!\n";
-
-				cerr << "bp_dist_mat:\n";
-				print2d_matrix( bp_dist_mat, cerr );
-				cerr << "cons_dist_mat:\n";
-				print2d_matrix( cons_dist_mat, cerr );
-//				debug_aligner = true;
-			}
-*/
-			cout << "Greedy BPE\n";
+			cout << "scaling bp penalty by conservation weight:\n";
+			print2d_matrix(cons_dist_mat, cout);
+			cout << "\n\nscaling bp penalty by bp weight: \n";
+			print2d_matrix(bp_dist_mat, cout);
+			cout << "\nGreedy BPE\n";
 			vector< TrackingMatch* > final;
 			if(scoring_scheme == AncestralScoring)
 			{
@@ -2869,7 +2843,7 @@ void findMidpoint( PhyloTree< AlignmentTreeNode >& alignment_tree, node_id_t& n1
 	// use boost's all pairs shortest path to find the longest path on the tree 
 	// Then actually traverse the path to determine which edge
 	// is halfway.
-	double scaling_factor = 10000;
+	double scaling_factor = 100000;
 	using namespace boost;
 	typedef adjacency_list<vecS, vecS, undirectedS, no_property,
 	property< edge_weight_t, int, property< edge_color_t, default_color_type > > > Graph;
@@ -2886,7 +2860,7 @@ void findMidpoint( PhyloTree< AlignmentTreeNode >& alignment_tree, node_id_t& n1
 		{
 			edge_array[eI] = Edge( vI, alignment_tree[vI].parents[0] );
 			// for some reason boost insists on using an int for weights.  need to figure that out
-			weights[eI] = (int)(scaling_factor * genome::absolut(alignment_tree[vI].distance));
+			weights[eI] = (int)(scaling_factor * genome::absolut(alignment_tree[vI].distance)) + 1;
 			eI++;
 		}
 	}
@@ -2950,14 +2924,14 @@ void findMidpoint( PhyloTree< AlignmentTreeNode >& alignment_tree, node_id_t& n1
 		if( alignment_tree[cur_node].parents.size() > 0 && 
 			alignment_tree[cur_node].parents[0] == pred[cur_node] )
 		{
-			max_dist -= (int)(scaling_factor * alignment_tree[cur_node].distance);
+			max_dist -= (int)(scaling_factor * alignment_tree[cur_node].distance) + 1;
 			prev_node = cur_node;
 			cur_node = pred[cur_node];
 		}else
 		{
 			prev_node = cur_node;
 			cur_node = pred[cur_node];
-			max_dist -= (int)(scaling_factor * alignment_tree[cur_node].distance);
+			max_dist -= (int)(scaling_factor * alignment_tree[cur_node].distance) + 1;
 		}
 	}
 	n1 = cur_node;
@@ -3262,9 +3236,9 @@ unsigned getDefaultBreakpointMax( const std::vector< genome::gnSequence* >& seq_
 	for( size_t seqI = 0; seqI < seq_table.size(); ++seqI )
 		avg_len += seq_table[seqI]->length();
 	avg_len /= (double)(seq_table.size());
-	// heavily rearranged, recently diverged genomes like yersinia have up to 20 rearrangements per megabase of sequence
+	// heavily rearranged, recently diverged genomes like yersinia have up to 15 rearrangements per megabase of sequence
 	avg_len /= 1000000.0;	// convert to number of megabases
-	avg_len *= 20.0;	// "lots" of rearrangement
+	avg_len *= 15.0;	// "lots" of rearrangement
 	return (unsigned)avg_len;
 }
 
@@ -3304,7 +3278,7 @@ void ProgressiveAligner::CreatePairwiseBPDistance( boost::multi_array<double, 2>
 
 		// eliminate overlaps as they correspond to inconsistently or
 		// multiply aligned regions
-		EliminateOverlaps_v2( ml );
+		EliminateOverlaps_v2( ml, true );
 		ml.MultiplicityFilter(2);
 
 		// do greedy b.p. elimination on the matches
@@ -3321,7 +3295,10 @@ void ProgressiveAligner::CreatePairwiseBPDistance( boost::multi_array<double, 2>
 
 		// want to discard all low-weight LCBs
 		// to arrive at a set of reliable LCBs
-		GreedyRemovalScorer wbs( adjacencies, bp_dist_estimate_score );
+		double cons_id = 1 - this->conservation_distance[seqI][seqJ];
+		double scaled_score = bp_dist_estimate_score * cons_id * cons_id * cons_id * cons_id;
+		cerr << "Using scaled bp penalty: " << scaled_score << endl;
+		GreedyRemovalScorer wbs( adjacencies, scaled_score );
 #ifdef LCB_WEIGHT_LOSS_PLOT
 		cur_min_coverage = greedyBreakpointElimination_v4( adjacencies, lcb_scores, wbs, &pair_bp_out, seqI, seqJ );
 		pair_bp_out.flush();
@@ -3546,8 +3523,8 @@ void ProgressiveAligner::alignPP(IntervalList& prof1, IntervalList& prof2, Inter
 	}
 
 	// rescale the conservation distance
-	double conservation_range = 2;
-	double bp_range = 2;
+	double conservation_range = 1;
+	double bp_range = 1;
 	for( uint seqI = 0; seqI < seq_count; ++seqI )
 		for( uint seqJ = 0; seqJ < seq_count; ++seqJ )
 			conservation_distance[seqI][seqJ] = distance(seqI,seqJ) / conservation_range;
@@ -3777,20 +3754,20 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 		// need sol lists for scoring
 		sol_list.resize(seq_count);
 		// temporarily create a weight 11 SML
-		MatchList w11_mlist;
+/*		MatchList w11_mlist;
 		w11_mlist.seq_filename = original_ml.seq_filename;
 		w11_mlist.seq_table = original_ml.seq_table;
 		cout << "Creating weight 11 SMLs for repeat detection\n";
 		w11_mlist.CreateMemorySMLs( 11, NULL );
-
+*/
 		cout << "Constructing seed occurrence lists for repeat detection\n";
 #pragma omp parallel for
 		for( int seqI = 0; seqI < seq_count; seqI++ )
 		{
-			sol_list[seqI].construct(*(w11_mlist.sml_table[seqI]));
-			delete w11_mlist.sml_table[seqI];
+			sol_list[seqI].construct(*(mlist.sml_table[seqI]));
+//			delete w11_mlist.sml_table[seqI];
 		}
-		w11_mlist.sml_table.clear();
+//		w11_mlist.sml_table.clear();
 	}
 	if( !collinear_genomes && use_weight_scaling )
 	{
