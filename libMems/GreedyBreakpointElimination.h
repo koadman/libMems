@@ -435,7 +435,7 @@ double GetPairwiseAnchorScore( MatchVector& lcb,
 				// in the worst case of a very repetitive match, the score becomes the negative of the match score
 				if( scores[colI] > 0 )
 					scores[colI] = (scores[colI] * 2 / (score_t)(uni1 * uni2)) - scores[colI];
-//				scores[colI] /= (score_t)(uni1 * uni2);
+//					scores[colI] /= (score_t)(uni1 * uni2);
 			}
 			if(et[0][colI] != '-')
 				merI++;
@@ -578,7 +578,7 @@ double greedySearch( SearchScorer& spbs );
 class SimpleBreakpointScorer
 {
 public:
-	SimpleBreakpointScorer( std::vector< LCB >& adjacencies, double breakpoint_penalty );
+	SimpleBreakpointScorer( std::vector< LCB >& adjacencies, double breakpoint_penalty, bool collinear );
 
 	size_t getMoveCount();
 
@@ -598,6 +598,7 @@ private:
 	std::vector< double > scores;
 	double total_weight;
 	size_t bp_count;
+	bool collinear;
 };
 
 

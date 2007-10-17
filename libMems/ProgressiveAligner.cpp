@@ -2219,7 +2219,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 			computeLCBAdjacencies_v3( LCB_list, lcb_scores, adjacencies );
 
 			// want to eliminate all breakpoints
-			SimpleBreakpointScorer wbs( adjacencies, score_sum );
+			SimpleBreakpointScorer wbs( adjacencies, score_sum, true );
 			cur_min_coverage = greedyBreakpointElimination_v4( adjacencies, lcb_scores, wbs, NULL, false );
 			vector<AbstractMatch*> deleted_matches;
 			filterMatches_v2( adjacencies, LCB_list, lcb_scores, deleted_matches );

@@ -411,7 +411,7 @@ double EvenFasterSumOfPairsBreakpointScorer::score()
 			// subtract 1 from number of LCBs so that a single circular LCB doesn't get penalized
 			double cweights = 1 - conservation_weights[seqI][seqJ];
 			double bweights = 1 - bp_weights[seqI][seqJ];
-			score -= (bp_penalty * cweights * cweights * cweights * bweights * bweights * bweights * (pairwise_lcb_count[seqI][seqJ]-1));
+			score -= (bp_penalty * cweights * cweights * cweights * bweights * bweights * (pairwise_lcb_count[seqI][seqJ]-1));
 			if( !(score > -1e200 && score < 1e200) )
 			{
 				genome::breakHere();
@@ -867,9 +867,10 @@ vector< TrackingMatch* > EvenFasterSumOfPairsBreakpointScorer::getResults()
 
 
 
-SimpleBreakpointScorer::SimpleBreakpointScorer( std::vector< LCB >& adjacencies, double breakpoint_penalty ) : 
+SimpleBreakpointScorer::SimpleBreakpointScorer( std::vector< LCB >& adjacencies, double breakpoint_penalty, bool collinear ) : 
   adjs( adjacencies ),
-  bp_penalty( breakpoint_penalty )
+  bp_penalty( breakpoint_penalty ),
+  collinear( collinear )
 {
 	scores = std::vector< double >(adjs.size(), 0);
 	total_weight = 0;
@@ -906,6 +907,9 @@ double SimpleBreakpointScorer::operator()( size_t lcbI )
 	undoLcbRemoval( adjs[0].left_adjacency.size(), adjs, id_remaps );
 	double bp_score = (double)(bp_count - bp_removed) * bp_penalty;
 	double move_score = total_weight - adjs[lcbI].weight - bp_score;
+	double score_diff = move_score - cur_score;
+	if( collinear && bp_count - bp_removed > 0 && score_diff < 0 )
+		return 1/(-score_diff);	// ensure that we continue removing blocks until only one is left
 	return move_score - cur_score;
 }
 

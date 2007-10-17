@@ -2228,7 +2228,7 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 		do{
 			vector<double> m_weights(weights.size());
 			std::copy( weights.begin(), weights.end(), m_weights.begin());
-			SimpleBreakpointScorer sbs(adjacencies, cur_perm_weight);
+			SimpleBreakpointScorer sbs(adjacencies, cur_perm_weight, this->collinear_genomes);
 			if( status_out )
 				(*status_out) << "Performing greedy breakpoint elimination (this may take some time)\n";
 
