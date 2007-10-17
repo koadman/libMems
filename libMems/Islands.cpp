@@ -69,6 +69,8 @@ void simpleFindIslands( IntervalList& iv_list, uint island_size, vector< Island 
 							int64 rightJ = leftJ < 0 ? leftJ - curJ : leftJ + curJ;
 							leftJ = leftJ < 0 ? leftJ - lastJ : leftJ + lastJ;
 							Island isle;
+							isle.seqI = seqI;
+							isle.seqJ = seqJ;
 							isle.leftI = leftI;
 							isle.leftJ = leftJ;
 							isle.rightI = rightI;
