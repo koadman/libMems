@@ -300,6 +300,8 @@ int64 getSeed( int weight, int seed_rank ){
 	masks = seedMasks();
 	if(weight > 31)
 		return getSolidSeed(32);
+	if( sizeof(masks[weight]) < seed_rank*2+1 )
+		return getSolidSeed(weight);
 	high = masks[ weight ][ seed_rank*2 ];
 	low = masks[ weight ][ seed_rank*2 + 1 ];
 	
