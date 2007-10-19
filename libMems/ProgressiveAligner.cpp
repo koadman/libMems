@@ -752,7 +752,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		for( size_t n2 = 0; n2 < node2_seqs.size(); n2++ )
 			node_pairs[nni++] = make_pair(n1,n2);
 
-#pragma omp parallel for
+//#pragma omp parallel for
 	for(int ni = 0; ni < node_pairs.size(); ni++)
 	{
 		size_t n1 = node_pairs[ni].first;
