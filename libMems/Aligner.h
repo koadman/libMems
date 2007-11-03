@@ -188,7 +188,7 @@ public:
 
 	void SetMaxExtensionIterations( uint ext_iters ){ this->max_extension_iters = ext_iters; }
 
-	void SearchWithinLCB( MatchList& mlist, std::vector< search_cache_t >& new_cache );
+	void SearchWithinLCB( MatchList& mlist, std::vector< search_cache_t >& new_cache, bool leftmost = false, bool rightmost = false );
 	void RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, std::vector< MatchList >& LCB_list, boolean entire_genome, std::ostream* status_out = NULL );
 
 	void AlignLCB( MatchList& mlist, Interval& iv );

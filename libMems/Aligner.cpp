@@ -649,6 +649,8 @@ void computeLCBAdjacencies_v2( vector<MatchList>& lcb_list, vector< int64 >& wei
 	computeLCBAdjacencies_v2( iv_list, weights, adjacencies );
 }
 
+const uint NO_ADJACENCY = (std::numeric_limits<uint>::max)();
+
 /**
  *  Redesign to be more intuitive.  left_adjacency is always left, regardless of LCB orientation
  */
@@ -680,8 +682,8 @@ void computeLCBAdjacencies_v2( IntervalList& iv_list, vector< int64 >& weights, 
 
 			lcb.left_end[seqI] = leftI;
 			lcb.right_end[seqI] = rightI;
-			lcb.left_adjacency[seqI] = (uint)-1;
-			lcb.right_adjacency[seqI] = (uint)-1;
+			lcb.left_adjacency[seqI] = NO_ADJACENCY;
+			lcb.right_adjacency[seqI] = NO_ADJACENCY;
 		}
 		lcb.lcb_id = lcbI;
 		lcb.weight = weights[ lcbI ];
@@ -699,8 +701,8 @@ void computeLCBAdjacencies_v2( IntervalList& iv_list, vector< int64 >& weights, 
 			lcbI--;	// need to decrement when there is only a single LCB
 
 		// set first and last lcb adjacencies to -1
-		adjacencies[ 0 ].left_adjacency[ seqI ] = (uint)-1;
-		adjacencies[ lcbI ].right_adjacency[ seqI ] = (uint)-1;
+		adjacencies[ 0 ].left_adjacency[ seqI ] = NO_ADJACENCY;
+		adjacencies[ lcbI ].right_adjacency[ seqI ] = NO_ADJACENCY;
 		if( lcbI > 0 ){
 			adjacencies[ 0 ].right_adjacency[ seqI ] = adjacencies[ 1 ].lcb_id;
 			adjacencies[ lcbI ].left_adjacency[ seqI ] = adjacencies[ lcbI - 1 ].lcb_id;
@@ -1508,6 +1510,9 @@ void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, Match
 			gappedI++;
 		turn = !turn;
 	}
+	// add the last alignment
+	if( success[mlist.size()]==1 )
+		merged[mJ++] = gapped_alns.back();
 	merged.resize(mJ);
 
 	iv.SetMatches(merged);
@@ -1616,9 +1621,9 @@ void Aligner::AlignLCB( MatchList& mlist, Interval& iv ){
 }
 
 // just search each intervening region once for matches, no gapped alignment...
-void Aligner::SearchWithinLCB( MatchList& mlist, std::vector< search_cache_t >& new_cache ){
+void Aligner::SearchWithinLCB( MatchList& mlist, std::vector< search_cache_t >& new_cache, bool leftmost, bool rightmost){
 	// check whether this function can do anything useful...
-	if( !collinear_genomes && mlist.size() < 2 )
+	if( !(leftmost || rightmost) && mlist.size() < 2 )
 		return;
 
 	boolean debug_recurse = false;
@@ -1633,7 +1638,7 @@ void Aligner::SearchWithinLCB( MatchList& mlist, std::vector< search_cache_t >& 
 
 	list< Match* >::iterator recurse_iter = match_list.begin();
 	list< Match* >::iterator recurse_prev = match_list.begin();
-	if( !collinear_genomes && recurse_iter != match_list.end() )
+	if( !leftmost && recurse_iter != match_list.end() )
 		++recurse_iter;
 	
 	uint memI = 0;
@@ -1657,10 +1662,10 @@ void Aligner::SearchWithinLCB( MatchList& mlist, std::vector< search_cache_t >& 
 		r_list.clear();
 		Match* r_left = NULL;
 		Match* r_right = NULL;
-		if( recurse_iter == match_list.begin() ){
+		if( recurse_iter == match_list.begin() && leftmost ){
 			r_left = NULL;
 			r_right = *recurse_iter;
-		}else if( recurse_iter == match_list.end() ){
+		}else if( recurse_iter == match_list.end() && rightmost ){
 			r_left = *recurse_prev;
 			r_right = NULL;
 		}else{
@@ -1707,7 +1712,7 @@ void Aligner::SearchWithinLCB( MatchList& mlist, std::vector< search_cache_t >& 
 			++recurse_iter;
 		
 		// break early if we aren't assuming genome collinearity
-		if( !collinear_genomes && recurse_iter == match_list.end() )
+		if( !rightmost && recurse_iter == match_list.end() )
 			break;
 			
 	}
@@ -2183,7 +2188,15 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 //				if( status_out )
 //					*status_out << "Searching in LCB: " << lcbI << endl;
 				int prev_size = LCB_list[ lcbI ].size();
-				SearchWithinLCB( LCB_list[ lcbI ], new_cache );
+				bool leftmost = true;
+				for( int i = 0; leftmost && i < adjacencies[lcbI].left_adjacency.size(); i++ )
+					if(adjacencies[lcbI].left_adjacency[i] != NO_ADJACENCY)
+						leftmost = false;
+				bool rightmost = true;
+				for( int i = 0; rightmost && i < adjacencies[lcbI].right_adjacency.size(); i++ )
+					if(adjacencies[lcbI].right_adjacency[i] != NO_ADJACENCY)
+						rightmost = false;
+				SearchWithinLCB( LCB_list[ lcbI ], new_cache, leftmost, rightmost );
 //				if( status_out )
 //					*status_out << "Gained " << LCB_list[ lcbI ].size() - prev_size << " matches\n";
 
@@ -2415,7 +2428,7 @@ void Aligner::align( MatchList& mlist, IntervalList& interval_list, double LCB_m
 			iv.SetMatches( LCB_list[lcbI] );
 		}else{
 //			AlignLCB( LCB_list[ lcbI ], iv );
-			AlignLCBInParallel( collinear_genomes, gal, LCB_list[ lcbI ], iv, apt );
+			AlignLCBInParallel( collinear_genomes || (LCB_list.size()==1), gal, LCB_list[ lcbI ], iv, apt );
 		}
 	}
 	
