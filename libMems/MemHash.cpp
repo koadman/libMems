@@ -239,7 +239,8 @@ MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe){
 		ExtendMatch(mhe, subset_matches);
 
 	MatchHashEntry* new_mhe = allocator.Allocate();
-	*new_mhe = mhe;
+	new_mhe = new(new_mhe) MatchHashEntry(mhe); 
+//	*new_mhe = mhe;
 	
 	// can't insert until after the extend!!
 	mem_table[bucketI].insert(new_mhe);

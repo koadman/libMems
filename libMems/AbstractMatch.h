@@ -50,7 +50,8 @@ T* m_allocateAndCopy( const T& t )
 #ifdef _USE_SLOT_ALLOCATOR
 	SlotAllocator<T>& sat = SlotAllocator<T>::GetSlotAllocator();
 	T* newt = sat.Allocate();
-	*newt = t;
+	newt = new(newt) T(t);	// construct a new T at the address given by newt
+//	*newt = t;
 	return newt;
 #elif defined(_USE_BOOST_MATCH_ALLOCATOR)
 	boost::fast_pool_allocator< T > fpa;

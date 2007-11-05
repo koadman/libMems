@@ -128,7 +128,9 @@ void SlotAllocator< T >::Free( T* t ){
 /*	for(size_t i = 0; i < free_list.size(); i++ )
 		if( free_list[i] == t )
 			std::cerr << "ERROR DOUBLE FREE\n";
-*/	free_list.push_back( t );
+*/	
+	t->~T();
+	free_list.push_back( t );
 }
 }
 
