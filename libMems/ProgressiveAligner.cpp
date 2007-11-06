@@ -3296,7 +3296,7 @@ void ProgressiveAligner::CreatePairwiseBPDistance( boost::multi_array<double, 2>
 		// want to discard all low-weight LCBs
 		// to arrive at a set of reliable LCBs
 		double cons_id = 1 - this->conservation_distance[seqI][seqJ];
-		double scaled_score = bp_dist_estimate_score * cons_id * cons_id * cons_id * cons_id;
+		double scaled_score = max( bp_dist_estimate_score * cons_id * cons_id * cons_id * cons_id, MIN_SIGNIFICANT_LCB_SCORE);
 		cerr << "Using scaled bp penalty: " << scaled_score << endl;
 		GreedyRemovalScorer wbs( adjacencies, scaled_score );
 #ifdef LCB_WEIGHT_LOSS_PLOT

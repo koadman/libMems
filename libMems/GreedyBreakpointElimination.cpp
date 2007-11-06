@@ -349,7 +349,8 @@ EvenFasterSumOfPairsBreakpointScorer::EvenFasterSumOfPairsBreakpointScorer(
   seqI_first(seqI_begin),
   seqI_last(seqI_end),
   seqJ_first(seqJ_begin),
-  seqJ_last(seqJ_end)
+  seqJ_last(seqJ_end),
+  first_time(true)
 {
 	std::sort(tracking_matches.begin(), tracking_matches.end());
 	pairwise_lcb_count.resize( boost::extents[pairwise_adjacencies.shape()[0]][pairwise_adjacencies.shape()[1]] );
@@ -411,7 +412,11 @@ double EvenFasterSumOfPairsBreakpointScorer::score()
 			// subtract 1 from number of LCBs so that a single circular LCB doesn't get penalized
 			double cweights = 1 - conservation_weights[seqI][seqJ];
 			double bweights = 1 - bp_weights[seqI][seqJ];
-			score -= (bp_penalty * cweights * cweights * cweights * bweights * bweights * (pairwise_lcb_count[seqI][seqJ]-1));
+			double penalty = max( bp_penalty * cweights * cweights * cweights * cweights * bweights * bweights, MIN_SIGNIFICANT_LCB_SCORE );
+			if(first_time)
+				cerr << "Scoring with scaled breakpoint penalty: " << penalty << endl;
+			first_time = false;
+			score -= ( penalty * (pairwise_lcb_count[seqI][seqJ]-1));
 			if( !(score > -1e200 && score < 1e200) )
 			{
 				genome::breakHere();

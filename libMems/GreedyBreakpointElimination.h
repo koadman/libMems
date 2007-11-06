@@ -14,7 +14,10 @@
 #include <libMems/IntervalList.h>
 #include <libMems/LCB.h>
 
+
 namespace mems {
+
+const double MIN_SIGNIFICANT_LCB_SCORE = 2500;
 
 /**
  * A wrapper that maps a match among extant sequences to a match among ancestral and extant seqs
@@ -561,6 +564,9 @@ private:
 	const size_t seqJ_first;
 	const size_t seqI_last;
 	const size_t seqJ_last;
+
+	// for debugging
+	bool first_time;
 };
 
 
