@@ -414,7 +414,7 @@ double EvenFasterSumOfPairsBreakpointScorer::score()
 			double bweights = 1 - bp_weights[seqI][seqJ];
 			double penalty = max( bp_penalty * cweights * cweights * cweights * cweights * bweights * bweights, MIN_SIGNIFICANT_LCB_SCORE );
 			if(first_time)
-				cerr << "Scoring with scaled breakpoint penalty: " << penalty << endl;
+				cout << "Scoring with scaled breakpoint penalty: " << penalty << endl;
 			first_time = false;
 			score -= ( penalty * (pairwise_lcb_count[seqI][seqJ]-1));
 			if( !(score > -1e200 && score < 1e200) )
