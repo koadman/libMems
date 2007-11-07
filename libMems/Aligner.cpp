@@ -2153,7 +2153,9 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 			// only do the search if there's something new to search
 			if( prev_iv_regions != cur_iv_regions )
 			{
+				int local_round = 0;
 				do {
+					local_round++;
 					// search the gaps between the LCBs to extend the ends of LCBs
 					new_matches.clear();
 					vector< vector< int64 > > new_iv_regions;
@@ -2176,7 +2178,7 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 					if( prev_extension_weight > extension_weight ){
 						cerr << "Error! Previous weight: " << prev_extension_weight << " new weight: " << extension_weight << endl;
 					}
-				}while( extension_weight > prev_extension_weight );
+				}while( extension_weight > prev_extension_weight && local_round < this->max_extension_iters);
 			}
 			swap( prev_iv_regions, cur_iv_regions );
 		}
