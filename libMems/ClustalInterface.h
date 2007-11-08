@@ -19,6 +19,33 @@
 #include "libMems/GappedAlignment.h"
 #include "libMems/GappedAligner.h"
 
+// attempt to auto-link the ClustalW library on windows
+#if defined(WIN64)&&defined(NDEBUG)&&defined(_OPENMP)
+#pragma comment(lib, "ClustalW64omp.lib")
+#endif
+#if defined(WIN64)&&!defined(NDEBUG)&&defined(_OPENMP)
+#pragma comment(lib, "ClustalW64fdomp.lib")
+#endif
+#if defined(WIN32)&&!defined(WIN64)&&defined(NDEBUG)&&defined(_OPENMP)
+#pragma comment(lib, "ClustalWomp.lib")
+#endif
+#if defined(WIN32)&&!defined(WIN64)&&!defined(NDEBUG)&&defined(_OPENMP)
+#pragma comment(lib, "ClustalWfdomp.lib")
+#endif
+#if defined(WIN64)&&defined(NDEBUG)&&!defined(_OPENMP)
+#pragma comment(lib, "ClustalW64.lib")
+#endif
+#if defined(WIN64)&&!defined(NDEBUG)&&!defined(_OPENMP)
+#pragma comment(lib, "ClustalW64fd.lib")
+#endif
+#if defined(WIN32)&&!defined(WIN64)&&defined(NDEBUG)&&!defined(_OPENMP)
+#pragma comment(lib, "ClustalW.lib")
+#endif
+#if defined(WIN32)&&!defined(WIN64)&&!defined(NDEBUG)&&!defined(_OPENMP)
+#pragma comment(lib, "ClustalWfd.lib")
+#endif
+
+
 namespace mems {
 
 class ClustalInterface : public GappedAligner {
