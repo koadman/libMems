@@ -7,19 +7,26 @@
 
 #if defined(WIN64)&&defined(NDEBUG)&&defined(_OPENMP)
 #pragma comment(lib, "mems64omp.lib")
-#else if defined(WIN64)&&!defined(NDEBUG)&&defined(_OPENMP)
+#endif
+#if defined(WIN64)&&!defined(NDEBUG)&&defined(_OPENMP)
 #pragma comment(lib, "mems64fdomp.lib")
-#else if defined(WIN32)&&defined(NDEBUG)&&defined(_OPENMP)
+#endif
+#if defined(WIN32)&&!defined(WIN64)&&defined(NDEBUG)&&defined(_OPENMP)
 #pragma comment(lib, "memsomp.lib")
-#else if defined(WIN32)&&!defined(NDEBUG)&&defined(_OPENMP)
+#endif
+#if defined(WIN32)&&!defined(WIN64)&&!defined(NDEBUG)&&defined(_OPENMP)
 #pragma comment(lib, "memsfdomp.lib")
+#endif
 #if defined(WIN64)&&defined(NDEBUG)&&!defined(_OPENMP)
 #pragma comment(lib, "mems64.lib")
-#else if defined(WIN64)&&!defined(NDEBUG)&&!defined(_OPENMP)
+#endif
+#if defined(WIN64)&&!defined(NDEBUG)&&!defined(_OPENMP)
 #pragma comment(lib, "mems64fd.lib")
-#else if defined(WIN32)&&defined(NDEBUG)&&!defined(_OPENMP)
+#endif
+#if defined(WIN32)&&!defined(WIN64)&&defined(NDEBUG)&&!defined(_OPENMP)
 #pragma comment(lib, "mems.lib")
-#else if defined(WIN32)&&!defined(NDEBUG)&&!defined(_OPENMP)
+#endif
+#if defined(WIN32)&&!defined(WIN64)&&!defined(NDEBUG)&&!defined(_OPENMP)
 #pragma comment(lib, "memsfd.lib")
 #endif
 
