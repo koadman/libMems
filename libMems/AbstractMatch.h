@@ -20,6 +20,7 @@
 #include <boost/type_traits/add_pointer.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <libMems/SlotAllocator.h>
+#include <libMems/configuration.h>
 
 namespace mems {
 
