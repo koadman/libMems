@@ -13,7 +13,7 @@
 #include <libMems/SeedOccurrenceList.h>
 #include <libMems/IntervalList.h>
 #include <libMems/LCB.h>
-
+#include <stack>
 
 namespace mems {
 
