@@ -39,12 +39,17 @@ public:
 		}
 		// set seed frequencies for the last few
 		for( size_t i = seed_start; i < seedI && i < mer_vec.size(); ++i )
-			count[mer_vec[i].position] = (frequency_type)(cur_seed_count < resolution_limit ? cur_seed_count : resolution_limit);
+			count[mer_vec[i].position] = (frequency_type)cur_seed_count;
 		// hack: fudge the last few values on the end of the sequence
 		for( ; seedI < count.size(); ++seedI )
 			count[seedI]=1;
 
 		smoothFrequencies( sml );
+
+		// wipe out any stray zeros
+		for( size_t i = 0; i < count.size(); ++i )
+			if( count[seedI]== 0 )
+				count[seedI] = 1;
 	}
 
 
@@ -77,13 +82,6 @@ protected:
 	}
 
 
-	/** 
-	 * using a uint16 limits us to a max frequency of 65535, but saves substantial memory.
-	 * the score contribution of something with frequency 65535 should be marginal enough
-	 * that the resolution limit shouldn't matter, at least for microbial genomes.
-	 * To handle mammalian genomes we'd need to dump this to a file anyways
-	 */
-	static const size_t resolution_limit = UINT16_MAX;
 	std::vector<frequency_type> count;	
 };
 
