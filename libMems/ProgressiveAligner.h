@@ -75,6 +75,8 @@ public:
 	void setOutputGuideTreeFileName( std::string& fname ){ this->output_guide_tree_fname = fname; }
 	/** set the max length (in columns) of alignments passed to MUSCLE */
 	void SetMaxGappedAlignmentLength( size_t len );
+	/** set whether a cache database should be used to speed up recursive anchor search */ 
+	void SetUseCacheDb( bool cbd ){ this->using_cache_db = cbd; }
 
 	/** Set whether iterative refinement using MUSCLE should be performed (true/false) */
 	void setRefinement( bool refine ){ this->refine = refine; }
@@ -196,6 +198,7 @@ protected:
 	std::string output_guide_tree_fname;
 	boolean debug;
 	boolean refine;
+	bool using_cache_db;
 
 	std::vector< SeedOccurrenceList > sol_list;
 	boost::multi_array<double, 2> bp_distance;	/**< pairwise breakpoint distances.  dims will be [seq_count][seq_count] */

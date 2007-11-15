@@ -190,7 +190,8 @@ conservation_dist_scale(1),
 bp_dist_scale(.9),
 max_gapped_alignment_length(20000),
 bp_dist_estimate_score(-1),
-use_seed_families(false)
+use_seed_families(false),
+using_cache_db(true)
 {
 	gapped_alignment = true;
 	max_window_size = max_gapped_alignment_length;
@@ -752,7 +753,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		for( size_t n2 = 0; n2 < node2_seqs.size(); n2++ )
 			node_pairs[nni++] = make_pair(n1,n2);
 
-//#pragma omp parallel for
+#pragma omp parallel for
 	for(int ni = 0; ni < node_pairs.size(); ni++)
 	{
 		size_t n1 = node_pairs[ni].first;
@@ -800,7 +801,6 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						l_match->SetOrientation(1, AbstractMatch::reverse );
 					}
 					l_match->SetLength(0);
-
 					Match* r_match = NULL;
 					if( charJ != iv.RightEnd(seqJ) && charI != iv.RightEnd(seqI) )
 					{
@@ -837,7 +837,8 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 						// search this region
 							pairwiseAnchorSearch(mlist, l_match, r_match, &iv, seqI, seqJ);
 					}
-					new_cache.push_back( cacheval );
+					if(using_cache_db)
+						new_cache.push_back( cacheval );
 				}
 				prev_charI = charI;
 				prev_charJ = charJ;
@@ -2376,7 +2377,10 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 				for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
 					pairwise_matches(seqI, seqJ).insert( pairwise_matches(seqI, seqJ).end(), matches(seqI, seqJ).begin(), matches(seqI, seqJ).end() );
 		}
-		
+
+		if(using_cache_db)
+		{
+
 		for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		{
 			for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
@@ -2393,11 +2397,26 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 				{
 					search_cache_db(seqI,seqJ).insert( search_cache_db(seqI,seqJ).end(), new_cache_db(seqI, seqJ).begin(), new_cache_db(seqI, seqJ).end() );
 					new_cache_db(seqI, seqJ).clear();
+/*					ofstream cachedb("cachedb_debug.txt");
+					for( size_t mI = 0; mI < search_cache_db(seqI,seqJ).size(); mI++ )
+					{
+						cachedb << search_cache_db(seqI,seqJ)[mI].first << '\t';
+						if( search_cache_db(seqI,seqJ)[mI].first != NULL )
+							cachedb << *(search_cache_db(seqI,seqJ)[mI].first);
+						cachedb << '\t' << search_cache_db(seqI,seqJ)[mI].second << '\t';
+						if( search_cache_db(seqI,seqJ)[mI].second != NULL )
+							cachedb << *(search_cache_db(seqI,seqJ)[mI].second);
+						cachedb << std::endl;
+					}
+					cachedb.close();
+*/
 					std::sort( search_cache_db(seqI, seqJ).begin(), search_cache_db(seqI, seqJ).end(), cache_comparator );
 				}
 				if( pairwise_matches(seqI,seqJ).size() > 0 )
 					cout << seqI << "," << seqJ << " has an additional " << pairwise_matches(seqI,seqJ).size() << " matches\n";
 			}
+		}
+		
 		}
 
 		// restore backed up tree since we only want the final set of ancestral
@@ -2408,6 +2427,8 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 
 	}	// end while(true)
 
+	if( using_cache_db )
+	{
 	// delete the search cache
 	for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 		for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
@@ -2418,6 +2439,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 				if( search_cache_db(seqI,seqJ)[mI].second != NULL )
 					search_cache_db(seqI,seqJ)[mI].second->Free();
 			}
+	}
 
 	printMemUsage();
 
