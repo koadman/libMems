@@ -17,8 +17,6 @@
 
 namespace mems {
 
-const double MIN_SIGNIFICANT_LCB_SCORE = 2500;
-
 /**
  * A wrapper that maps a match among extant sequences to a match among ancestral and extant seqs
  */
@@ -471,6 +469,7 @@ class EvenFasterSumOfPairsBreakpointScorer
 public:
 	EvenFasterSumOfPairsBreakpointScorer( 
 		double breakpoint_penalty,
+		double minimum_breakpoint_penalty,
 		boost::multi_array<double,2> bp_weight_matrix, 
 		boost::multi_array<double,2> conservation_weight_matrix,
 		std::vector< TrackingMatch* > tracking_match,
@@ -538,6 +537,8 @@ protected:
 	boost::multi_array< double, 2 > pairwise_lcb_score;
 
 	std::vector< TrackingMatch* > deleted_tracking_matches;
+
+	double min_breakpoint_penalty;
 
 private:
 	// avoid continuous size lookup

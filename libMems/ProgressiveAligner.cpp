@@ -182,6 +182,7 @@ double getDefaultBpDistEstimateMinScore( std::vector< gnSequence* >& sequences )
 ProgressiveAligner::ProgressiveAligner( uint seq_count ) :
 Aligner( seq_count ),
 breakpoint_penalty( -1 ),
+min_breakpoint_penalty( 2000 ),
 debug(false),
 refine(true),
 scoring_scheme(ExtantSumOfPairsScoring),
@@ -2162,13 +2163,13 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 				vector<node_id_t>::iterator d2_iter = std::find( node2_descendants.begin(), node2_descendants.end(), node2 );
 				size_t d1_index = d1_iter - node1_descendants.begin();
 				size_t d2_index = d2_iter - node2_descendants.begin();
-				EvenFasterSumOfPairsBreakpointScorer spbs( breakpoint_penalty, bp_dist_mat, cons_dist_mat, 
+				EvenFasterSumOfPairsBreakpointScorer spbs( breakpoint_penalty, min_breakpoint_penalty, bp_dist_mat, cons_dist_mat, 
 					t_matches, pairwise_adj_mat, node1_descendants, node2_descendants, 
 					tm_score_array, tm_lcb_id_array, d1_index, d1_index+1, d2_index, d2_index+1 );
 				cur_anchoring_score = greedySearch( spbs );
 				final = spbs.getResults();
 			}else{
-				EvenFasterSumOfPairsBreakpointScorer spbs( breakpoint_penalty, bp_dist_mat, cons_dist_mat, 
+				EvenFasterSumOfPairsBreakpointScorer spbs( breakpoint_penalty, min_breakpoint_penalty, bp_dist_mat, cons_dist_mat, 
 					t_matches, pairwise_adj_mat, node1_descendants, node2_descendants, 
 					tm_score_array, tm_lcb_id_array, 0, node1_descendants.size(), 0, node2_descendants.size() );
 				cur_anchoring_score = greedySearch( spbs );
@@ -3318,7 +3319,7 @@ void ProgressiveAligner::CreatePairwiseBPDistance( boost::multi_array<double, 2>
 		// want to discard all low-weight LCBs
 		// to arrive at a set of reliable LCBs
 		double cons_id = 1 - this->conservation_distance[seqI][seqJ];
-		double scaled_score = max( bp_dist_estimate_score * cons_id * cons_id * cons_id * cons_id, MIN_SIGNIFICANT_LCB_SCORE);
+		double scaled_score = max( bp_dist_estimate_score * cons_id * cons_id * cons_id * cons_id, min_breakpoint_penalty);
 		cout << "Using scaled bp penalty: " << scaled_score << endl;
 		GreedyRemovalScorer wbs( adjacencies, scaled_score );
 #ifdef LCB_WEIGHT_LOSS_PLOT

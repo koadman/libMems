@@ -65,6 +65,8 @@ public:
 
 	/** sets the breakpoint penalty */
 	void setBreakpointPenalty( double bp_penalty ){ breakpoint_penalty = bp_penalty; }
+	/** sets the the minimum breakpoint penalty after scaling */
+	void setMinimumBreakpointPenalty( double min_bp_penalty ){ min_breakpoint_penalty = min_bp_penalty; }
 	/** assume all genomes are collinear when set to true */
 	void setCollinear( boolean collinear ){ this->collinear_genomes = collinear; }
 	/** use a list of precomputed matches instead of computing them */
@@ -194,6 +196,7 @@ protected:
 	PhyloTree< AlignmentTreeNode > alignment_tree;
 	std::vector< uint > node_sequence_map;
 	double breakpoint_penalty;
+	double min_breakpoint_penalty;
 	std::string input_guide_tree_fname;
 	std::string output_guide_tree_fname;
 	boolean debug;

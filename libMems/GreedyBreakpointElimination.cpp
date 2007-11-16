@@ -322,6 +322,7 @@ void undoLcbRemoval( uint seq_count, LcbVector& adjs, std::vector< std::pair< ui
 
 EvenFasterSumOfPairsBreakpointScorer::EvenFasterSumOfPairsBreakpointScorer( 
 	double breakpoint_penalty,
+	double minimum_breakpoint_penalty,
 	boost::multi_array<double,2> bp_weight_matrix, 
 	boost::multi_array<double,2> conservation_weight_matrix,
 	vector< TrackingMatch* > tracking_match,
@@ -336,6 +337,7 @@ EvenFasterSumOfPairsBreakpointScorer::EvenFasterSumOfPairsBreakpointScorer(
 	size_t seqJ_end
 	) :
   bp_penalty( breakpoint_penalty ),
+  min_breakpoint_penalty( minimum_breakpoint_penalty ),
   bp_weights( bp_weight_matrix ), 
   conservation_weights( conservation_weight_matrix ),
   tracking_matches( tracking_match ),
@@ -412,7 +414,7 @@ double EvenFasterSumOfPairsBreakpointScorer::score()
 			// subtract 1 from number of LCBs so that a single circular LCB doesn't get penalized
 			double cweights = 1 - conservation_weights[seqI][seqJ];
 			double bweights = 1 - bp_weights[seqI][seqJ];
-			double penalty = max( bp_penalty * cweights * cweights * cweights * cweights * bweights * bweights, MIN_SIGNIFICANT_LCB_SCORE );
+			double penalty = max( bp_penalty * cweights * cweights * cweights * cweights * bweights * bweights, min_breakpoint_penalty );
 			if(first_time)
 				cout << "Scoring with scaled breakpoint penalty: " << penalty << endl;
 			first_time = false;
