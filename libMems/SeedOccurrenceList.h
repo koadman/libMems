@@ -48,8 +48,8 @@ public:
 
 		// wipe out any stray zeros
 		for( size_t i = 0; i < count.size(); ++i )
-			if( count[seedI]== 0 )
-				count[seedI] = 1;
+			if( count[i]== 0 )
+				count[i] = 1;
 	}
 
 
