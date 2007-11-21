@@ -39,15 +39,14 @@ public:
 	T* Allocate();
 	void Free( T* t );
 	~SlotAllocator(){ 
-		for( unsigned dataI = 0; dataI < data.size(); dataI++ )
-			delete[] data[ dataI ];
-		data.clear();
+		Purge();
 	};
 	void Purge(){
 #pragma omp critical
 {
 		for( unsigned dataI = 0; dataI < data.size(); dataI++ )
-			delete[] data[ dataI ];
+			free(data[dataI]);
+//			delete[] data[ dataI ];
 		data.clear();
 		free_list.clear();
 		tail_free = 0;
@@ -99,7 +98,8 @@ T* SlotAllocator< T >::Allocate(){
 		T* new_data = NULL;
 		while( true ){
 			try{
-				new_data = new T[ new_size ];
+//				new_data = new T[ new_size ];
+				new_data = (T*)malloc(sizeof(T)*new_size);
 				break;
 			}catch(...){
 				new_size = new_size / 2;
@@ -122,14 +122,14 @@ T* SlotAllocator< T >::Allocate(){
 template< class T >
 inline
 void SlotAllocator< T >::Free( T* t ){
-#pragma omp critical
-{
 	// for debugging double free
 /*	for(size_t i = 0; i < free_list.size(); i++ )
 		if( free_list[i] == t )
 			std::cerr << "ERROR DOUBLE FREE\n";
 */	
 	t->~T();
+#pragma omp critical
+{
 	free_list.push_back( t );
 }
 }
