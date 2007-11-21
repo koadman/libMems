@@ -1453,7 +1453,7 @@ void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, Match
 	vector<GappedAlignment*> gapped_alns(mlist.size()+1, NULL);
 	vector<int> success(gapped_alns.size(), 0);
 	gnSeqI progress_base = apt.cur_leftend;
-#pragma omp parallel for
+//#pragma omp parallel for
 	for( int mI = 0; mI < mlist.size()-1; mI++ )
 	{
 		// align the region between mI and mI+1
@@ -1470,7 +1470,7 @@ void AlignLCBInParallel( bool collinear_genomes, mems::GappedAligner* gal, Match
 			for( int i = 0; i < gapped_alns.size(); i++ )
 				if(gapped_alns[i] != NULL)
 					done++;
-#pragma omp critical
+//#pragma omp critical
 {
 			double cur_progress = ((double)(progress_base+done) / (double)apt.total_len)*100.0;
 			printProgress((uint)apt.prev_progress, (uint)cur_progress, cout);
