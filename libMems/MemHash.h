@@ -169,6 +169,7 @@ protected:
 
 	std::ostream* match_log;
 	SlotAllocator<MatchHashEntry>& allocator;
+	std::vector<MatchHashEntry*> allocated;	// used to track what needs to get explicitly destroyed later...
 //	boost::object_pool<MatchHashEntry> allocator;
 
 };

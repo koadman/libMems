@@ -44,6 +44,7 @@ MemHash::~MemHash(){
 		delete[] mem_table;
 		mem_table = NULL;
 	}
+	allocator.Free(allocated);
 	// WARNING! WARNING! WARNING! this will destroy ALL objects since the allocator has static lifetime!!
 	// this is bad because if more than one MemHash is in use (e.g. in a multi-threaded program) then
 	// its storage could suddenly disappear.  consider this a temporary workaround until all matches
@@ -99,6 +100,7 @@ void MemHash::Clear()
 	}
 	match_log = NULL;
 
+	allocator.Free(allocated);
 	// WARNING! WARNING! WARNING! this will destroy ALL objects since the allocator has static lifetime!!
 //	allocator.Purge();
 }
@@ -241,6 +243,7 @@ MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe){
 	MatchHashEntry* new_mhe = allocator.Allocate();
 	new_mhe = new(new_mhe) MatchHashEntry(mhe); 
 //	*new_mhe = mhe;
+	allocated.push_back(new_mhe);
 	
 	// can't insert until after the extend!!
 	mem_table[bucketI].insert(new_mhe);

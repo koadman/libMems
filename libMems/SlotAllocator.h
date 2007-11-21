@@ -38,6 +38,7 @@ public:
 	static SlotAllocator<T>& GetSlotAllocator();
 	T* Allocate();
 	void Free( T* t );
+	void Free( std::vector<T*>& chunk );
 	~SlotAllocator(){ 
 		Purge();
 	};
@@ -46,7 +47,6 @@ public:
 {
 		for( unsigned dataI = 0; dataI < data.size(); dataI++ )
 			free(data[dataI]);
-//			delete[] data[ dataI ];
 		data.clear();
 		free_list.clear();
 		tail_free = 0;
@@ -87,7 +87,7 @@ T* SlotAllocator< T >::Allocate(){
 		free_list.pop_back();
 	}else if( tail_free > 0 ){
 		int T_index = n_elems - tail_free--;
-		t_ptr = &(data[ data.size() - 1 ][ T_index ]);
+		t_ptr = &(data.back()[ T_index ]);
 	}else{
 
 		// Last resort:
@@ -98,7 +98,6 @@ T* SlotAllocator< T >::Allocate(){
 		T* new_data = NULL;
 		while( true ){
 			try{
-//				new_data = new T[ new_size ];
 				new_data = (T*)malloc(sizeof(T)*new_size);
 				break;
 			}catch(...){
@@ -112,7 +111,7 @@ T* SlotAllocator< T >::Allocate(){
 		}
 		data.push_back( new_data );
 		tail_free = new_size - 1;
-		t_ptr = & data[ data.size() - 1 ][ 0 ];
+		t_ptr = & data.back()[0];
 		n_elems = new_size;
 	}
 }
@@ -132,6 +131,23 @@ void SlotAllocator< T >::Free( T* t ){
 {
 	free_list.push_back( t );
 }
+}
+
+template< class T >
+inline
+void SlotAllocator< T >::Free( std::vector<T*>& chunk ){
+	// for debugging double free
+/*	for(size_t i = 0; i < free_list.size(); i++ )
+		if( free_list[i] == t )
+			std::cerr << "ERROR DOUBLE FREE\n";
+*/	
+	for( size_t i = 0; i < chunk.size(); i++ )
+		chunk[i]->~T();
+#pragma omp critical
+{
+	free_list.insert(free_list.end(), chunk.begin(), chunk.end());
+}
+	chunk.clear();
 }
 
 }
