@@ -45,11 +45,6 @@ MemHash::~MemHash(){
 		mem_table = NULL;
 	}
 	allocator.Free(allocated);
-	// WARNING! WARNING! WARNING! this will destroy ALL objects since the allocator has static lifetime!!
-	// this is bad because if more than one MemHash is in use (e.g. in a multi-threaded program) then
-	// its storage could suddenly disappear.  consider this a temporary workaround until all matches
-	// can be freed individually
-	allocator.Purge();
 }
 
 MemHash::MemHash(const MemHash& mh) : MatchFinder(mh), allocator( SlotAllocator<MatchHashEntry>::GetSlotAllocator() )
