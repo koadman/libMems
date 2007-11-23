@@ -44,7 +44,7 @@ MemHash::~MemHash(){
 		delete[] mem_table;
 		mem_table = NULL;
 	}
-	allocator.Free(allocated);
+//	allocator.Free(allocated);
 }
 
 MemHash::MemHash(const MemHash& mh) : MatchFinder(mh), allocator( SlotAllocator<MatchHashEntry>::GetSlotAllocator() )
