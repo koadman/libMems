@@ -35,7 +35,7 @@ static const gnSeqI NO_MATCH = 0;
 // slot allocator turns out to have the fastest new/free implementation for single object allocations
 #define _USE_SLOT_ALLOCATOR
 #else
-//#define _USE_SLOT_ALLOCATOR
+#define _USE_SLOT_ALLOCATOR
 #endif
 typedef boost::dynamic_bitset<> bitset_t;
 
