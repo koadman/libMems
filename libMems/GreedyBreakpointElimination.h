@@ -432,10 +432,12 @@ double GetPairwiseAnchorScore( MatchVector& lcb,
 			{
 				mems::SeedOccurrenceList::frequency_type uni1 = sol_1.getFrequency(m->LeftEnd(0) + merI - 1);
 				mems::SeedOccurrenceList::frequency_type uni2 = sol_2.getFrequency(m->LeftEnd(1) + merJ - 1);
+				mems::SeedOccurrenceList::frequency_type uniprod = uni1*uni2;
+				uniprod = uniprod == 0 ? 1 : uniprod;
 				// scale by the uniqueness product, which approximates the number of ways to match up non-unique k-mers
 				// in the worst case of a very repetitive match, the score becomes the negative of the match score
 				if( scores[colI] > 0 )
-					scores[colI] = (scores[colI] * 2 / (score_t)(uni1 * uni2)) - scores[colI];
+					scores[colI] = (score_t)((double)scores[colI] * (2.0 / uniprod)) - scores[colI];
 //					scores[colI] /= (score_t)(uni1 * uni2);
 			}
 			if(et[0][colI] != '-')
