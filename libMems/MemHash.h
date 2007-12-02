@@ -160,7 +160,7 @@ protected:
 	virtual uint32 quadratic_li(uint32 listI){return (listI*(listI+1))/2;}
 		
 	uint32 table_size;
-	std::set<MatchHashEntry*, MheCompare>* mem_table;
+	std::vector< std::vector<MatchHashEntry*> > mem_table;
 	uint32 m_repeat_tolerance;
 	uint32 m_enumeration_tolerance;
 	uint64 m_mem_count;
@@ -171,7 +171,7 @@ protected:
 	SlotAllocator<MatchHashEntry>& allocator;
 	std::vector<MatchHashEntry*> allocated;	// used to track what needs to get explicitly destroyed later...
 //	boost::object_pool<MatchHashEntry> allocator;
-
+	MheCompare mhecomp;
 };
 
 
@@ -184,7 +184,6 @@ void MemHash::GetMatchList( MatchListType& mem_list ) const {
 	
 	mem_list.clear();
 	typedef typename MatchListType::value_type MatchType;
-	std::map<MatchHashEntry*,MatchType> address_map;
    
 	//Boost to the rescue! use remove_pointer to get at MatchListType's type
 	typedef typename boost::remove_pointer<MatchType>::type SinPtrMatchType;
@@ -192,13 +191,12 @@ void MemHash::GetMatchList( MatchListType& mem_list ) const {
 
 	for(uint32 i=0; i < table_size; ++i)
 	{
-		std::set<MatchHashEntry*, MheCompare>::iterator iter = mem_table[i].begin();
+		std::vector<MatchHashEntry*>::const_iterator iter = mem_table[i].begin();
 		for(; iter != mem_table[i].end(); iter++ )
 		{
 			MatchType m = mm.Copy();
 			*m = **iter;
 			mem_list.push_back( m );
-			address_map.insert( make_pair( *iter, m ) ); 
 		}
 	}
 

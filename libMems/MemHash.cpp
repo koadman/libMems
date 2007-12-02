@@ -30,7 +30,7 @@ namespace mems {
 	m_repeat_tolerance = DEFAULT_REPEAT_TOLERANCE;
 	m_enumeration_tolerance = DEFAULT_ENUMERATION_TOLERANCE;
 	//allocate the hash table
-	mem_table = new set<MatchHashEntry*, MheCompare>[table_size];
+	mem_table.resize(table_size);
 	mem_table_count.reserve( table_size );
 	for(uint32 i=0; i < table_size; ++i)
 		mem_table_count.push_back(0);
@@ -39,10 +39,6 @@ namespace mems {
 
 //make sure this calls the destructor on each element
 MemHash::~MemHash(){
-	if(mem_table != NULL){
-		delete[] mem_table;
-		mem_table = NULL;
-	}
 //	allocator.Free(allocated);
 }
 
@@ -59,10 +55,7 @@ MemHash& MemHash::operator=( const MemHash& mh ){
 	m_collision_count = mh.m_collision_count;
 	m_repeat_tolerance = mh.m_repeat_tolerance;
 	m_enumeration_tolerance = mh.m_enumeration_tolerance;
-	//allocate the hash table
-	if(mem_table != NULL)
-		delete[] mem_table;
-	mem_table = new set<MatchHashEntry*, MheCompare>[table_size];
+	mem_table.resize(table_size);
 	for(uint32 i=0; i < table_size; ++i){
 		mem_table_count.push_back(mh.mem_table_count[i]);
 		mem_table[i] = mh.mem_table[i];
@@ -100,15 +93,12 @@ void MemHash::Clear()
 }
 
 void MemHash::SetTableSize(uint32 new_table_size){
-	//deallocate the hash table
-	if(mem_table != NULL)
-		delete[] mem_table;
 	//allocate the hash table
 	table_size = new_table_size;
-	mem_table = new set<MatchHashEntry*, MheCompare>[table_size];
+	mem_table.clear();
+	mem_table.resize(table_size);
 	mem_table_count.clear();
-	for(uint32 i=0; i < table_size; ++i)
-		mem_table_count.push_back(0);
+	mem_table_count.resize(table_size,0);
 }
 
 boolean MemHash::CreateMatches(){
@@ -221,9 +211,10 @@ MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe){
 	int64 offset = mhe.Offset();
 
 	uint32 bucketI = ((offset % table_size) + table_size) % table_size;
-    set<MatchHashEntry*, MheCompare>::iterator insert_he;
-	insert_he = mem_table[bucketI].find(&mhe);
-	if( insert_he != mem_table[bucketI].end()){
+	vector<MatchHashEntry*>::iterator insert_he;
+	insert_he = std::lower_bound(mem_table[bucketI].begin(), mem_table[bucketI].end(), &mhe, mhecomp);
+//	insert_he = mem_table[bucketI].find(&mhe);
+	if( insert_he != mem_table[bucketI].end() && (!mhecomp(*insert_he, &mhe) && !mhecomp(&mhe, *insert_he)) ){
 		++m_collision_count;
 		return *insert_he;
 	}
@@ -240,7 +231,8 @@ MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe){
 	allocated.push_back(new_mhe);
 	
 	// can't insert until after the extend!!
-	mem_table[bucketI].insert(new_mhe);
+	insert_he = std::lower_bound(mem_table[bucketI].begin(), mem_table[bucketI].end(), new_mhe, mhecomp);
+	mem_table[bucketI].insert(insert_he, new_mhe);
 
 	// log it.
 	if( match_log != NULL ){
@@ -259,7 +251,7 @@ MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe){
 }
 
 void MemHash::PrintDistribution(ostream& os) const{
-    set<MatchHashEntry*, MheCompare>::const_iterator mem_iter;
+    vector<MatchHashEntry*>::const_iterator mem_iter;
 	gnSeqI base_count;
 	for(uint32 i=0; i < mem_table_count.size(); ++i){
 		mem_iter = mem_table[i].begin();
@@ -326,7 +318,7 @@ void MemHash::WriteFile(ostream& mem_file) const{
 	}
 	mem_file << "MatchCount" << '\t' << m_mem_count << endl;
 	//get all the mems out of the hash table and write them out
-    set<MatchHashEntry*, MheCompare>::const_iterator mem_table_iter;
+    vector<MatchHashEntry*>::const_iterator mem_table_iter;
 	for(uint32 i=0; i < table_size; i++){
 		mem_table_iter = mem_table[i].begin();
 		for(; mem_table_iter != mem_table[i].end(); mem_table_iter++)
