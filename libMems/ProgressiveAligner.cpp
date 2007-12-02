@@ -724,7 +724,6 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 			if( add_ok )
 				r_list.push_back( *mum_iter );
 			else{
-				(*mum_iter)->UnlinkSelf();
 				(*mum_iter)->Free();
 				(*mum_iter) = NULL;
 			}

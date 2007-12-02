@@ -15,7 +15,6 @@
 #include <list>
 #include <map>
 #include <sstream>
-#include "libMems/MemSubsets.h"
 
 using namespace std;
 using namespace genome;
@@ -252,7 +251,6 @@ MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe){
 	// link up the subset matches
 	for(uint32 subsetI = 0; subsetI < subset_matches.size(); ++subsetI){
 		MatchHashEntry* submem = AddHashEntry( subset_matches[ subsetI ] );
-		new_mhe->LinkSubset( submem );
 	}
 	
 	++mem_table_count[bucketI];

@@ -52,23 +52,6 @@ public:
 	
 	/** comparison operator, compares two matches to see if they are the same */
 	boolean operator==(const GenericMatch<BaseType>& mhe) const;
-
-	//GenericMatch count
-	
-	/**
-	 * Links a subset match to this mem and this mem to the subset.
-	 * @param subset The subset match which this mem overlaps
-	 */
-	virtual void LinkSubset( GenericMatch<BaseType>* subset );
-	/** Returns a copy of set of the matches which overlap this match */
-	std::set< GenericMatch<BaseType>* > GetSubsets() const { return m_subsets; }
-	/** Returns a copy of set of the matches which this mem overlaps */
-	std::set< GenericMatch<BaseType>* > GetSupersets() const { return m_supersets; }
-	
-	/** Returns a reference to the set of matches which overlap this match */
-	std::set< GenericMatch<BaseType>* >& Subsets() { return m_subsets; }
-	/** Returns a reference to the set of matches which this match overlaps */
-	std::set< GenericMatch<BaseType>* >& Supersets() { return m_supersets; }
 		
 	/**
 	 *  Will return true if this match evenly overlaps mhe
@@ -86,20 +69,8 @@ public:
 	virtual boolean GetUniqueStart(const GenericMatch<BaseType>& mhe, GenericMatch<BaseType>& unique_mhe) const;
 	virtual boolean GetUniqueEnd(const GenericMatch<BaseType>& mhe, GenericMatch<BaseType>& unique_mhe) const;
 
-	/** Ensures all linked supersets are really supersets and are correctly linked */
-	virtual void UpdateSupersets();
-	/** Unlinks this mem from any supersets and subsets it may be linked to. */
-	virtual void UnlinkSelf();
-
-	virtual void AddSubset( GenericMatch<BaseType>* overlapper );
-	virtual void AddSuperset( GenericMatch<BaseType>* underlapper );
 protected:
 	void HomogenizeParity(std::vector<int64>& start1, std::vector<int64>& start2, const uint32 startI) const;
-
-	virtual void UnlinkSubset( GenericMatch<BaseType>* subset );
-	virtual void UnlinkSuperset( GenericMatch<BaseType>* superset );
-	std::set< GenericMatch<BaseType>* > m_subsets;
-	std::set< GenericMatch<BaseType>* > m_supersets;
 
 };
 
@@ -121,52 +92,6 @@ void GenericMatch<BaseType>::Free()
 }
 
 template< class BaseType >
-void GenericMatch<BaseType>::UnlinkSubset( GenericMatch* subset ) {
-	m_subsets.erase( subset );
-}
-
-template< class BaseType >
-void GenericMatch<BaseType>::UnlinkSuperset( GenericMatch<BaseType>* superset ) {
-	m_supersets.erase( superset );
-}
-
-template< class BaseType >
-void GenericMatch<BaseType>::UnlinkSelf() 
-{
-	// unlink from the supersets
-	typename std::set< GenericMatch<BaseType>* >::iterator match_iter = this->m_supersets.begin();
-	for(; match_iter != this->m_supersets.end(); ++match_iter )
-		(*match_iter)->UnlinkSubset( this );
-	this->m_supersets.clear();
-
-	// unlink from the subsets
-	match_iter = this->m_subsets.begin();
-	for(; match_iter != this->m_subsets.end(); ++match_iter )
-		(*match_iter)->UnlinkSuperset( this );
-	this->m_subsets.clear();
-
-}
-
-template< class BaseType >
-void GenericMatch<BaseType>::UpdateSupersets() {
-	typename std::set< GenericMatch<BaseType>* >::iterator super_iter = this->m_supersets.begin();
-
-	while(super_iter != this->m_supersets.end()) {			
-		GenericMatch<BaseType>* supermem = *super_iter;
-		if( this->EvenlyOverlaps(*supermem) ){
-			supermem->m_subsets.insert( this );
-			++super_iter;
-		}else {
-			typename std::set< GenericMatch<BaseType>* >::iterator to_del = super_iter;
-			++super_iter;
-			this->m_supersets.erase( to_del );
-		}
-	}
-}
-
-
-
-template< class BaseType >
 GenericMatch<BaseType>::GenericMatch(uint seq_count)
  : BaseType( seq_count )
 {}
@@ -182,25 +107,6 @@ template< class BaseType >
 boolean GenericMatch<BaseType>::operator==(const GenericMatch<BaseType>& mhe) const
 {
 	return BaseType::operator ==(mhe);
-}
-
-template< class BaseType >
-void GenericMatch<BaseType>::LinkSubset( GenericMatch<BaseType>* subset )
-{
-	this->m_subsets.insert( subset );
-	subset->AddSuperset( this );
-}
-
-template< class BaseType >
-void GenericMatch<BaseType>::AddSuperset( GenericMatch<BaseType>* overlapper )
-{
-	this->m_supersets.insert(overlapper);
-}
-
-template< class BaseType >
-void GenericMatch<BaseType>::AddSubset( GenericMatch<BaseType>* underlapper )
-{
-	this->m_subsets.insert(underlapper);
 }
 
 template< class BaseType >

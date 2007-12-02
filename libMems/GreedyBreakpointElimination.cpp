@@ -6,7 +6,6 @@
 #include "libMems/GreedyBreakpointElimination.h"
 #include "libMems/ProgressiveAligner.h"
 #include "libMems/Aligner.h"
-#include "libMems/MemSubsets.h"
 #include "libMems/Islands.h"
 #include "libMems/DNAFileSML.h"
 #include "libMems/MuscleInterface.h"	// it's the default gapped aligner

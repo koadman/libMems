@@ -100,11 +100,6 @@ public:
 	 */
 //	void IntersectFilter( valarray< bool >& filter_spec );
 
-	/**
-	 * Keeps only matches that are not subsets and whose first matching
-	 * sequence is the specified sequence.
-	 */
-	void UnlinkedFirstStartFilter( unsigned start_seq );
 	
 	std::vector<std::string> sml_filename;		/**< The file names of the sorted mer list for each sequence, may be empty or null */
 	std::vector<std::string> seq_filename;		/**< The file names of the sequence data, may be empty or null */
@@ -466,11 +461,6 @@ void ReadList(MatchList& mlist, std::istream& match_file)
 		// skip the tab character
 		tag = tag.substr( 1 );
 		mlist.seq_filename.push_back(tag);
-//		try{
-//			gnSequence *new_seq = new gnSequence();
-//			new_seq->LoadSource(tag);
-//			seq_table.push_back( new_seq );
-//		}catch( gnException& gne );
 		match_file >> tag;	// length tag
 		gnSeqI seq_len;
 		match_file >> seq_len;	// length
@@ -508,32 +498,16 @@ void ReadList(MatchList& mlist, std::istream& match_file)
 		uint sub_count;
 		boolean bad_stream = false;
 		line_stream >> sub_count;
-		for( uint subI = 0; subI < sub_count; subI++ ){
-			//break if the stream ended early
-			if(!line_stream.good() ){
-				bad_stream = true;
-				break;
-			}
-			MatchID_t sub;
-			line_stream >> sub;
-			mhe.AddSubset( (Match*)sub );
-		}
+		if(sub_count > 0)
+			throw "Unable to read file, invalid format, cannot read subset data\n";
 
 		if( bad_stream )
 			break;
 
 		uint sup_count;
 		line_stream >> sup_count;
-		for( uint supI = 0; supI < sup_count; supI++ ){
-			//break if the stream ended early
-			if(!line_stream.good() ){
-				bad_stream = true;
-				break;
-			}
-			MatchID_t sup;
-			line_stream >> sup;
-			mhe.AddSuperset( (Match*)sup );
-		}
+		if(sub_count > 0)
+			throw "Unable to read file, invalid format, cannot read superset data\n";
 		if( bad_stream )
 			break;
 		
@@ -544,10 +518,6 @@ void ReadList(MatchList& mlist, std::istream& match_file)
 	if( match_count != mlist.size() ){
 		Throw_gnEx(InvalidFileFormat());
 	}
-	
-	// now remap the subset and superset links
-	RemapSubsetMatchAddresses( match_map, mlist );
-
 }
 
 inline
@@ -590,20 +560,10 @@ void WriteList( const MatchList& mlist, std::ostream& match_file)
 		match_file << (MatchID_t)(*match_iter) << '\t';
 		
 		// print subset id's
-		const std::set<Match*>& cur_set = (*match_iter)->Subsets();
-		match_file << cur_set.size();
-		std::set<Match*>::const_iterator set_iter = cur_set.begin();
-		for(; set_iter != cur_set.end(); set_iter++ ){
-			match_file << '\t' << (MatchID_t)*set_iter;
-		}
+		match_file << 0;
 
 		// print superset id's
-		const std::set<Match*>& cur_set2 = (*match_iter)->Supersets();
-		match_file << '\t' << cur_set2.size();
-		set_iter = cur_set2.begin();
-		for(; set_iter != cur_set2.end(); set_iter++ ){
-			match_file << '\t' << (MatchID_t)*set_iter;
-		}
+		match_file << '\t' << 0;
 		match_file << std::endl;
 	}
 }
@@ -616,7 +576,6 @@ void GenericMatchList< MatchPtrType >::MultiplicityFilter( unsigned mult ){
 		if( (*this)[ memI ]->Multiplicity() == mult )
 			(*this)[cur++] = (*this)[memI];
 		else{
-			(*this)[ memI ]->UnlinkSelf();
 			(*this)[ memI ]->Free();
 			(*this)[ memI ] = NULL;
 		}
@@ -632,35 +591,12 @@ void GenericMatchList< MatchPtrType >::LengthFilter( gnSeqI length ){
 		if( (*this)[ memI ]->Length() >= length )
 			(*this)[cur++] = (*this)[memI];
 		else{
-			(*this)[ memI ]->UnlinkSelf();
 			(*this)[ memI ]->Free();
 			(*this)[ memI ] = NULL;
 		}
 	}
 	this->resize(cur);
 }
-
-template< typename MatchPtrType >
-void GenericMatchList< MatchPtrType >::UnlinkedFirstStartFilter( unsigned start_seq )
-{
-	genome::ErrorMsg( "GenericMatchList< MatchPtrType >::UnlinkedFirstStartFilter() needs to be re-implemented\n" );
-	typename std::vector<MatchPtrType>::iterator match_iter;
-	typename std::vector<MatchPtrType>::iterator to_del;
-	match_iter = this->begin();
-	while( match_iter != this->end() ){
-		if( (*match_iter)->FirstStart() != start_seq ||
-			(*match_iter)->Supersets().size() > 0 ) 
-		{
-			to_del = match_iter;
-			match_iter++;
-			this->erase( to_del );
-			continue;
-		}
-		match_iter++;
-	}
-}
-
-
 
 }
 

@@ -7,7 +7,6 @@
  ******************************************************************************/
 
 #include "libMems/Aligner.h"
-#include "libMems/MemSubsets.h"
 #include "libMems/Islands.h"
 #include "libMems/DNAFileSML.h"
 #include "libMems/MuscleInterface.h"	// it's the default gapped aligner
@@ -1337,16 +1336,8 @@ void Aligner::Recursion( MatchList& r_list, Match* r_begin, Match* r_end, boolea
 		else
 			gap_mh.get().GetMatchList( gap_list );
 		
-	//	SubsetInclusionRemover sir;
-	//	sir.EliminateLinkedInclusions( gap_list );
 
-		// delete overlaps/inclusions
-	//	SubsetLinker slinker;
-	//	slinker.Subsets( gap_list );
-		
-	//	SubsetInclusionRemover sir;
-	//	sir.EliminateLinkedInclusions( gap_list );
-		
+		// delete overlaps/inclusions		
 		EliminateOverlaps( gap_list );
 		// mult. filter after EliminateOverlaps because e.o. may generate some subset matches
 		if( nway_only )
@@ -1366,18 +1357,6 @@ void Aligner::Recursion( MatchList& r_list, Match* r_begin, Match* r_end, boolea
 				list<Match*>::iterator gappy_iter = gap_list.begin();
 				while( gappy_iter != gap_list.end() ){
 					cout << **gappy_iter;
-					set<MatchID_t>& subsets = (*gappy_iter)->Subsets();
-					set<MatchID_t>::iterator sub_iter = subsets.begin();
-					cout << "\tsubsets: ";
-					for(; sub_iter != subsets.end(); sub_iter++ ){
-						cout << "\t" << *sub_iter;
-					}
-					set<MatchID_t>& supersets = (*gappy_iter)->Supersets();
-					set<MatchID_t>::iterator super_iter = supersets.begin();
-					cout << "\tsupersets: ";
-					for(; super_iter != supersets.end(); super_iter++ ){
-						cout << "\t" << *super_iter;
-					}
 					cout << endl;
 					gappy_iter++;
 				}
@@ -1413,7 +1392,6 @@ void Aligner::Recursion( MatchList& r_list, Match* r_begin, Match* r_end, boolea
 				if( add_ok )
 					r_list.push_back( *mum_iter );
 				else{
-					(*mum_iter)->UnlinkSelf();
 					(*mum_iter)->Free();
 					(*mum_iter) = NULL;
 				}
@@ -2368,9 +2346,6 @@ void Aligner::align( MatchList& mlist, IntervalList& interval_list, double LCB_m
 // Step 1) Eliminate overlaps among the multi-MUMs
 //	
 	// Remove linked inclusions
-	SubsetInclusionRemover sir;
-	sir.EliminateLinkedInclusions( mlist );
-	cout << "ELI gives " << mlist.size() << " MUMs\n";
 	EliminateOverlaps( mlist );
 	cout << "Eliminating overlaps yields " << mlist.size() << " MUMs\n";
 

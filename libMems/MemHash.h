@@ -202,7 +202,6 @@ void MemHash::GetMatchList( MatchListType& mem_list ) const {
 		}
 	}
 
-	RemapSubsetMatchAddresses( address_map, mem_list );
 }
 
 

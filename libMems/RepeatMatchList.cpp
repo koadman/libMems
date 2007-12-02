@@ -226,32 +226,16 @@ void RepeatMatchList::ReadList(istream& match_file){
 		uint sub_count;
 		boolean bad_stream = false;
 		line_stream >> sub_count;
-		for( uint subI = 0; subI < sub_count; subI++ ){
-			//break if the stream ended early
-			if(!line_stream.good() ){
-				bad_stream = true;
-				break;
-			}
-			MatchID_t sub;
-			line_stream >> sub;
-			mhe.AddSubset( (Match*)sub );
-		}
+		if(sub_count > 0)
+			throw "Unable to read file, invalid format, cannot read subset information\n";
 
 		if( bad_stream )
 			break;
 
 		uint sup_count;
 		line_stream >> sup_count;
-		for( uint supI = 0; supI < sup_count; supI++ ){
-			//break if the stream ended early
-			if(!line_stream.good() ){
-				bad_stream = true;
-				break;
-			}
-			MatchID_t sup;
-			line_stream >> sup;
-			mhe.AddSuperset( (Match*)sup );
-		}
+		if(sup_count > 0)
+			throw "Unable to read file, invalid format, cannot read superset information\n";
 		if( bad_stream )
 			break;
 		
@@ -261,31 +245,6 @@ void RepeatMatchList::ReadList(istream& match_file){
 	}
 	if( match_count != size() ){
 		Throw_gnEx(InvalidFileFormat());
-	}
-	
-	// now remap the subset and superset links
-	vector<Match*>::iterator match_iter = begin();
-	map<MatchID_t, Match*>::iterator map_iter;
-	for(; match_iter != end(); match_iter++ ){
-		// remap all subsets
-		set< Match* >& subsets = (*match_iter)->Subsets();
-		set< Match* > new_subsets;
-		set< Match* >::iterator sub_iter = subsets.begin();
-		for(; sub_iter != subsets.end(); sub_iter++ ){
-			map_iter = match_map.find( (MatchID_t)*sub_iter );
-			new_subsets.insert( map_iter->second );
-		}
-		subsets = new_subsets;
-
-		// remap all supersets
-		set< Match* >& supersets = (*match_iter)->Supersets();
-		set< Match* > new_supersets;
-		set< Match* >::iterator super_iter = supersets.begin();
-		for(; super_iter != supersets.end(); super_iter++ ){
-			map_iter = match_map.find( (MatchID_t)*super_iter );
-			new_supersets.insert( map_iter->second );
-		}
-		supersets = new_supersets;
 	}
 }
 
@@ -328,27 +287,12 @@ void RepeatMatchList::WriteList(ostream& match_file) const{
 
 		// print the match address
 		match_file << (MatchID_t)(*match_iter) << '\t';
-		
-		// unlink self
-		//(*match_iter)->UnlinkFromSets();
-            
-		
+				
 		// print subset id's
-		cur_set = (*match_iter)->Subsets();
-		match_file << cur_set.size();
-		set_iter = cur_set.begin();
-		for(; set_iter != cur_set.end(); set_iter++ ){
-			match_file << '\t' << (MatchID_t)*set_iter;
-			//cout  << *set_iter << endl;
-		}
+		match_file << 0;
 
 		// print superset id's
-		cur_set = (*match_iter)->Supersets();
-		match_file << '\t' << cur_set.size();
-		set_iter = cur_set.begin();
-		for(; set_iter != cur_set.end(); set_iter++ ){
-			match_file << '\t' << (MatchID_t)*set_iter;
-		}
+		match_file << '\t' << 0;
 		match_file << endl;
 	}
 }
