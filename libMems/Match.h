@@ -52,23 +52,7 @@ public:
 	
 	/** comparison operator, compares two matches to see if they are the same */
 	boolean operator==(const GenericMatch<BaseType>& mhe) const;
-		
-	/**
-	 *  Will return true if this match evenly overlaps mhe
-	 *  An even overlap implies that for each genome which this match has 
-	 *  coordinates, the difference in start positions must always be the
-	 *  same and this match's coordinates completely contain mhe's in those
-	 *  genomes.
-	 *  mhe may have coordinates in genomes which this mem does not.
-	 * @param mhe The mem to check for intersection.
-	 * @return True if this mem intersects with mhe.
-	 */
-	virtual boolean EvenlyOverlaps(const GenericMatch<BaseType>& mhe) const;
-	
-
-	virtual boolean GetUniqueStart(const GenericMatch<BaseType>& mhe, GenericMatch<BaseType>& unique_mhe) const;
-	virtual boolean GetUniqueEnd(const GenericMatch<BaseType>& mhe, GenericMatch<BaseType>& unique_mhe) const;
-
+			
 protected:
 	void HomogenizeParity(std::vector<int64>& start1, std::vector<int64>& start2, const uint32 startI) const;
 
@@ -109,120 +93,6 @@ boolean GenericMatch<BaseType>::operator==(const GenericMatch<BaseType>& mhe) co
 	return BaseType::operator ==(mhe);
 }
 
-template< class BaseType >
-boolean GenericMatch<BaseType>::GetUniqueStart(const GenericMatch<BaseType>& mhe, GenericMatch<BaseType>& unique_mhe) const
-{
-	uint i;
-	int64 diff_i;
-	int64 diff;
-	uint seq_count = mhe.SeqCount();
-	std::vector<int64> m_start1, m_start2;
-	for( uint seqI = 0; seqI < this->SeqCount(); seqI++ ){
-		m_start1.push_back( this->Start( seqI ) );
-		m_start2.push_back( mhe.Start( seqI ) );
-	}
-
-	//find the first matching sequence...
-	for(i=0; i < seq_count; i++){
-		if(mhe.Start(i) == NO_MATCH || this->Start(i) == NO_MATCH)
-			continue;
-		else
-			break;
-	}
-
-	uint fm = i;
-
-	//make sure the parity of each genome is forward
-//	if(this->FirstStart() != mhe.FirstStart())
-		HomogenizeParity(m_start1, m_start2, i);
-	diff = m_start2[i] - m_start1[i];
-
-	//check for overlao properties
-	if(diff >= this->Length() || diff <= 0)
-		return false;
-
-	//everything is ok so far, check for alignment
-	int64 diff_rc = (int64)mhe.Length() - (int64)this->Length() + diff;
-	for(i++; i < seq_count; i++){
-		//check for consistent alignment between all genomes
-		//in the case of revcomp, diff_i must equal m.length - diff
-		diff_i = m_start2[i] - m_start1[i];
-		//it's ok if this mem has a sequence which mhe doesn't
-		if(m_start2[i] == NO_MATCH || m_start1[i] == NO_MATCH)
-			continue;
-		else if(m_start2[i] < 0 && diff_rc == diff_i)
-			continue;
-		else if(diff != diff_i )
-			return false;
-	}
-	//it was aligned and intersects.
-	unique_mhe = *this;
-	if( this->Start(fm) > 0 ){
-		unique_mhe.CropEnd( this->Length() - diff );
-	}else{
-		unique_mhe.CropEnd( mhe.Length() + diff );
-	}
-	return true;
-}
-
-template< class BaseType >
-boolean GenericMatch<BaseType>::GetUniqueEnd(const GenericMatch<BaseType>& mhe, GenericMatch<BaseType>& unique_mhe) const
-{
-	uint32 i;
-	int64 diff_i;
-	int64 diff;
-	uint32 seq_count = mhe.SeqCount();
-	std::vector<int64> m_start1, m_start2;
-	for( uint seqI = 0; seqI < this->SeqCount(); seqI++ ){
-		m_start1.push_back( this->Start( seqI ) );
-		m_start2.push_back( mhe.Start( seqI ) );
-	}
-	uint fm;
-	
-	//find the first matching sequence...
-	for(i=0; i < seq_count; i++){
-		if(mhe.Start(i) == NO_MATCH || this->Start(i) == NO_MATCH)
-			continue;
-		else
-			break;
-	}
-	fm = i;
-
-	//make sure the parity of each genome is the same
-//	if(FirstStart() != mhe.FirstStart())
-		HomogenizeParity(m_start1, m_start2, i);
-	diff = m_start2[i] - m_start1[i];
-
-	//check for overlap properties
-	if(this->Length() <= mhe.Length() + diff)
-		return false;
-
-
-	//everything is ok so far, check for alignment
-	int64 diff_rc = (int64)mhe.Length() - (int64)this->Length() + diff;
-	for(i++; i < seq_count; i++){
-		//check for consistent alignment between all genomes
-		//in the case of revcomp, diff_i must equal m.length - diff
-		diff_i = m_start2[i] - this->Start(i);
-		//it's ok if this mem has a sequence which mhe doesn't
-		if(m_start2[i] == NO_MATCH || m_start1[i] == NO_MATCH)
-			continue;
-		else if(m_start2[i] < 0 && diff_rc == diff_i)
-			continue;
-		else if(diff != diff_i )
-			return false;
-	}
-
-	//it was aligned and intersects.
-	unique_mhe = *this;
-	if( this->Start(fm) > 0 ){
-		unique_mhe.CropStart(mhe.Length() + diff);
-	}else{
-		unique_mhe.CropStart( this->Length() - diff );
-	}
-	return true;
-}
-
 
 template< class BaseType >
 void GenericMatch<BaseType>::HomogenizeParity(std::vector<int64>& start1, std::vector<int64>& start2, const uint32 startI) const
@@ -238,58 +108,6 @@ void GenericMatch<BaseType>::HomogenizeParity(std::vector<int64>& start1, std::v
 		for( uint32 j=startI; j < start2.size(); j++)
 			start2[j] *= -1;
 	}
-}
-
-
-
-//check if this mem evenly overlaps mhe in every sequence for which
-//this match is defined.
-template< class BaseType >
-boolean GenericMatch<BaseType>::EvenlyOverlaps(const GenericMatch<BaseType>& mhe) const
-{
-	uint i;
-	int64 diff_i;
-	int64 diff;
-	std::vector<int64> m_start1, m_start2;
-	for( uint seqI = 0; seqI < this->SeqCount(); seqI++ ){
-		m_start1.push_back( this->Start(seqI) );
-		m_start2.push_back( mhe.Start(seqI) );
-	}
-	uint seq_count = m_start2.size();
-
-	//ensure the first sequence in this mem exists in both mems...
-	i = this->FirstStart();
-	if(m_start2[i] == NO_MATCH)
-		return false;
-
-	//make sure the parity of each genome is the same
-	if(this->FirstStart() != mhe.FirstStart())
-		HomogenizeParity(m_start1, m_start2, i);
-	diff = m_start2[i] - m_start1[i];
-
-	//check for even overlap properties
-	if(diff >= this->Length() || -diff >= mhe.Length())
-		return false;
-
-	//everything is ok so far, check for alignment
-	int64 diff_rc = (int64)mhe.Length() - (int64)this->Length() + diff;
-	for(i++; i < seq_count; i++){
-		//check for consistent alignment between all genomes
-		//in the case of revcomp, diff_i must equal m.length - diff
-		diff_i = m_start2[i] - m_start1[i];
-		//it's ok if mhe has a sequence which this mem doesn't
-		//but not vice versa
-		if(m_start1[i] == NO_MATCH)
-			continue;
-		if(m_start2[i] == NO_MATCH)
-			return false;
-		else if(m_start2[i] < 0 && diff_rc == diff_i)
-			continue;
-		else if(diff != diff_i )
-			return false;
-	}
-	//it was an even overlap
-	return true;
 }
 
 
