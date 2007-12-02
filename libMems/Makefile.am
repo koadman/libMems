@@ -6,17 +6,17 @@ AM_CFLAGS = @DEPS_CFLAGS@ -DUSE_POSIX_AIO @OPENMP_CFLAGS@
 AM_CXXFLAGS = @DEPS_CFLAGS@ $(D_CXXFLAGS)  @OPENMP_CXXFLAGS@ 
 
 LIBMEMS_H = \
-MemSubsets.h       RepeatHash.h      MatchHashEntry.h \
+RepeatHash.h      MatchHashEntry.h \
 DNAFileSML.h     MemorySML.h         MatchProjectionAdapter.h \
 DNAMemorySML.h  MatchFinder.h           SortedMerList.h IntervalList.h \
 FileSML.h      gnAlignedSequences.h  Interval.h        ClustalInterface.h  \
-MemHash.h      MemScorer.h          AbstractMatch.h    SlotAllocator.h \
+MemHash.h      AbstractMatch.h    SlotAllocator.h \
 Aligner.h   Match.h     MatchList.h Matrix.h NumericMatrix.h \
 Islands.h   MaskedMemHash.h   SlotAllocator.h SeedMasks.h GappedAlignment.h \
 MuscleInterface.h GappedAligner.h PhyloTree.h SparseAbstractMatch.h \
 DenseAbstractMatch.h RepeatMatch.h UngappedLocalAlignment.h \
 AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
-twister.h SubstitutionMatrix.h RepeatHashCat.h RepeatMatchList.h \
+twister.h SubstitutionMatrix.h RepeatMatchList.h \
 Backbone.h ProgressiveAligner.h PairwiseMatchAdapter.h PairwiseMatchFinder.h \
 SeedOccurrenceList.h TreeUtilities.h SuperInterval.h GreedyBreakpointElimination.h \
 LCB.h DistanceMatrix.h Scoring.h configuration.h
@@ -30,8 +30,8 @@ dmSML/util.h dmSML/sorting.h dmSML/dmsort.h \
 dmSML/timing.h dmSML/sml.h
 
 LIBMEMS_SRC = \
-MemScorer.cpp        RepeatHash.cpp       ClustalInterface.cpp \
-DNAFileSML.cpp       MatchFinder.cpp      MemSubsets.cpp \
+RepeatHash.cpp       ClustalInterface.cpp \
+DNAFileSML.cpp       MatchFinder.cpp       \
 DNAMemorySML.cpp     MemorySML.cpp        SortedMerList.cpp \
 FileSML.cpp          MemHash.cpp          MatchHashEntry.cpp \
 Interval.cpp	     IntervalList.cpp     twister.c \
@@ -39,7 +39,7 @@ gnAlignedSequences.cpp                     \
 MatchList.cpp        Aligner.cpp \
 Islands.cpp          MaskedMemHash.cpp    GappedAlignment.cpp \
 MuscleInterface.cpp  PhyloTree.cpp         \
-RepeatHashCat.cpp    RepeatMatchList.cpp  RepeatMatch.cpp \
+RepeatMatchList.cpp  RepeatMatch.cpp \
 Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp \
 SuperInterval.cpp	GreedyBreakpointElimination.cpp
 
