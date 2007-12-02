@@ -687,8 +687,17 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		//	Find all matches in the gap region
 		//
 		gap_mh.get().ClearSequences();
-		gap_mh.get().FindMatches( gap_list );
+		if(seed_count>1)
+		{
+			MatchList cur_list = gap_list;
+			gap_mh.get().FindMatches( cur_list );
+			for( size_t mI = 0; mI < cur_list.size(); mI++ )
+				cur_list[mI]->Free();
+		}else
+			gap_mh.get().FindMatches( gap_list );
 	}
+	if(seed_count>1)
+		gap_mh.get().GetMatchList(gap_list);
 
 	EliminateOverlaps_v2( gap_list );
 
@@ -696,40 +705,18 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 	// anchor length after EliminateOverlaps()
 	gap_list.LengthFilter( MIN_ANCHOR_LENGTH + 3 );
 
-	if( gap_list.size() > 0 )
+	for( size_t gI = 0; gI < gap_list.size(); gI++ )
 	{
-		// shift all the matches that were found
-		vector< Match* >::iterator mum_iter = gap_list.begin();
-		for( ; mum_iter != gap_list.end(); ){
-			boolean add_ok = true;
-			for( uint seqI = 0; seqI < (*mum_iter)->SeqCount(); seqI++ ){
-				int64 gap_start;
-				if( (*mum_iter)->Start( seqI ) < 0 ){
-					gap_start = r_begin != NULL ? -r_begin->End( seqI ) : 0;
-					if( gap_start > 0 )
-						gap_start = r_end != NULL ? r_end->Start( seqI ) - r_end->Length() + 1 : 0;
-					else if( r_begin )
-						add_ok = false;
-					(*mum_iter)->SetStart( seqI, (*mum_iter)->Start( seqI ) + gap_start );
-				}else{
-					// insert them all before mem_iter
-					gap_start = r_begin != NULL ? r_begin->End( seqI ) : 0;
-					if( gap_start < 0 ){
-						gap_start = r_end != NULL ? r_end->Start( seqI ) - r_end->Length() + 1 : 0;
-						add_ok = false;
-					}
-					(*mum_iter)->SetStart( seqI, (*mum_iter)->Start( seqI ) + gap_start );
-				}
-			}
-			if( add_ok )
-				r_list.push_back( *mum_iter );
-			else{
-				(*mum_iter)->Free();
-				(*mum_iter) = NULL;
-			}
-			++mum_iter;
+		for( seqI = 0; seqI < 2; seqI++ )
+		{
+			int64 gap_rend = 0;
+			int64 gap_lend = 0;
+			getInterveningCoordinates( iv, (seqI == 0 ? oseqI : oseqJ), r_begin, r_end, seqI, gap_lend, gap_rend);
+			gap_list[gI]->SetLeftEnd(seqI, gap_list[gI]->LeftEnd(seqI) + gap_lend - 1);
 		}
 	}
+	r_list.insert(r_list.end(), gap_list.begin(), gap_list.end());
+
 	// delete sequences and smls
 	for( uint seqI = 0; seqI < gap_list.seq_table.size(); seqI++ )
 		delete gap_list.seq_table[ seqI ];
