@@ -42,6 +42,8 @@
 #include <limits>
 #include <iomanip>
 
+#include "stdlib.h"
+
 using namespace std;
 using namespace genome;
 
@@ -1944,6 +1946,14 @@ void ProgressiveAligner::getRepresentativeAncestralMatches( const vector< node_i
 	EliminateOverlaps_v2( ancestral_matches, true );
 }
 
+int cachecomp( const void* e1, const void* e2 )
+{
+	bool a = mems::cache_comparator(*(search_cache_t*)e1, *(search_cache_t*)e2);
+	bool b = mems::cache_comparator(*(search_cache_t*)e2, *(search_cache_t*)e1);
+	if(!a && !b)
+		return 0;
+	return a ? -1 : 1;
+}
 
 void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2, node_id_t ancestor )
 {
@@ -2388,7 +2398,18 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 				search_cache_db(seqI,seqJ).clear();
 				if(new_cache_db(seqI, seqJ).size() > 0)
 				{
-					search_cache_db(seqI,seqJ).insert( search_cache_db(seqI,seqJ).end(), new_cache_db(seqI, seqJ).begin(), new_cache_db(seqI, seqJ).end() );
+					// try sorting using C's qsort -- maybe there's something wrong with std::sort?
+					search_cache_t* sc_array = new search_cache_t[new_cache_db(seqI,seqJ).size()];
+					for( size_t i = 0; i < new_cache_db(seqI,seqJ).size(); i++ )
+						sc_array[i] = new_cache_db(seqI,seqJ)[i];
+					qsort(sc_array, new_cache_db(seqI,seqJ).size(), sizeof(AbstractMatch*), cachecomp);
+
+					search_cache_db(seqI, seqJ).resize(new_cache_db(seqI,seqJ).size());
+					for( size_t i = 0; i < new_cache_db(seqI,seqJ).size(); i++ )
+						search_cache_db(seqI, seqJ)[i] = sc_array[i];
+					delete[] sc_array;
+
+//					search_cache_db(seqI,seqJ).insert( search_cache_db(seqI,seqJ).end(), new_cache_db(seqI, seqJ).begin(), new_cache_db(seqI, seqJ).end() );
 					new_cache_db(seqI, seqJ).clear();
 /*					ofstream cachedb("cachedb_debug.txt");
 					for( size_t mI = 0; mI < search_cache_db(seqI,seqJ).size(); mI++ )
@@ -2403,7 +2424,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 					}
 					cachedb.close();
 */
-					std::sort( search_cache_db(seqI, seqJ).begin(), search_cache_db(seqI, seqJ).end(), cache_comparator );
+//					std::sort( search_cache_db(seqI, seqJ).begin(), search_cache_db(seqI, seqJ).end(), cache_comparator );
 				}
 				if( pairwise_matches(seqI,seqJ).size() > 0 )
 					cout << seqI << "," << seqJ << " has an additional " << pairwise_matches(seqI,seqJ).size() << " matches\n";
