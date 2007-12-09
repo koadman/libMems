@@ -199,6 +199,8 @@ public:
 	/** Set output parameters for permutation matrices */
 	void SetPermutationOutput( std::string& permutation_filename, int64 permutation_weight );
 	void WritePermutation( std::vector< LCB >& adjacencies, std::string out_filename );
+
+	void SetRecursive( bool value ){ this->recursive = value; }
 protected:
 	TLS<MemHash> gap_mh;			/**< Used during recursive alignment */
 	MaskedMemHash nway_mh;	/**< Used during recursive alignment to find nway matches only */

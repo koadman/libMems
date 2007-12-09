@@ -958,14 +958,14 @@ int IsDenseEnough( GappedAlignment* gal_iter )
 	return 0;
 }
 
-void splitGappedAlignment( const GappedAlignment& ga, GappedAlignment& ga1, GappedAlignment& ga2, std::vector<uint>& seqs1, std::vector<uint>& seqs2 )
+void splitGappedAlignment( const GappedAlignment& ga, GappedAlignment& ga1, GappedAlignment& ga2, std::vector<size_t>& seqs1, std::vector<size_t>& seqs2 )
 {
 	const vector< string >& aln = GetAlignment( ga, std::vector<gnSequence*>(ga.SeqCount()) );
 	ga1 = ga;
 	ga2 = ga;
-	for( uint seqI = 0; seqI < seqs1.size(); seqI++ )
+	for( size_t seqI = 0; seqI < seqs1.size(); seqI++ )
 		ga2.SetLeftEnd(seqs1[seqI], NO_MATCH);
-	for( uint seqI = 0; seqI < seqs2.size(); seqI++ )
+	for( size_t seqI = 0; seqI < seqs2.size(); seqI++ )
 		ga1.SetLeftEnd(seqs2[seqI], NO_MATCH);
 }
 
@@ -978,6 +978,8 @@ void removeLargeGapsPP( GappedAlignment& gal, list< GappedAlignment* >& gal_list
 	const vector< string >& aln_matrix = GetAlignment(gal, vector<gnSequence*>(gal.SeqCount(),NULL));
 	size_t gap_cols = 0;
 	size_t last_aln_col = (std::numeric_limits<size_t>::max)();
+	size_t col_base = 0;
+	GappedAlignment* galp = gal.Copy();
 	for( size_t colI = 0; colI < gal.AlignmentLength(); colI++ )
 	{
 		 size_t g1 = 0;
@@ -1001,20 +1003,20 @@ void removeLargeGapsPP( GappedAlignment& gal, list< GappedAlignment* >& gal_list
 				gnSeqI split_point = 0;
 				if( last_aln_col != (std::numeric_limits<size_t>::max)() )
 				{
-					split_point = last_aln_col + lcb_hangover;
-					gal_list.push_back( gal.Copy() );
+					split_point = last_aln_col + lcb_hangover - col_base;
+					gal_list.push_back( galp );
 					gap_iv.push_back(false);
-					gal_list.back()->CropEnd( gal.AlignmentLength()-split_point );
-					gal.CropStart( split_point );
+					galp = (GappedAlignment*)galp->Split(split_point);	// set galp to the right side after splitting
+					col_base += split_point;
 				}
-				split_point = colI - lcb_hangover - split_point;
-				gal_list.push_back( gal.Copy() );
+				split_point = colI - lcb_hangover - col_base;
+				gal_list.push_back( galp );
 				gap_iv.push_back(true);
-				gal_list.back()->CropEnd( gal.AlignmentLength()-split_point );
-				gal.CropStart( split_point );
+				galp = (GappedAlignment*)galp->Split(split_point);	// set galp to the right side after splitting
+				col_base += split_point;
 			 }
-			 gap_cols = 0;
 			 last_aln_col = colI;
+			 gap_cols = 0;
 		 }else
 			 ++gap_cols;
 	}
@@ -1024,16 +1026,15 @@ void removeLargeGapsPP( GappedAlignment& gal, list< GappedAlignment* >& gal_list
 		gnSeqI split_point = 0;
 		if( last_aln_col != (std::numeric_limits<size_t>::max)() )
 		{
-			split_point = last_aln_col + lcb_hangover;
-			gal_list.push_back( gal.Copy() );
+			split_point = last_aln_col + lcb_hangover - col_base;
+			gal_list.push_back( galp );
 			gap_iv.push_back(false);
-			gal_list.back()->CropEnd( gal.AlignmentLength()-split_point );
-			gal.CropStart( split_point );
+			galp = (GappedAlignment*)galp->Split(split_point);	// set galp to the right side after splitting
 		}
 		gap_iv.push_back(true);
 	}else
 		gap_iv.push_back(false);
-	gal_list.push_back( gal.Copy() );
+	gal_list.push_back( galp );
 }
 
 void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancestor, bool profile_aln, AlnProgressTracker& apt )
@@ -1047,19 +1048,19 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 	std::vector<node_id_t> nodes2;
 	getAlignedChildren( alignment_tree[ancestor].children[0], nodes1 );
 	getAlignedChildren( alignment_tree[ancestor].children[1], nodes2 );
-	std::vector<uint> seqs1( nodes1.size() );
-	std::vector<uint> seqs2( nodes2.size() );
+	std::vector<size_t> seqs1( nodes1.size() );
+	std::vector<size_t> seqs2( nodes2.size() );
 	for( size_t nI = 0; nI < nodes1.size(); nI++ )
 		seqs1[nI] = node_sequence_map[nodes1[nI]];
 	for( size_t nI = 0; nI < nodes2.size(); nI++ )
 		seqs2[nI] = node_sequence_map[nodes2[nI]];
 //	if( profile_aln )
 //	{
-//		removeLargeGapsPP( gal, gal_list, gap_iv, seqs1, seqs2 );
+		removeLargeGapsPP( gal, gal_list, gap_iv, seqs1, seqs2 );
 //	}else{
 //		gal_list.push_back( gal.Copy() );
-		gal_list.push_back( new GappedAlignment( gal ) );
-		gap_iv.push_back(false);
+//		gal_list.push_back( new GappedAlignment( gal ) );
+//		gap_iv.push_back(false);
 //	}
 	list< GappedAlignment* >::iterator gal_iter = gal_list.begin();
 	vector<bool>::iterator gap_iter = gap_iv.begin();
@@ -1103,9 +1104,12 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 	for( int galI = 0; galI < gal_count; galI++ )
 	{
 		list<GappedAlignment*>::iterator my_g_iter = gal_list.begin();
-		for(uint a = 0; a < galI; a++)
-			my_g_iter++;
 		vector<bool>::iterator my_b_iter = gap_iv.begin();
+		for(uint a = 0; a < galI; a++)
+		{
+			++my_g_iter;
+			++my_b_iter;
+		}
 #pragma omp critical
 {
 		apt.cur_leftend += (*my_g_iter)->AlignmentLength();
@@ -1119,7 +1123,7 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 			{
 				mi.ProfileAlignFast( ga1, ga2, **my_g_iter, true );
 			}
-		}else
+		}else if(!(*my_b_iter))
 		{
 			int density = IsDenseEnough( *my_g_iter );
 			if( density == 0 )
@@ -2348,6 +2352,8 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		if(debug_aligner)
 			validateSuperIntervals( node1, node2, ancestor );
 
+		if(recursive)
+		{
 		// search for additional alignment anchors
 		cout << "recursive anchor search\n";
 		cout.flush();
@@ -2405,6 +2411,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		}
 		
 		}
+		}	// if recursive
 
 		// restore backed up tree since we only want the final set of ancestral
 		// breakpoints applied to the descendants
