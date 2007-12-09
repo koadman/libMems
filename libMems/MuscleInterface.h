@@ -20,28 +20,28 @@
 #include "libMems/GappedAligner.h"
 
 // attempt to auto-link the MUSCLE library on windows
-#if defined(WIN64)&&defined(NDEBUG)&&defined(_OPENMP)
+#if defined(WIN64)&&defined(NDEBUG)&&!defined(FASTDEBUG)&&defined(_OPENMP)
 #pragma comment(lib, "MUSCLE64omp.lib")
 #endif
-#if defined(WIN64)&&!defined(NDEBUG)&&defined(_OPENMP)
+#if defined(WIN64)&&defined(FASTDEBUG)&&defined(_OPENMP)
 #pragma comment(lib, "MUSCLE64fdomp.lib")
 #endif
-#if defined(WIN32)&&!defined(WIN64)&&defined(NDEBUG)&&defined(_OPENMP)
+#if defined(WIN32)&&!defined(WIN64)&&defined(NDEBUG)&&!defined(FASTDEBUG)&&defined(_OPENMP)
 #pragma comment(lib, "MUSCLEomp.lib")
 #endif
-#if defined(WIN32)&&!defined(WIN64)&&!defined(NDEBUG)&&defined(_OPENMP)
+#if defined(WIN32)&&!defined(WIN64)&&defined(FASTDEBUG)&&defined(_OPENMP)
 #pragma comment(lib, "MUSCLEfdomp.lib")
 #endif
-#if defined(WIN64)&&defined(NDEBUG)&&!defined(_OPENMP)
+#if defined(WIN64)&&defined(NDEBUG)&&!defined(FASTDEBUG)&&!defined(_OPENMP)
 #pragma comment(lib, "MUSCLE64.lib")
 #endif
-#if defined(WIN64)&&!defined(NDEBUG)&&!defined(_OPENMP)
+#if defined(WIN64)&&defined(FASTDEBUG)&&!defined(_OPENMP)
 #pragma comment(lib, "MUSCLE64fd.lib")
 #endif
-#if defined(WIN32)&&!defined(WIN64)&&defined(NDEBUG)&&!defined(_OPENMP)
+#if defined(WIN32)&&!defined(WIN64)&&defined(NDEBUG)&&!defined(FASTDEBUG)&&!defined(_OPENMP)
 #pragma comment(lib, "MUSCLE.lib")
 #endif
-#if defined(WIN32)&&!defined(WIN64)&&!defined(NDEBUG)&&!defined(_OPENMP)
+#if defined(WIN32)&&!defined(WIN64)&&defined(FASTDEBUG)&&!defined(_OPENMP)
 #pragma comment(lib, "MUSCLEfd.lib")
 #endif
 
