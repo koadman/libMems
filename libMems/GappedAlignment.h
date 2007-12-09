@@ -56,8 +56,16 @@ public:
 
 	void GetColumn( gnSeqI col, std::vector<gnSeqI>& pos, std::vector<bool>& column ) const;
 
+	/**
+	 * Splits the alignment before the specified column.  The left-side remains in "this" GappedAlignment,
+	 * and the right side is returned as a new GappedAlignment
+	 */
+	virtual AbstractMatch* Split( gnSeqI before_column );
 protected:
 	std::vector< std::string > align_matrix;
+
+	void CropStartCoords(gnSeqI crop_amount);
+	void CropEndCoords(gnSeqI crop_amount);
 };
 
 
@@ -81,7 +89,7 @@ void GappedAlignment::Invert(){
 }
 
 inline
-void GappedAlignment::CropStart(gnSeqI crop_amount){
+void GappedAlignment::CropStartCoords(gnSeqI crop_amount){
 	if( crop_amount > AlignmentLength() )
 		Throw_gnEx( genome::SeqIndexOutOfBounds() );
 	for( uint i=0; i < SeqCount(); i++ ){
@@ -89,19 +97,25 @@ void GappedAlignment::CropStart(gnSeqI crop_amount){
 		for( gnSeqI cropI = 0; cropI < crop_amount; cropI++ )
 			if( align_matrix[i][cropI] != '-' )
 				char_count++;
-		align_matrix[ i ] = align_matrix[ i ].substr( crop_amount );
 		if( Start(i) > 0 )
 			SetStart(i, Start(i) + char_count);
 		SetLength(Length(i)-char_count, i);
 		if( Length(i) == 0 )
 			SetLeftEnd(i, NO_MATCH);
 	}
+}
+
+inline
+void GappedAlignment::CropStart(gnSeqI crop_amount){
+	CropStartCoords(crop_amount);
+	for( uint i=0; i < SeqCount(); i++ )
+		align_matrix[ i ] = align_matrix[ i ].substr( crop_amount );
 
 	SetAlignmentLength( AlignmentLength() - crop_amount );
 }
 
 inline
-void GappedAlignment::CropEnd(gnSeqI crop_amount){
+void GappedAlignment::CropEndCoords(gnSeqI crop_amount){
 	if( crop_amount > AlignmentLength() )
 		Throw_gnEx( genome::SeqIndexOutOfBounds() );
 	SetAlignmentLength( AlignmentLength() - crop_amount );
@@ -111,13 +125,19 @@ void GappedAlignment::CropEnd(gnSeqI crop_amount){
 		for( gnSeqI cropI = align_matrix[i].length() - crop_amount; cropI < align_matrix[i].length(); cropI++ )
 			if( align_matrix[i][cropI] != '-' )
 				char_count++;
-		align_matrix[ i ] = align_matrix[ i ].substr( 0, AlignmentLength() );
 		if( Start(i) < 0 )
 			SetStart(i, Start(i)-char_count);
 		SetLength(Length(i)-char_count, i);
 		if( Length(i) == 0 )
 			SetLeftEnd(i, NO_MATCH);
 	}
+}
+
+inline
+void GappedAlignment::CropEnd(gnSeqI crop_amount){
+	CropEndCoords(crop_amount);
+	for( uint i=0; i < SeqCount(); i++ )
+		align_matrix[ i ].resize( AlignmentLength() );
 }
 
 inline
@@ -162,6 +182,28 @@ void GappedAlignment::GetAlignment( std::vector< bitset_t >& align_matrix ) cons
 			if( this->align_matrix[seqI][charI] != '-' )
 				align_matrix[seqI].set(charI);
 	}
+}
+
+inline
+AbstractMatch* GappedAlignment::Split( gnSeqI before_column )
+{
+	GappedAlignment ga_tmp(SeqCount(), AlignmentLength());
+	GappedAlignment* ga = ga_tmp.Copy();
+
+	for( size_t seqI = 0; seqI < SeqCount(); seqI++ )
+	{
+		ga->SetStart( seqI, Start(seqI) );
+		ga->SetLength( Length(seqI), seqI );
+	}
+	swap(ga->align_matrix, align_matrix);
+	ga->CropStartCoords(before_column);
+	swap(ga->align_matrix, align_matrix);
+	ga->align_matrix.resize(SeqCount());
+	for( size_t seqI = 0; seqI < SeqCount(); seqI++ )
+		ga->align_matrix[seqI] = align_matrix[seqI].substr( before_column );
+	ga->SetAlignmentLength( AlignmentLength()-before_column );
+	CropEnd(AlignmentLength()-before_column);
+	return ga;
 }
 
 const std::vector<std::string>& GetAlignment( const GappedAlignment& ga, const std::vector< genome::gnSequence* >& seq_table );
