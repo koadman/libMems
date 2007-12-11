@@ -20,7 +20,7 @@
 #include "homology.h"
 
 
-void run(std::string& sequence, std::string& prediction, double goUnrelated, double goHomologous) 
+void run(std::string& sequence, std::string& prediction, std::vector<double>& emitHomologous, std::vector<double>& emitUnrelated, double goHomologous, double goUnrelated) 
 {
 
   // The parameters of the model
@@ -37,31 +37,63 @@ void run(std::string& sequence, std::string& prediction, double goUnrelated, dou
   iPar.iStartHomologous = 0.5;	// probability of starting in the homologous state.  
 
 
-  // these values derived from the HOXD matrix of Chiaramonte et al 2002
-  iPar.aEmitHomologous[0] = 0.4522941233821017820048370573372;		//a:a, t:t
-  iPar.aEmitHomologous[1] = 0.44848066098577262840393576702477;		//c:c, g:g
-  iPar.aEmitHomologous[2] = 0.0051952975642225538102111260336614;	//a:c, c:a, g:t, t:g
-  iPar.aEmitHomologous[3] = 0.030436787995307373189004842137023;	//a:g, g:a, c:t, t:c
-  iPar.aEmitHomologous[4] = 0.0042890021493835663524878678185533;	//a:t, t:a
-  iPar.aEmitHomologous[5] = 0.0041101279232120962395233396480786;	//g:c, c:g
-  iPar.aEmitHomologous[6] = 0.004461;	// gap open (from an e. coli y pestis alignment)
-  // gap extend // 0.050733
-  iPar.aEmitHomologous[7] = 1 - (iPar.aEmitHomologous[0] + iPar.aEmitHomologous[1] + iPar.aEmitHomologous[2] +
-			iPar.aEmitHomologous[3] + iPar.aEmitHomologous[4] + iPar.aEmitHomologous[5] + iPar.aEmitHomologous[6]);
+  if (emitHomologous.size() == 0)
+  {
+      // these values derived from the HOXD matrix of Chiaramonte et al 2002
+      iPar.aEmitHomologous[0] = 0.4522941233821017820048370573372;		//a:a, t:t
+      iPar.aEmitHomologous[1] = 0.44848066098577262840393576702477;		//c:c, g:g
+      iPar.aEmitHomologous[2] = 0.0051952975642225538102111260336614;	//a:c, c:a, g:t, t:g
+      iPar.aEmitHomologous[3] = 0.030436787995307373189004842137023;	//a:g, g:a, c:t, t:c
+      iPar.aEmitHomologous[4] = 0.0042890021493835663524878678185533;	//a:t, t:a
+      iPar.aEmitHomologous[5] = 0.0041101279232120962395233396480786;	//g:c, c:g
+      iPar.aEmitHomologous[6] = 0.004461;	// gap open (from an e. coli y pestis alignment)
+      // gap extend // 0.050733
+      iPar.aEmitHomologous[7] = 1 - (iPar.aEmitHomologous[0] + iPar.aEmitHomologous[1] + iPar.aEmitHomologous[2] +
+			    iPar.aEmitHomologous[3] + iPar.aEmitHomologous[4] + iPar.aEmitHomologous[5] + iPar.aEmitHomologous[6]);
+  }
+  else
+  {
+      // these values derived from the HOXD matrix of Chiaramonte et al 2002
+      iPar.aEmitHomologous[0] = emitHomologous[0];		//a:a, t:t
+      iPar.aEmitHomologous[1] = emitHomologous[1];		//c:c, g:g
+      iPar.aEmitHomologous[2] = emitHomologous[2];	//a:c, c:a, g:t, t:g
+      iPar.aEmitHomologous[3] = emitHomologous[3];	//a:g, g:a, c:t, t:c
+      iPar.aEmitHomologous[4] = emitHomologous[4];	//a:t, t:a
+      iPar.aEmitHomologous[5] = emitHomologous[5];	//g:c, c:g
+      iPar.aEmitHomologous[6] = emitHomologous[6];	// gap open (from an e. coli y pestis alignment)
+      // gap extend // 0.050733
+      iPar.aEmitHomologous[7] = emitHomologous[7];
 
-  iPar.aEmitUnrelated[0] = 0.12818742714404662781015820149872;	// a:a, t:t
-  iPar.aEmitUnrelated[1] = 0.10493347210657785179017485428807;	// c:c, g:g
-  iPar.aEmitUnrelated[2] = 0.11597910074937552039966694421313;	// a:c, c:a
-  iPar.aEmitUnrelated[3] = iPar.aEmitUnrelated[2];
-  iPar.aEmitUnrelated[4] = iPar.aEmitUnrelated[0];
-  iPar.aEmitUnrelated[5] = iPar.aEmitUnrelated[1]; 
-  iPar.aEmitUnrelated[6] = 0.0483;	// gap open (derived by aligning a 48%GC sequence with 
-									// its reverse--not complement--to derive expected gap frequencies in 
-									// unrelated sequence)
-  // gap extend // 0.2535
-  iPar.aEmitUnrelated[7] = 1 - (iPar.aEmitUnrelated[0] + iPar.aEmitUnrelated[1] + iPar.aEmitUnrelated[2] +
-			iPar.aEmitUnrelated[3] + iPar.aEmitUnrelated[4] + iPar.aEmitUnrelated[5] + iPar.aEmitUnrelated[6]);
-
+  }
+  if (emitUnrelated.size() == 0)
+  {
+      iPar.aEmitUnrelated[0] = 0.12818742714404662781015820149872;	// a:a, t:t
+      iPar.aEmitUnrelated[1] = 0.10493347210657785179017485428807;	// c:c, g:g
+      iPar.aEmitUnrelated[2] = 0.11597910074937552039966694421313;	// a:c, c:a
+      iPar.aEmitUnrelated[3] = iPar.aEmitUnrelated[2];
+      iPar.aEmitUnrelated[4] = iPar.aEmitUnrelated[0];
+      iPar.aEmitUnrelated[5] = iPar.aEmitUnrelated[1]; 
+      iPar.aEmitUnrelated[6] = 0.0483;	// gap open (derived by aligning a 48%GC sequence with 
+									    // its reverse--not complement--to derive expected gap frequencies in 
+									    // unrelated sequence)
+      // gap extend // 0.2535
+      iPar.aEmitUnrelated[7] = 1 - (iPar.aEmitUnrelated[0] + iPar.aEmitUnrelated[1] + iPar.aEmitUnrelated[2] +
+			    iPar.aEmitUnrelated[3] + iPar.aEmitUnrelated[4] + iPar.aEmitUnrelated[5] + iPar.aEmitUnrelated[6]);
+  }
+  else
+  {
+      iPar.aEmitUnrelated[0] = emitUnrelated[0];	// a:a, t:t
+      iPar.aEmitUnrelated[1] = emitUnrelated[1];	// c:c, g:g
+      iPar.aEmitUnrelated[2] = emitUnrelated[2];	// a:c, c:a
+      iPar.aEmitUnrelated[3] = emitUnrelated[3];
+      iPar.aEmitUnrelated[4] = emitUnrelated[4];
+      iPar.aEmitUnrelated[5] = emitUnrelated[5];
+      iPar.aEmitUnrelated[6] = emitUnrelated[6];	// gap open (derived by aligning a 48%GC sequence with 
+									    // its reverse--not complement--to derive expected gap frequencies in 
+									    // unrelated sequence)
+      // gap extend // 0.2535
+      iPar.aEmitUnrelated[7] = emitUnrelated[7];
+  }
   //
   // Next, build an input emission sequence by sampling the emitted symbols according to true path
   //
