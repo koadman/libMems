@@ -252,10 +252,6 @@ uint64 SortedMerList::Seed() const{
 	return header.seed;
 }
 
-//uint32 SortedMerList::MerSize() const{
-//	return header.mer_size;
-//}
-
 boolean SortedMerList::IsCircular() const{
 	return header.circular;
 }
