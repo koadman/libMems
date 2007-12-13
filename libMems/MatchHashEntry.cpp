@@ -105,7 +105,6 @@ m_mersize( 0 )
 
 MatchHashEntry::MatchHashEntry(uint32 seq_count, const gnSeqI mersize, MemType m_type) : 
  Match( seq_count ),
- m_offsets( SeqCount(), 0 ),
  m_mersize( mersize )
 {
 	m_extended = m_type == extended;
@@ -121,7 +120,6 @@ MatchHashEntry& MatchHashEntry::operator=(const MatchHashEntry& mhe)
 	Match::operator=( mhe );
 	m_extended = mhe.m_extended;
 	m_mersize = 0;
-	m_offsets = mhe.m_offsets;
 	m_offset = mhe.m_offset;
 
 	return *this;
@@ -137,9 +135,6 @@ boolean MatchHashEntry::operator==(const MatchHashEntry& mhe) const
 		return false;
 	if( m_offset != mhe.m_offset )
 		return false;
-	for( uint seqI = 0; seqI < SeqCount(); seqI++ )
-		if( m_offsets[seqI] != mhe.m_offsets[seqI] )
-			return false;
 	return Match::operator ==(mhe);
 }
 
@@ -148,19 +143,18 @@ void MatchHashEntry::CalculateOffset()
 	if( SeqCount() == 0 )
 		return;
 
+	int64 tmp_off = 0;
 	m_offset = 0;
-	for( uint offsetI = 0; offsetI < SeqCount(); offsetI++ )
-		m_offsets[ offsetI ] = 0;
 
 	uint seqI = FirstStart();
 	int64 ref_start = Start(seqI);
 
 	for(seqI++; seqI < SeqCount(); seqI++){
 		if(Start(seqI) != NO_MATCH){
-			m_offsets[ seqI ] = Start(seqI) - ref_start;
+			tmp_off = Start(seqI) - ref_start;
 			if( Start(seqI) < 0 )
-				m_offsets[ seqI ] -= (int64)Length( seqI );
-			m_offset += m_offsets[ seqI ];
+				tmp_off -= (int64)Length( seqI );
+			m_offset += tmp_off;
 		}
 	}
 }

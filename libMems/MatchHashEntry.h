@@ -74,11 +74,7 @@ public:
 	int64 Offset() const{return m_offset;};
 
 	/** Sets the generalized offset of this match to "offset" */
-	void SetOffset(int64 offset){m_offset = offset;};
-
-	/** Returns the specified sequence's offset in this match */
-	int64 Offset( uint seqI ) const{ return m_offsets[ seqI ]; };
-		
+	void SetOffset(int64 offset){m_offset = offset;};		
 
 	static boolean offset_lessthan(const MatchHashEntry& a, const MatchHashEntry& b);
 	static boolean start_lessthan_ptr(const MatchHashEntry* a, const MatchHashEntry* b);
@@ -107,7 +103,6 @@ private:
 	boolean m_extended;
 	gnSeqI m_mersize;
 	int64 m_offset;
-	std::vector<int64> m_offsets;
 };
 
 inline
