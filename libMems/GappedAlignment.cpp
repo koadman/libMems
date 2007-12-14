@@ -27,10 +27,7 @@ AbstractGappedAlignment< SparseAbstractMatch<> >()
 GappedAlignment::GappedAlignment( uint seq_count, gnSeqI align_length ) : 
 AbstractGappedAlignment< SparseAbstractMatch<> >( seq_count, align_length )
 {
-	for( uint seqI = 0; seqI < seq_count; seqI++ ){
-		string empty_str;
-		align_matrix.push_back( empty_str );
-	}
+	align_matrix.resize(seq_count);
 }
 
 void GappedAlignment::SetAlignment( const vector< string >& seq_align ){
