@@ -20,7 +20,7 @@
 #include "homology.h"
 
 
-void run(std::string& sequence, std::string& prediction,  const std::vector<double>& emitHomologous, const std::vector<double>& emitUnrelated, double goHomologous, double goUnrelated) 
+void run(std::string& sequence, std::string& prediction,  std::vector<double>* emitHomologous, std::vector<double>* emitUnrelated, double goHomologous, double goUnrelated) 
 {
 
   // The parameters of the model
@@ -37,7 +37,7 @@ void run(std::string& sequence, std::string& prediction,  const std::vector<doub
   iPar.iStartHomologous = 0.5;	// probability of starting in the homologous state.  
 
 
-  if (emitHomologous.size() == 0)
+  if (emitHomologous == NULL)
   {
       // these values derived from the HOXD matrix of Chiaramonte et al 2002
       iPar.aEmitHomologous[0] = 0.4522941233821017820048370573372;		//a:a, t:t
@@ -54,18 +54,18 @@ void run(std::string& sequence, std::string& prediction,  const std::vector<doub
   else
   {
       // these values derived from the HOXD matrix of Chiaramonte et al 2002
-      iPar.aEmitHomologous[0] = emitHomologous[0];		//a:a, t:t
-      iPar.aEmitHomologous[1] = emitHomologous[1];		//c:c, g:g
-      iPar.aEmitHomologous[2] = emitHomologous[2];	//a:c, c:a, g:t, t:g
-      iPar.aEmitHomologous[3] = emitHomologous[3];	//a:g, g:a, c:t, t:c
-      iPar.aEmitHomologous[4] = emitHomologous[4];	//a:t, t:a
-      iPar.aEmitHomologous[5] = emitHomologous[5];	//g:c, c:g
-      iPar.aEmitHomologous[6] = emitHomologous[6];	// gap open (from an e. coli y pestis alignment)
+      iPar.aEmitHomologous[0] = emitHomologous->at(0);		//a:a, t:t
+      iPar.aEmitHomologous[1] = emitHomologous->at(1);		//c:c, g:g
+      iPar.aEmitHomologous[2] = emitHomologous->at(2);	//a:c, c:a, g:t, t:g
+      iPar.aEmitHomologous[3] = emitHomologous->at(3);	//a:g, g:a, c:t, t:c
+      iPar.aEmitHomologous[4] = emitHomologous->at(4);	//a:t, t:a
+      iPar.aEmitHomologous[5] = emitHomologous->at(5);	//g:c, c:g
+      iPar.aEmitHomologous[6] = emitHomologous->at(6);	// gap open (from an e. coli y pestis alignment)
       // gap extend // 0.050733
-      iPar.aEmitHomologous[7] = emitHomologous[7];
+      iPar.aEmitHomologous[7] = emitHomologous->at(7);
 
   }
-  if (emitUnrelated.size() == 0)
+  if (emitUnrelated == NULL)
   {
       iPar.aEmitUnrelated[0] = 0.12818742714404662781015820149872;	// a:a, t:t
       iPar.aEmitUnrelated[1] = 0.10493347210657785179017485428807;	// c:c, g:g
@@ -82,17 +82,17 @@ void run(std::string& sequence, std::string& prediction,  const std::vector<doub
   }
   else
   {
-      iPar.aEmitUnrelated[0] = emitUnrelated[0];	// a:a, t:t
-      iPar.aEmitUnrelated[1] = emitUnrelated[1];	// c:c, g:g
-      iPar.aEmitUnrelated[2] = emitUnrelated[2];	// a:c, c:a
-      iPar.aEmitUnrelated[3] = emitUnrelated[3];
-      iPar.aEmitUnrelated[4] = emitUnrelated[4];
-      iPar.aEmitUnrelated[5] = emitUnrelated[5];
-      iPar.aEmitUnrelated[6] = emitUnrelated[6];	// gap open (derived by aligning a 48%GC sequence with 
+      iPar.aEmitUnrelated[0] = emitUnrelated->at(0);	// a:a, t:t
+      iPar.aEmitUnrelated[1] = emitUnrelated->at(1);	// c:c, g:g
+      iPar.aEmitUnrelated[2] = emitUnrelated->at(2);	// a:c, c:a
+      iPar.aEmitUnrelated[3] = emitUnrelated->at(3);
+      iPar.aEmitUnrelated[4] = emitUnrelated->at(4);
+      iPar.aEmitUnrelated[5] = emitUnrelated->at(5);
+      iPar.aEmitUnrelated[6] = emitUnrelated->at(6);	// gap open (derived by aligning a 48%GC sequence with 
 									    // its reverse--not complement--to derive expected gap frequencies in 
 									    // unrelated sequence)
       // gap extend // 0.2535
-      iPar.aEmitUnrelated[7] = emitUnrelated[7];
+      iPar.aEmitUnrelated[7] = emitUnrelated->at(7);
   }
   //
   // Next, build an input emission sequence by sampling the emitted symbols according to true path
