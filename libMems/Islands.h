@@ -378,7 +378,7 @@ static char colmap[5][5] = {
 
 
 inline
-void findHssHomologyHMM( std::vector< std::string >& aln_table, hss_list_t& hss_list, uint seqI, uint seqJ, double pGoHomo, double pGoUnrelated, const std::vector<double>& pEmitHomo, const std::vector<double>& pEmitUnrelated,
+void findHssHomologyHMM( std::vector< std::string >& aln_table, hss_list_t& hss_list, uint seqI, uint seqJ, double pGoHomo, double pGoUnrelated, std::vector<double>* pEmitHomo, std::vector<double>* pEmitUnrelated,
 						boolean left_homologous, boolean right_homologous )
 {
 	static char* charmap = getCharmap();
@@ -615,7 +615,7 @@ void findHssRandomWalk( const MatchVector& iv_list, std::vector< genome::gnSeque
 }
 
 template< typename MatchVector >
-void findHssHomologyHMM( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring,  hss_array_t& hss_array, double pGoHomo, double pGoUnrelated, const std::vector<double>& pEmitHomo, const std::vector<double>& pEmitUnrelated, boolean left_homologous, boolean right_homologous )
+void findHssHomologyHMM( const MatchVector& iv_list, std::vector< genome::gnSequence* >& seq_table, const PairwiseScoringScheme& scoring,  hss_array_t& hss_array, double pGoHomo, double pGoUnrelated, std::vector<double>* pEmitHomo, std::vector<double>* pEmitUnrelated, boolean left_homologous, boolean right_homologous )
 {
 	typedef typename MatchVector::value_type MatchType;
 	if( iv_list.size() == 0 )

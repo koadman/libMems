@@ -64,13 +64,13 @@ void checkForAllGapColumns( IntervalList& iv_list );
  * @param	right_homologous	Set to true if the detection code should assume that sequence beyond the right-most alignment
  *							column is homologous sequence
  */
-void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD, const float pGoHomo = 0.004, const float pGoUnrelated = 0.004, const std::vector<double>& pEmitHomo = std::vector <double> (), const std::vector<double>& pEmitUnrelated = std::vector <double> (), boolean left_homologous = false, boolean right_homologous = false );
+void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD, const float pGoHomo = 0.004, const float pGoUnrelated = 0.004, std::vector<double>* pEmitHomo = NULL, std::vector<double>* pEmitUnrelated = NULL, boolean left_homologous = false, boolean right_homologous = false );
 
 /**
  * Applies pairwise transitive homology statistics to detect backbone in a genome alignment
  * Unaligns any regions found to be non-homologous, returns coordinates of the homologous segments in bb_list
  */
-void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, double pGoHomo, double pGoUnrelated, const std::vector<double>& pEmitHomo = std::vector <double> (), const std::vector<double>& pEmitUnrelated = std::vector <double> (),score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
+void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, double pGoHomo, double pGoUnrelated, std::vector<double>* pEmitHomo = NULL, std::vector<double>* pEmitUnrelated = NULL,score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
 
 /**
  * Writes a backbone column file.  This file type gets used by the Mauve GUI.
