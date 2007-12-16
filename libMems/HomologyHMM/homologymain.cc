@@ -20,7 +20,7 @@
 #include "homology.h"
 
 
-void run(std::string& sequence, std::string& prediction,  std::vector<double>* emitHomologous, std::vector<double>* emitUnrelated, double goHomologous, double goUnrelated) 
+void run(std::string& sequence, std::string& prediction,  double goHomologous, double goUnrelated, std::vector<double>* emitHomologous, std::vector<double>* emitUnrelated) 
 {
 
   // The parameters of the model

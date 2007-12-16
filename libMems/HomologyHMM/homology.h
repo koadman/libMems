@@ -40,7 +40,7 @@ using std::string;
 
 using std::map;
 
-void run(std::string& sequence, std::string& prediction, std::vector<double>* emitHomologous, std::vector<double>* emitUnrelated,double goHomologous = 0.004, double goUnrelated = 0.004);
+void run(std::string& sequence, std::string& prediction, double goHomologous = 0.004, double goUnrelated = 0.004, std::vector<double>* emitHomologous = NULL, std::vector<double>* emitUnrelated = NULL);
 
 // Here go the state memory clique typedefs:
 typedef States<bfloat,2> Statesblock2;
