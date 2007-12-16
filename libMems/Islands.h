@@ -415,7 +415,7 @@ void findHssHomologyHMM( std::vector< std::string >& aln_table, hss_list_t& hss_
 	if( right_homologous && !left_homologous )
 		std::reverse(column_states.begin(), column_states.end());
 
-	run(column_states, prediction, pEmitHomo, pEmitUnrelated,pGoHomo, pGoUnrelated);
+	run(column_states, prediction, pGoHomo, pGoUnrelated, pEmitHomo, pEmitUnrelated);
 
 	if( right_homologous && !left_homologous )
 		std::reverse(prediction.begin(), prediction.end());

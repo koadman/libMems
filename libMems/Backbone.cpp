@@ -298,7 +298,7 @@ void translateToPairwiseGenomeHSS( const hss_array_t& hss_array, pairwise_genome
 }
 
 
-void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlignment<>* >& iv_ptrs, vector< CompactGappedAlignment<>* >& iv_orig_ptrs,  const PairwiseScoringScheme& subst_scoring, std::vector<double>* pEmitHomo, std::vector<double>* pEmitUnrelated, score_t score_threshold, pairwise_genome_hss_t& hss_cols, double pGoHomo, double pGoUnrelated )
+void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlignment<>* >& iv_ptrs, vector< CompactGappedAlignment<>* >& iv_orig_ptrs,  const PairwiseScoringScheme& subst_scoring, score_t score_threshold, pairwise_genome_hss_t& hss_cols,  double pGoHomo, double pGoUnrelated,std::vector<double>* pEmitHomo, std::vector<double>* pEmitUnrelated )
 {
 	uint seq_count = iv_list.seq_table.size();
 	// make pairwise projections of intervals and find LCBs...
@@ -943,7 +943,7 @@ void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, co
 	}
 	vector< CompactGappedAlignment<>* > iv_orig_ptrs(iv_ptrs);
 
-	makeAllPairwiseGenomeHSS( iv_list, iv_ptrs, iv_orig_ptrs, subst_scoring, pEmitHomo, pEmitUnrelated, score_threshold, hss_cols, pGoHomo, pGoUnrelated);
+	makeAllPairwiseGenomeHSS( iv_list, iv_ptrs, iv_orig_ptrs, subst_scoring,score_threshold, hss_cols,  pGoHomo, pGoUnrelated,pEmitHomo, pEmitUnrelated );
 
 	backbone_list_t ula_list;
 
