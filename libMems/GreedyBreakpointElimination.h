@@ -17,6 +17,8 @@
 
 namespace mems {
 
+extern bool penalize_repeats;
+
 /**
  * A wrapper that maps a match among extant sequences to a match among ancestral and extant seqs
  */
@@ -437,8 +439,11 @@ double GetPairwiseAnchorScore( MatchVector& lcb,
 				// scale by the uniqueness product, which approximates the number of ways to match up non-unique k-mers
 				// in the worst case of a very repetitive match, the score becomes the negative of the match score
 				if( scores[colI] > 0 )
-					scores[colI] = (score_t)((double)scores[colI] * (2.0 / uniprod)) - scores[colI];
-//					scores[colI] /= (score_t)(uni1 * uni2);
+				{
+					if(penalize_repeats)
+						scores[colI] = (score_t)((double)scores[colI] * (2.0 / uniprod)) - scores[colI];
+					else
+						scores[colI] /= (score_t)(uni1 * uni2);
 			}
 			if(et[0][colI] != '-')
 				merI++;

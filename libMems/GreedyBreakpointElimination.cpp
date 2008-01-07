@@ -35,6 +35,8 @@ using namespace genome;
 namespace mems {
 // working in mems
 
+bool penalize_repeats = false;
+
 void printProgress( uint prev_prog, uint cur_prog, ostream& os )
 {
 	if( prev_prog != cur_prog )
