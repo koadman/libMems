@@ -444,6 +444,7 @@ double GetPairwiseAnchorScore( MatchVector& lcb,
 						scores[colI] = (score_t)((double)scores[colI] * (2.0 / uniprod)) - scores[colI];
 					else
 						scores[colI] /= (score_t)(uni1 * uni2);
+				}
 			}
 			if(et[0][colI] != '-')
 				merI++;
