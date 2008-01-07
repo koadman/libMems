@@ -17,6 +17,8 @@
 #include "libGenome/gnSequence.h"
 #include "libMems/SparseAbstractMatch.h"
 #include "libMems/AbstractGappedAlignment.h"
+#include "libMems/Memory.h"
+#include <iostream>
 
 namespace mems {
 
@@ -61,6 +63,8 @@ public:
 	 * and the right side is returned as a new GappedAlignment
 	 */
 	virtual AbstractMatch* Split( gnSeqI before_column );
+
+	virtual bool IsGap( uint seq, gnSeqI col ) const;
 protected:
 	std::vector< std::string > align_matrix;
 
@@ -103,6 +107,7 @@ void GappedAlignment::CropStartCoords(gnSeqI crop_amount){
 		if( Length(i) == 0 )
 			SetLeftEnd(i, NO_MATCH);
 	}
+	SetAlignmentLength( AlignmentLength() - crop_amount );
 }
 
 inline
@@ -111,7 +116,6 @@ void GappedAlignment::CropStart(gnSeqI crop_amount){
 	for( uint i=0; i < SeqCount(); i++ )
 		align_matrix[ i ] = align_matrix[ i ].substr( crop_amount );
 
-	SetAlignmentLength( AlignmentLength() - crop_amount );
 }
 
 inline
@@ -136,8 +140,16 @@ void GappedAlignment::CropEndCoords(gnSeqI crop_amount){
 inline
 void GappedAlignment::CropEnd(gnSeqI crop_amount){
 	CropEndCoords(crop_amount);
+	// this code doesn't free up memory in Windows release builds
+//	for( uint i=0; i < SeqCount(); i++ )
+//	{
+//		align_matrix[ i ].resize( AlignmentLength() );
+//		align_matrix[ i ].reserve( AlignmentLength() );
+//	}
+	std::vector< std::string > new_matrix(SeqCount());
 	for( uint i=0; i < SeqCount(); i++ )
-		align_matrix[ i ].resize( AlignmentLength() );
+		new_matrix[ i ] = align_matrix[ i ].substr( 0, AlignmentLength() );
+	swap( new_matrix, align_matrix );
 }
 
 inline
@@ -198,11 +210,13 @@ AbstractMatch* GappedAlignment::Split( gnSeqI before_column )
 	swap(ga->align_matrix, align_matrix);
 	ga->CropStartCoords(before_column);
 	swap(ga->align_matrix, align_matrix);
+
 	ga->align_matrix.resize(SeqCount());
 	for( size_t seqI = 0; seqI < SeqCount(); seqI++ )
 		ga->align_matrix[seqI] = align_matrix[seqI].substr( before_column );
 	ga->SetAlignmentLength( AlignmentLength()-before_column );
 	CropEnd(AlignmentLength()-before_column);
+
 	return ga;
 }
 
@@ -236,6 +250,12 @@ void GappedAlignment::GetColumn( gnSeqI col, std::vector<gnSeqI>& pos, std::vect
 				pos[seqI] = RightEnd(seqI) - count + 1;
 		}
 	}
+}
+
+inline
+bool GappedAlignment::IsGap( uint seq, gnSeqI col ) const
+{
+	return align_matrix[seq][col] == '-';
 }
 
 }

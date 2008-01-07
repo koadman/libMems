@@ -119,6 +119,19 @@ public:
 			column.push_back(m_column[seq[seqI]]);
 		}
 	}
+	bool IsGap( uint seqI, gnSeqI col ) const { return m->IsGap( seq[seqI],col ); }
+	uint UsedSeq( uint seqI ) const 
+	{
+		uint c = 0;
+		for( uint i = 0; i < seq.size(); i++ )
+		{
+			if(m->Start(seq[i]) != 0)
+				c++;
+			if(c>seqI)
+				return i;
+		}
+		return (std::numeric_limits<uint>::max)();
+	};
 
 	mems::AbstractMatch* m;
 	std::vector< size_t > seq;

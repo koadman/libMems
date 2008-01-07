@@ -161,6 +161,8 @@ public:
 
 	void GetColumn( gnSeqI col, std::vector<gnSeqI>& pos, std::vector<bool>& column ) const;
 	
+	bool IsGap( uint seq, gnSeqI col ) const;
+
 	/** self test code */
 	void ValidateMatches() const;
 protected:
@@ -920,6 +922,15 @@ void GenericInterval<GappedBaseImpl>::GetAlignedSequences( gnAlignedSequences& g
 		gnas.positions.push_back(this->Start(seqI));
 	}
 	mems::GetAlignment( *this, seq_table, gnas.sequences );
+}
+
+template<class GappedBaseImpl>
+bool GenericInterval<GappedBaseImpl>::IsGap( uint seq, gnSeqI col ) const
+{
+	vector<gnSeqI> pos;
+	vector<bool> column;
+	GetColumn(col, pos, column);
+	return column[seq];
 }
 
 

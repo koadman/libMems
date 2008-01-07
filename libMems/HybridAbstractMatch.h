@@ -73,6 +73,11 @@ public:
 
 	virtual boolean operator==( const HybridAbstractMatch& ham ) const;
 
+	virtual uint UsedSeq( uint seqI ) const { 
+		if(seqI < FIXED_SEQ_COUNT) return fixed_seq_ids[seqI];
+		return seq_ids[seqI];
+	}
+
 protected:
 	uint m_seq_count;
 

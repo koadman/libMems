@@ -75,6 +75,10 @@ public:
 	 */
 	template<typename AMImpl> friend std::ostream& operator<<(std::ostream& os, const UngappedLocalAlignment<AMImpl>& ula); //write to source.
 
+	bool IsGap( uint seqI, gnSeqI col ) const {
+		return (this->LeftEnd(seqI) != NO_MATCH && col < m_length);
+	}
+
 protected:
 
 	gnSeqI m_length;

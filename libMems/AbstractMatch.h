@@ -182,9 +182,7 @@ public:
 	 */
 	virtual void CropRight(gnSeqI crop_amount, uint seqI) = 0;
 	
-//	virtual void Split( gnSeqI split_column ) = 0;
-
-//	virtual void Split( gnSeqI split_column ) = 0;
+//	virtual AbstractMatch* Split( gnSeqI before_column ) = 0;
 
 	/**
 	 * Gets a copy of the alignment as an array of dynamic_bitsets
@@ -199,6 +197,12 @@ public:
 	 *  for that sequence.
 	 */
 	virtual void GetColumn( gnSeqI col, std::vector<gnSeqI>& pos, std::vector<bool>& column ) const = 0;
+
+//	gnSeqI SeqPosToColumn( uint seq, int64 pos) const = 0;
+	/** returns true if the given row,column of the alignment has a gap character */
+	virtual bool IsGap( uint seq, gnSeqI col ) const = 0;
+	/** Returns the id of the i-th defined sequence in this match */ 
+	virtual uint UsedSeq( uint seqI ) const = 0;
 };
 
 inline

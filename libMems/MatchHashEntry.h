@@ -95,9 +95,6 @@ public:
 	 */
 	boolean Contains(const MatchHashEntry& mhe) const;
 
-protected:
-	void HomogenizeParity(std::vector<int64>& start1, std::vector<int64>& start2, const uint32 startI) const;
-
 private:
 
 	boolean m_extended;

@@ -489,11 +489,13 @@ void CompactGappedAlignment<BaseType>::CropStart(gnSeqI crop_amount){
 		if( this->LeftEnd(i) == NO_MATCH )
 		{
 			align_matrix[i].resize(this->AlignmentLength()-crop_amount);
+			align_matrix[i] = align_matrix[i];	// force reallocation on "optimized" windows builds
 			continue;
 		}
 
 		align_matrix[i] >>= crop_amount;	// why not shift left?  is this a bug in boost::dynamic_bitset?
 		align_matrix[i].resize(this->AlignmentLength()-crop_amount);
+		align_matrix[i] = align_matrix[i];	// force reallocation on "optimized" windows builds
 		size_t char_count = this->Orientation(i) == AbstractMatch::forward ? pos[i] - this->LeftEnd(i) + 1 : this->RightEnd(i) - pos[i] + 1;
 
 		if( pos[i] > 0 && char_count > 0 )
@@ -534,6 +536,7 @@ void CompactGappedAlignment<BaseType>::CropEnd(gnSeqI crop_amount){
 
 	for( uint i=0; i < this->SeqCount(); i++ ){
 		align_matrix[i].resize( this->AlignmentLength() - crop_amount );
+		align_matrix[i] = align_matrix[i];	// force reallocation on "optimized" windows builds
 		if( this->LeftEnd(i) == NO_MATCH )
 			continue;
 		AbstractMatch::orientation orient = this->Orientation(i);
@@ -783,7 +786,10 @@ void CompactGappedAlignment<BaseType>::CondenseGapColumns()
 	}
 	this->SetAlignmentLength(d);
 	for( size_t seqI = 0; seqI < align_matrix.size(); ++seqI )
+	{
 		align_matrix[seqI].resize(d);
+		align_matrix[seqI] = align_matrix[seqI];	// force reallocation on "optimized" windows builds
+	}
 	this->create_bitcount();
 }
 

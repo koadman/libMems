@@ -58,6 +58,7 @@ public:
 
 	virtual boolean operator==( const SparseAbstractMatch& sam ) const;
 
+	virtual uint UsedSeq( uint seqI ) const;
 protected:
 
 	std::vector<uint, uintAlloc > seq_ids;
@@ -219,6 +220,19 @@ boolean SparseAbstractMatch< gnSeqIAlloc, uintAlloc >::operator==( const SparseA
 	return true;
 }
 
+template< class gnSeqIAlloc, class uintAlloc >
+uint SparseAbstractMatch< gnSeqIAlloc, uintAlloc >::UsedSeq( uint seqI ) const
+{
+	uint count = 0;
+	for( uint i = 0; i < leftend.size(); i++ )
+	{
+		if(leftend[i] != 0)
+			count++;
+		if( count > seqI )
+			return i;
+	}
+	return (std::numeric_limits<uint>::max)();
+}
 
 }
 

@@ -95,6 +95,16 @@ public:
 			m->Invert();
 	}
 
+	bool IsGap( uint seqI, gnSeqI col ) const { return m->IsGap( seq[seqI],col ); }
+	uint UsedSeq( uint seqI ) const 
+	{
+		if(m->Start(seq[0]) != NO_MATCH)
+			return 0;
+		if(m->Start(seq[1]) != NO_MATCH)
+			return 1;
+		return (std::numeric_limits<uint>::max)();
+	};
+
 	AbstractMatch* m;
 	TrackingMatch* tm;
 	uint seq[2];
