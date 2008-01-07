@@ -428,12 +428,15 @@ double GetPairwiseAnchorScore( MatchVector& lcb,
 		size_t merJ = 0;
 		double uni_count = 0;
 		double uni_score = 0;
-		for( size_t colI = 0; colI < m->AlignmentLength(); ++colI )
+		const size_t m_aln_length = m->AlignmentLength();
+		const int64 m_leftend_0 = m->LeftEnd(0);
+		const int64 m_leftend_1 = m->LeftEnd(1);
+		for( size_t colI = 0; colI < m_aln_length; ++colI )
 		{
 			if(et[0][colI] != '-' && et[1][colI] != '-' )
 			{
-				mems::SeedOccurrenceList::frequency_type uni1 = sol_1.getFrequency(m->LeftEnd(0) + merI - 1);
-				mems::SeedOccurrenceList::frequency_type uni2 = sol_2.getFrequency(m->LeftEnd(1) + merJ - 1);
+				mems::SeedOccurrenceList::frequency_type uni1 = sol_1.getFrequency(m_leftend_0 + merI - 1);
+				mems::SeedOccurrenceList::frequency_type uni2 = sol_2.getFrequency(m_leftend_1 + merJ - 1);
 				mems::SeedOccurrenceList::frequency_type uniprod = uni1*uni2;
 				uniprod = uniprod == 0 ? 1 : uniprod;
 				// scale by the uniqueness product, which approximates the number of ways to match up non-unique k-mers

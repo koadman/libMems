@@ -64,55 +64,6 @@ size_t max_gap_length = 3000;
 size_t lcb_hangover = 300;
 
 
-#ifdef WIN32
-#include <windows.h>
-#include <PSAPI.h>
-void printMemUsage()
-{
-	DWORD proclist[500];
-	DWORD cbNeeded;
-	BOOL rval;
-	rval = EnumProcesses( proclist, sizeof(proclist), &cbNeeded );
-	int p_count = cbNeeded / sizeof(DWORD);
-	HANDLE phand;
-	HMODULE hMod;
-	char szFileName[MAX_PATH];
-	for( int p = 0; p < p_count; p++ )
-	{
-		phand = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 0, proclist[p] );
-		DWORD dwSize2;
-		if (EnumProcessModules(phand, &hMod, sizeof(hMod), &dwSize2)) 
-		{
-
-			// Get the module name
-			if ( !GetModuleBaseName(phand, hMod, szFileName, sizeof(szFileName)) )
-				szFileName[0] = 0;
-			if( strncmp( szFileName, "progressiveMauve", 16 ) == 0 )
-				break;	// found the right module
-		}
-		CloseHandle(phand);
-	}
-
-	PROCESS_MEMORY_COUNTERS mem_info;
-
-	if( GetProcessMemoryInfo( phand, &mem_info, sizeof(mem_info) ) )
-	{
-		if( debug_aligner )
-		{
-		cout << "Working set size: " << mem_info.WorkingSetSize / (1024 * 1024) << " Mb\n";
-//		cout << "Paged pool usage: " << mem_info.QuotaPagedPoolUsage << endl;
-//		cout << "Non-Paged pool usage: " << mem_info.QuotaNonPagedPoolUsage << endl;
-		cout << "Pagefile usage: " << mem_info.PagefileUsage / (1024 * 1024) << " Mb\n";
-		cout.flush();
-		}
-	}
-}
-#else
-void printMemUsage()
-{};
-#endif
-
-
 void mergeUnalignedIntervals( uint seqI, vector< Interval* >& iv_list, vector< Interval* >& new_list );
 
 /**
@@ -763,9 +714,10 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		gnSeqI prev_charI = 0;
 		gnSeqI prev_charJ = 0;
 		bool in_gap = false;
-		for( uint colI = 0; colI <= iv.AlignmentLength(); colI++ )
+		const size_t iv_aln_length = iv.AlignmentLength();
+		for( uint colI = 0; colI <= iv_aln_length; colI++ )
 		{
-			if( colI == iv.AlignmentLength() || 
+			if( colI == iv_aln_length || 
 				(aln_matrix[seqI].test(colI) && aln_matrix[seqJ].test(colI)) )
 			{
 				if( in_gap && 
@@ -1061,7 +1013,6 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 		removeLargeGapsPP( gal, gal_list, gap_iv, seqs1, seqs2 );
 //	}else{
 //		gal_list.push_back( gal.Copy() );
-//		gal_list.push_back( new GappedAlignment( gal ) );
 //		gap_iv.push_back(false);
 //	}
 	list< GappedAlignment* >::iterator gal_iter = gal_list.begin();
