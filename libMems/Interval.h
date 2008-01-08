@@ -927,8 +927,8 @@ void GenericInterval<GappedBaseImpl>::GetAlignedSequences( gnAlignedSequences& g
 template<class GappedBaseImpl>
 bool GenericInterval<GappedBaseImpl>::IsGap( uint seq, gnSeqI col ) const
 {
-	vector<gnSeqI> pos;
-	vector<bool> column;
+	std::vector<gnSeqI> pos;
+	std::vector<bool> column;
 	GetColumn(col, pos, column);
 	return column[seq];
 }

@@ -51,6 +51,7 @@ void printMemUsage()
 	}
 }
 #else
+inline
 void printMemUsage()
 {};
 #endif
