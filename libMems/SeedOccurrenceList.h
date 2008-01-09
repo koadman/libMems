@@ -3,6 +3,9 @@
 
 #include <vector>
 #include "libMems/SortedMerList.h"
+#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/filesystem.hpp>
+#include <fstream>
 
 namespace mems
 {
@@ -19,7 +22,7 @@ public:
 	{
 		std::vector<mems::bmer> mer_vec;
 		sml.Read( mer_vec, sml.SMLLength(), 0 );
-		count.resize( sml.Length() );
+		frequency_type* count = new frequency_type[sml.Length()];
 		size_t seed_start = 0;
 		size_t cur_seed_count = 1;
 		uint64 mer_mask = sml.GetSeedMask();
@@ -41,29 +44,53 @@ public:
 		for( size_t i = seed_start; i < seedI && i < mer_vec.size(); ++i )
 			count[mer_vec[i].position] = (frequency_type)cur_seed_count;
 		// hack: fudge the last few values on the end of the sequence
-		for( ; seedI < count.size(); ++seedI )
+		for( ; seedI < sml.Length(); ++seedI )
 			count[seedI]=1;
 
-		smoothFrequencies( sml );
+		smoothFrequencies( sml, count );
 
 		// wipe out any stray zeros
-		for( size_t i = 0; i < count.size(); ++i )
+		for( size_t i = 0; i < sml.Length(); ++i )
 			if( count[i]== 0 )
 				count[i] = 1;
+
+		mer_vec.clear();
+		// create a temporary memory-mapped file to store mer counts
+		tmpfile = CreateTempFileName("sol");
+		// resize the file to be big
+		std::ofstream tfout;
+		tfout.open(tmpfile.c_str(), ios::binary | ios::trunc );
+		tfout.write(((const char*)count), sml.Length()*sizeof(frequency_type));
+		tfout.close();
+		delete[] count;
+
+		data.open( tmpfile );	// map the file
 	}
 
 
 	frequency_type getFrequency( gnSeqI position )
 	{
-		return count[position];
+		return ((frequency_type*)data.data())[position];
 	}
+	~SeedOccurrenceList()
+	{
+		if(data.is_open())
+		{
+			data.close();
+			boost::filesystem::remove(tmpfile);
+			tmpfile.clear();
+		}
+	}
+
+	SeedOccurrenceList( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";};
+	SeedOccurrenceList& SeedOccurrenceList::operator=( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";}
 
 protected:
 	/**
 	 * converts position freqs to the average freq of all k-mers containing that position
 	 */
 	template< typename SMLType >
-	void smoothFrequencies( const SMLType& sml )
+	void smoothFrequencies( const SMLType& sml, frequency_type* count )
 	{
 		size_t seed_length = sml.SeedLength();
 		// hack: for beginning (seed_length) positions assume that previous
@@ -71,7 +98,7 @@ protected:
 		double sum = seed_length - 1 + count[0];
 		std::vector<frequency_type> buf(seed_length, 1);
 		buf[0] = count[0];
-		for( size_t i = 1; i < count.size(); i++ )
+		for( size_t i = 1; i < sml.Length(); i++ )
 		{
 			count[i-1] = sum / seed_length;
 			sum += count[i];
@@ -80,9 +107,10 @@ protected:
 			buf[bufI] = count[i];
 		}
 	}
+	
+	boost::iostreams::mapped_file_source data;
+	std::string tmpfile;
 
-
-	std::vector<frequency_type> count;	
 };
 
 }
