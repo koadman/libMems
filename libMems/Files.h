@@ -22,6 +22,7 @@
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/exception.hpp"
+#include "boost/algorithm/string.hpp"
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -57,7 +58,7 @@ std::string CreateTempFileName(const std::string& prefix)
     {
                 strncpy(buf, dir.c_str(), MAX_PATH);
         if ( !::GetTempPath(MAX_PATH, buf) )
-            cerr << "GetTempPath\n";
+			std::cerr << "GetTempPath\n";
 
                 dir = buf;
         if ( dir.size()==0 )
@@ -73,7 +74,7 @@ std::string CreateTempFileName(const std::string& prefix)
         strncpy(buf, path.string().c_str(), MAX_PATH);
         if ( !::GetTempFileName(dir.c_str(), name.c_str(), 0, buf) )
     {
-        cerr << "GetTempFileName\n";
+        std::cerr << "GetTempFileName\n";
                 path = boost::filesystem::path();
     }
         ret_path = buf;
