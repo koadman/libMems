@@ -446,7 +446,7 @@ double GetPairwiseAnchorScore( MatchVector& lcb,
 					if(penalize_repeats)
 						scores[colI] = (score_t)((double)scores[colI] * (2.0 / uniprod)) - scores[colI];
 					else
-						scores[colI] /= (score_t)(uni1 * uni2);
+						scores[colI] = (score_t)((mems::SeedOccurrenceList::frequency_type)scores[colI] / uniprod);
 				}
 			}
 			if(et[0][colI] != '-')
