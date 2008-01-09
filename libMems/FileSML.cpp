@@ -93,6 +93,9 @@ void FileSML::LoadFile(const string& fname){
 		Throw_gnExMsg( FileUnreadable(), "Premature end of file.");
 	}
 	filename = fname;
+
+	// create a memory-map to the data of interest
+	sardata.open(fname);
 	
 	// check whether there is a .coords mask file to read
 	string coordfile = filename + ".coords";
@@ -367,13 +370,15 @@ void FileSML::Create(const gnSequence& seq, const uint64 seed){
 	if(!sarfile.is_open())
 		Throw_gnExMsg( FileNotOpened(), "FileSML::Create: Error opening sorted mer list file.\n");
 
+	sardata.open(filename);
 }
 
 bmer FileSML::operator[](gnSeqI index)
 {
-	vector<bmer> the_mers;
-	Read(the_mers, 1, index);
-	return the_mers[0];
+	bmer tmp_mer;
+	tmp_mer.position = base()[index];
+	tmp_mer.mer = GetSeedMer(tmp_mer.position);
+	return tmp_mer;
 }
 
 
@@ -391,49 +396,20 @@ boolean FileSML::Read(vector<bmer>& readVector, gnSeqI size, const gnSeqI offset
 	}
 	gnSeqI readlen = offset + size < total_len ? size : total_len - offset;
 	
-//	wxMutexLocker wxml(*file_mutex);
-	
-	uint64 seekpos = sarray_start_offset;
-	//now seekpos contains the index of the first byte of the sorted mer list
-	//seek to where we want to read
-	seekpos += offset * sizeof(smlSeqI_t);
-	sarfile.seekg(seekpos);
-	
-	//allocate memory to read
-	Array<smlSeqI_t> pos_array( readlen );
-
-	//read
-	sarfile.read((char*)pos_array.data, sizeof(smlSeqI_t) * readlen);
-	gnSeqI success_count = sarfile.gcount() / sizeof(smlSeqI_t);
-	readVector.reserve( success_count );
+	readVector.resize( readlen );
 
 	//copy data to the vector
-	for(gnSeqI j=0; j < success_count; j++){
+	for(gnSeqI j=0; j < readlen; j++){
 		bmer tmp_mer;
-		tmp_mer.position = pos_array.data[j];
+		tmp_mer.position = base()[offset+j];
 		if( tmp_mer.position > header.length ){
 			string errmsg = "Corrupted SML, position ";
 			errmsg += tmp_mer.position + " is out of range\n";
 			ErrorMsg( errmsg );
 			cerr << errmsg;
 		}else
-			tmp_mer.mer = GetSeedMer(pos_array.data[j]);
-		if( j < readVector.size() )
-			readVector[ j ] = tmp_mer;
-		else
-			readVector.push_back(tmp_mer);
-	}
-	if( success_count < readVector.size() ){
-		vector<bmer>::iterator erase_iter = readVector.begin();
-		erase_iter += success_count;
-		readVector.erase( erase_iter, readVector.end() );
-	}
-	if( success_count < readlen){
-		// couldn't read the entire request for some reason -- usually EOF.
-		if(!sarfile.eof())
-			ErrorMsg("Error reading from file.\n");
-		sarfile.clear();
-		return false;
+			tmp_mer.mer = GetSeedMer(tmp_mer.position);
+		readVector[ j ] = tmp_mer;
 	}
 	return true;
 }

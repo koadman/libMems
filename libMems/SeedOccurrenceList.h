@@ -20,41 +20,45 @@ public:
 	template< typename SMLType >
 	void construct( SMLType& sml )
 	{
-		std::vector<mems::bmer> mer_vec;
-		sml.Read( mer_vec, sml.SMLLength(), 0 );
-		frequency_type* count = new frequency_type[sml.Length()];
+//		std::vector<mems::bmer> mer_vec;
+//		sml.Read( mer_vec, sml.SMLLength(), 0 );
+		const size_t total_len = sml.Length();
+		frequency_type* count = new frequency_type[total_len];
 		size_t seed_start = 0;
 		size_t cur_seed_count = 1;
 		uint64 mer_mask = sml.GetSeedMask();
 		size_t seedI = 1;
-		for( ; seedI < mer_vec.size(); ++seedI )
+		bmer prevmer;
+		bmer merI = sml[0];
+		for( seedI = 1; seedI < total_len; seedI++ )
 		{
-			if( (mer_vec[seedI].mer & mer_mask) == (mer_vec[seedI-1].mer & mer_mask) )
+			prevmer = merI;
+			merI = sml[seedI];
+			if( (merI.mer & mer_mask) == (prevmer.mer & mer_mask) )
 			{
 				++cur_seed_count;
 				continue;
 			}
 			// set seed frequencies
 			for( size_t i = seed_start; i < seedI; ++i )
-				count[mer_vec[i].position] = (frequency_type)cur_seed_count;
+				count[sml[i].position] = (frequency_type)cur_seed_count;
 			seed_start = seedI;
 			cur_seed_count = 1;
 		}
 		// set seed frequencies for the last few
-		for( size_t i = seed_start; i < seedI && i < mer_vec.size(); ++i )
-			count[mer_vec[i].position] = (frequency_type)cur_seed_count;
+		for( size_t i = seed_start; i < seedI && i < total_len; ++i )
+			count[sml[i].position] = (frequency_type)cur_seed_count;
 		// hack: fudge the last few values on the end of the sequence
-		for( ; seedI < sml.Length(); ++seedI )
+		for( ; seedI < total_len; ++seedI )
 			count[seedI]=1;
 
 		smoothFrequencies( sml, count );
 
 		// wipe out any stray zeros
-		for( size_t i = 0; i < sml.Length(); ++i )
+		for( size_t i = 0; i < total_len; ++i )
 			if( count[i]== 0 )
 				count[i] = 1;
 
-		mer_vec.clear();
 		// create a temporary memory-mapped file to store mer counts
 		tmpfile = CreateTempFileName("sol");
 		// resize the file to be big

@@ -19,6 +19,7 @@
 
 #include "libGenome/gnSequence.h"
 #include "libMems/SortedMerList.h"
+#include <boost/iostreams/device/mapped_file.hpp>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -105,7 +106,9 @@ protected:
 	std::string filename;
 	std::fstream sarfile;
 	uint64 sarray_start_offset;
-//	wxMutex* file_mutex;
+
+	boost::iostreams::mapped_file_source sardata;
+	smlSeqI_t* base(){ return (smlSeqI_t*)(sardata.data()+sarray_start_offset); }
 	
 	static char** tmp_paths;	/**< paths to scratch disk space that can be used for an external sort */
 	std::vector< int64 > seq_coords;	/**< If Ns are masked, contains coordinates of regions without Ns */
