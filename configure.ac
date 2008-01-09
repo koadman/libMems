@@ -79,20 +79,21 @@ esac],[debug=false])
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
 
 dnl Get location of Boost
-AX_PATH_BOOST(1.33)
+AX_BOOST_BASE(1.33.1)
 AC_CXX_NAMESPACES
 AX_BOOST_FILESYSTEM
 AX_BOOST_PROGRAM_OPTIONS
+AX_BOOST_IOSTREAMS
 
 dnl Get location of libGenome/libClustalW Headers
 PKG_CHECK_MODULES(DEPS, libGenome-1.3 >= 1.0.0  libClustalW-1.0 >= 1.8.4  libMUSCLE-3.6 >= 1.0.0)
 AC_SUBST(DEPS_CFLAGS)
 
 dnl Check for OpenMP
-AX_OPENMP()
+#AX_OPENMP()
 AC_SUBST(OPENMP_CFLAGS)
 dnl OpenMP checker only defines for C when compiling both C and C++
-OPENMP_CXXFLAGS=$OPENMP_CFLAGS
+#OPENMP_CXXFLAGS=$OPENMP_CFLAGS
 AC_SUBST(OPENMP_CXXFLAGS)
 
 dnl ensure portability for OS X with these checks
