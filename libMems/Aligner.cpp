@@ -13,24 +13,15 @@
 #include "libMems/ClustalInterface.h"
 #include "libGenome/gnRAWSource.h"
 #include "libMems/DistanceMatrix.h"
+#include "libMems/Files.h"
 
 #include <map>
 #include <fstream>	// for debugging
 #include <sstream>
 #include <stack>
 #include <algorithm>
-#include <iomanip>
 #include <limits>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/exception.hpp"
 #include "boost/algorithm/string.hpp"
-
-// for CreateTempFilename
-#ifdef WIN32
-#include "windows.h"
-#else
-#include "unistd.h"
-#endif
 
 using namespace std;
 using namespace genome;
@@ -722,131 +713,6 @@ void scanRight( int& right_recurseI, vector< LCB >& adjacencies, int min_weight,
 		right_recurseI = adjacencies[ right_recurseI ].right_adjacency[ seqI ];
 }
 
-/* shamelessly ripped from wxWidgets and boostified*/
-string CreateTempFileName(const string& prefix)
-{
-    string dir, name, ret_path;
-#ifdef WIN32
-	char buf[MAX_PATH + 1];
-#else
-	char buf[PATH_MAX + 1];
-#endif
-	boost::filesystem::path path( prefix );
-	dir = path.branch_path().string();
-	name = path.leaf();
-	if( name == "/" )
-	{
-		dir += name;
-		name.clear();
-	}
-#if defined(WIN32)
-
-    if ( dir.size() == 0 )
-    {
-		strncpy(buf, dir.c_str(), MAX_PATH);
-        if ( !::GetTempPath(MAX_PATH, buf) )
-            cerr << "GetTempPath\n";
-
-		dir = buf;
-        if ( dir.size()==0 )
-            dir = ".";  // GetTempFileName() fails if we pass it an empty string
-    }
-    else // we have a dir to create the file in
-    {
-        // ensure we use only the back slashes as GetTempFileName(), unlike all
-        // the other APIs, is picky and doesn't accept the forward ones
-		boost::algorithm::replace_all( dir, "/", "\\" );
-    }
-
-	strncpy(buf, path.string().c_str(), MAX_PATH);
-	if ( !::GetTempFileName(dir.c_str(), name.c_str(), 0, buf) )
-    {
-        cerr << "GetTempFileName\n";
-		path = boost::filesystem::path();
-    }
-	ret_path = buf;
-
-#else // !Windows
-    if ( dir.empty() )
-    {
-	char* env_val = getenv("TMP");
-        dir = env_val != NULL ? env_val : "";
-
-        if ( dir.size() == 0 ){
-	    env_val = getenv("TEMP");
-            dir = env_val != NULL ? env_val : "";
-	}
-
-        if ( dir.size()==0 )
-        {
-            // default
-            #ifdef __DOS__
-                dir = ".";
-            #else
-                dir = "/tmp";
-            #endif
-        }
-    }
-
-    path = dir;
-    path /= name;
-
-    // we need to copy the path to the buffer in which mkstemp() can modify it
-	string path_str = path.string();
-	path_str += "XXXXXX";  // scratch space for mkstemp()
-	strncpy( buf, path_str.c_str(), path_str.size()+1 );
-
-#if defined(HAVE_MKSTEMP)
-    // cast is safe because the string length doesn't change
-    int fdTemp = mkstemp( buf );
-    if ( fdTemp == -1 )
-    {
-        // this might be not necessary as mkstemp() on most systems should have
-        // already done it but it doesn't hurt neither...
-//        path.clear();
-    }
-    else // mkstemp() succeeded
-    {
-		ret_path = buf;
-        close(fdTemp);
-    }
-#else // !HAVE_MKSTEMP
-
-#ifdef HAVE_MKTEMP
-    // same as above
-    if ( mktemp( buf ) )
-		ret_path = buf;
-
-#else // !HAVE_MKTEMP (includes __DOS__)
-    // generate the unique file name ourselves
-    unsigned my_pid = 0;
-    #ifndef __DOS__
-    my_pid = getpid();
-    #endif
-
-	ostringstream oss;
-
-    static const size_t numTries = 1000;
-    for ( size_t n = 0; n < numTries; n++ )
-    {
-		oss << path.string() << my_pid << "." << setfill('0') << setw(3) << n;
-        // 3 hex digits is enough for numTries == 1000 < 4096
-		boost::filesystem::path pathTry( oss.str() );
-        if ( !boost::filesystem::exists(pathTry) )
-            break;
-
-        oss.clear();
-    }
-
-    ret_path = oss.str();
-#endif // HAVE_MKTEMP/!HAVE_MKTEMP
-
-#endif // HAVE_MKSTEMP/!HAVE_MKSTEMP
-
-#endif // Windows/!Windows
-
-	return ret_path;
-}
 
 
 /** iv_regions -- lists of intervening regions between LCBs in each sequence

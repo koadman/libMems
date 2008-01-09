@@ -269,14 +269,6 @@ void filterMatches( std::vector< LCB >& adjacencies, std::vector< MatchList >& l
 
 static const uint MIN_ANCHOR_LENGTH = 9;
 
-/**
- * Create a temporary file
- * TODO: move this to a more appropriate location
- * shamelessly ripped from wxWidgets and boostified
- */
-std::string CreateTempFileName(const std::string& prefix);
-
-
 
 /** used for search cache lookups */
 class SearchCacheComparator

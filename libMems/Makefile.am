@@ -3,7 +3,7 @@ if DEBUG
 D_CXXFLAGS = -Wall -g -D__GNDEBUG__
 endif
 AM_CFLAGS = @DEPS_CFLAGS@ -DUSE_POSIX_AIO @OPENMP_CFLAGS@
-AM_CXXFLAGS = @DEPS_CFLAGS@ $(D_CXXFLAGS)  @OPENMP_CXXFLAGS@ 
+AM_CXXFLAGS = @DEPS_CFLAGS@ @BOOST_CPPFLAGS@ $(D_CXXFLAGS)  @OPENMP_CXXFLAGS@ 
 
 LIBMEMS_H = \
 RepeatHash.h      MatchHashEntry.h \
@@ -19,7 +19,7 @@ AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
 twister.h SubstitutionMatrix.h RepeatMatchList.h \
 Backbone.h ProgressiveAligner.h PairwiseMatchAdapter.h PairwiseMatchFinder.h \
 SeedOccurrenceList.h TreeUtilities.h SuperInterval.h GreedyBreakpointElimination.h \
-LCB.h DistanceMatrix.h Scoring.h configuration.h
+LCB.h DistanceMatrix.h Scoring.h configuration.h Memory.h Files.h gnRAWSequence.h
 
 HOMOLOGYHMM_H = HomologyHMM/homology.h HomologyHMM/dptables.h HomologyHMM/algebras.h
 
