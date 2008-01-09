@@ -20,6 +20,8 @@
 #include "libMems/DNAMemorySML.h"
 #include "libGenome/gnSequence.h"
 #include "libMems/Match.h"
+#include "libMems/gnRAWSequence.h"
+#include "libGenome/gnRAWSource.h"
 #include <sstream>
 #include <map>
 #include <ctime>
@@ -166,7 +168,6 @@ void LoadSequences( MatchListType& mlist, std::ostream* log_stream ){
 	if( mlist.seq_filename.size() == 0 )
 		return;
 
-	gnSeqI total_len = 0;
 	for( uint seqI = 0; seqI < mlist.seq_filename.size(); seqI++ ){
 		genome::gnSequence* file_sequence = new genome::gnSequence();
 		// Load the sequence and tell the user if it loaded successfully
@@ -191,7 +192,6 @@ void LoadSequences( MatchListType& mlist, std::ostream* log_stream ){
 			return;
 		}
 		
-		total_len += file_sequence->length();
 		mlist.seq_table.push_back( file_sequence );
 		if( log_stream != NULL ){
 			(*log_stream) << "Sequence loaded successfully.\n";
@@ -200,6 +200,62 @@ void LoadSequences( MatchListType& mlist, std::ostream* log_stream ){
 	}
 
 }
+
+/**
+ * Loads the sequences designated by the elements of the seq_filename vector and
+ * creates temporary RAW sequence files.  The resulting gnSequences are gnRAWSequences.
+ * The genome::gnRAWSequence objects are created on the heap
+ * and are not deallocated when this class is destroyed.  They should
+ * be manually destroyed when no longer in use.
+ */
+template< typename MatchListType >
+void LoadAndCreateRawSequences( MatchListType& mlist, std::ostream* log_stream ){
+	
+	if( mlist.seq_filename.size() == 0 )
+		return;
+
+	for( uint seqI = 0; seqI < mlist.seq_filename.size(); seqI++ ){
+		gnSequence* file_sequence = new genome::gnSequence();
+		// Load the sequence and tell the user if it loaded successfully
+		try{
+			file_sequence->LoadSource( mlist.seq_filename[ seqI ] );
+		}catch( genome::gnException& gne ){
+			delete file_sequence;
+			if( gne.GetCode() == genome::FileNotOpened() )
+				std::cerr << "Error loading " << mlist.seq_filename[ seqI ] << std::endl;
+			else
+				std::cerr << gne;
+			return;
+		}catch( std::exception& e ){
+			delete file_sequence;
+			std::cerr << "Unhandled exception loading " << mlist.seq_filename[ seqI ] << std::endl;
+			std::cerr << "At: " << __FILE__ << ":" << __LINE__ << std::endl;
+			std::cerr << e.what();
+			return;
+		}catch( ... ){
+			delete file_sequence;
+			std::cerr << "Unknown exception when loading " << mlist.seq_filename[ seqI ] << std::endl;
+			return;
+		}
+
+		// now create a temporary raw sequence
+		string tmpfilename = "rawseq";
+		tmpfilename = CreateTempFileName(tmpfilename);
+		gnRAWSource::Write( *file_sequence, tmpfilename );
+		delete file_sequence;
+
+		gnRAWSequence* raw_seq = new gnRAWSequence( tmpfilename );
+		
+		mlist.seq_table.push_back( raw_seq );
+		if( log_stream != NULL ){
+			(*log_stream) << "Sequence loaded successfully.\n";
+			(*log_stream) << "Raw sequence stored at " << tmpfilename << std::endl;
+			(*log_stream) << mlist.seq_filename[ seqI ] << " " << raw_seq->length() << " base pairs.\n";
+		}
+	}
+
+}
+
 
 template< typename MatchPtrType >
 void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* log_stream, int seed_rank ){
