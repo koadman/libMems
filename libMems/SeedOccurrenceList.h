@@ -6,6 +6,7 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/filesystem.hpp>
 #include <fstream>
+#include "libMems/Files.h"
 
 namespace mems
 {
@@ -63,7 +64,7 @@ public:
 		tmpfile = CreateTempFileName("sol");
 		// resize the file to be big
 		std::ofstream tfout;
-		tfout.open(tmpfile.c_str(), ios::binary | ios::trunc );
+		tfout.open(tmpfile.c_str(), std::ios::binary );
 		tfout.write(((const char*)count), sml.Length()*sizeof(frequency_type));
 		tfout.close();
 		delete[] count;
@@ -87,7 +88,7 @@ public:
 	}
 
 	SeedOccurrenceList( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";};
-	SeedOccurrenceList& SeedOccurrenceList::operator=( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";}
+	SeedOccurrenceList& operator=( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";}
 
 protected:
 	/**
