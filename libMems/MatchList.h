@@ -22,6 +22,7 @@
 #include "libMems/Match.h"
 #include "libMems/gnRAWSequence.h"
 #include "libGenome/gnRAWSource.h"
+#include "libMems/Files.h"
 #include <sstream>
 #include <map>
 #include <ctime>
@@ -215,7 +216,7 @@ void LoadAndCreateRawSequences( MatchListType& mlist, std::ostream* log_stream )
 		return;
 
 	for( uint seqI = 0; seqI < mlist.seq_filename.size(); seqI++ ){
-		gnSequence* file_sequence = new genome::gnSequence();
+		genome::gnSequence* file_sequence = new genome::gnSequence();
 		// Load the sequence and tell the user if it loaded successfully
 		try{
 			file_sequence->LoadSource( mlist.seq_filename[ seqI ] );
@@ -239,17 +240,17 @@ void LoadAndCreateRawSequences( MatchListType& mlist, std::ostream* log_stream )
 		}
 
 		// now create a temporary raw sequence
-		string tmpfilename = "rawseq";
-		tmpfilename = CreateTempFileName(tmpfilename);
-		gnRAWSource::Write( *file_sequence, tmpfilename );
+		std::string tmpfilename = "rawseq";
+		tmpfilename = CreateTempFileName("rawseq");
+		genome::gnRAWSource::Write( *file_sequence, tmpfilename );
 		delete file_sequence;
 
-		gnRAWSequence* raw_seq = new gnRAWSequence( tmpfilename );
-		
+		if( log_stream != NULL )
+			(*log_stream) << "Storing raw sequence at " << tmpfilename << std::endl;	
+		genome::gnRAWSequence* raw_seq = new genome::gnRAWSequence( tmpfilename );
 		mlist.seq_table.push_back( raw_seq );
 		if( log_stream != NULL ){
 			(*log_stream) << "Sequence loaded successfully.\n";
-			(*log_stream) << "Raw sequence stored at " << tmpfilename << std::endl;
 			(*log_stream) << mlist.seq_filename[ seqI ] << " " << raw_seq->length() << " base pairs.\n";
 		}
 	}
