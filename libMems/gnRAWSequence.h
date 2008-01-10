@@ -44,6 +44,7 @@ public:
 	 */
 	gnRAWSequence( const std::string& filename )
 	{
+		this->filename = filename;
 		data.open( filename );
 	}
 
@@ -111,6 +112,7 @@ public:
 	virtual void localToSource(uint32& contigI, gnSeqI& baseI) const{};
 	virtual bool LoadSource(const std::string sourcename){
 		data.open( sourcename );
+		filename = sourcename;
 		return true;
 	}
 
@@ -133,9 +135,14 @@ public:
 	virtual void insert( const gnSeqI offset, const gnRAWSequence& seq);
 	virtual void insert( const gnSeqI offset, const gnGenomeSpec& gnbs);
 	gnRAWSequence const operator+(const gnRAWSequence& seq) const;
-	gnRAWSequence subseq(const gnSeqI offset, const gnSeqI length) const;
 	virtual void erase( const gnSeqI offset=0, const gnSeqI length=GNSEQI_END );
 */
+	gnRAWSequence subseq(const gnSeqI offset, const gnSeqI length) const
+	{
+		gnRAWSequence gnrs;
+		gnrs.data.open(filename, length, offset - 1);
+		return gnrs;
+	}
 //	friend std::istream& operator>>(std::istream& is, gnRAWSequence& gns);	//read from source.
 	/**
 	 * Writes the bases in this sequence to the specified output stream (e.g. cout).
@@ -177,6 +184,7 @@ public:
 	
 private:
 	boost::iostreams::mapped_file_source data;
+	std::string filename;
 }; // class gnRAWSequence
 
 /*
