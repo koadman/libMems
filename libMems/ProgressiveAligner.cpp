@@ -605,7 +605,7 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		starts.push_back( gap_start );
 		gnSequence* new_seq = NULL;
 		if(diff > 0 && gap_start + diff - 1 <= r_list.seq_table[ seqI ]->length())
-			new_seq = new gnSequence( r_list.seq_table[ seqI ]->subseq( gap_start, diff ) );
+			new_seq = new gnSequence( r_list.seq_table[ seqI ]->ToString( diff, gap_start ) );
 		else
 			new_seq = new gnSequence();
 		gap_list.seq_table.push_back( new_seq );
@@ -3740,7 +3740,9 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 	if( !collinear_genomes )
 	{
 		// need sol lists for scoring
-		sol_list.resize(seq_count);
+		vector<SeedOccurrenceList> blah(seq_count);
+		swap( blah, sol_list );
+//		sol_list = ;
 		// temporarily create a weight 11 SML
 /*		MatchList w11_mlist;
 		w11_mlist.seq_filename = original_ml.seq_filename;
