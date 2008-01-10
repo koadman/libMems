@@ -21,7 +21,6 @@
 #include <stack>
 #include <algorithm>
 #include <limits>
-#include "boost/algorithm/string.hpp"
 
 using namespace std;
 using namespace genome;
