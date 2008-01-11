@@ -24,9 +24,11 @@ namespace mems {
 
 {
 	omp_locks.resize(table_size);
+	for( size_t i = 0; i < table_size; i++ )
+		omp_init_lock( &omp_locks[i] );
 }
 
-ParallelMemHash::ParallelMemHash(const ParallelMemHash& mh) : MemHash(mh), allocator( SlotAllocator<MatchHashEntry>::GetSlotAllocator() )
+ParallelMemHash::ParallelMemHash(const ParallelMemHash& mh) : MemHash(mh)
 {
 	*this = mh;
 }
@@ -45,6 +47,8 @@ void ParallelMemHash::SetTableSize(uint32 new_table_size)
 {
 	MemHash::SetTableSize(new_table_size);
 	omp_locks.resize(new_table_size);
+	for( size_t i = 0; i < new_table_size; i++ )
+		omp_init_lock( &omp_locks[i] );
 }
 
 void ParallelMemHash::FindMatches( MatchList& ml ) 
@@ -58,30 +62,29 @@ void ParallelMemHash::FindMatches( MatchList& ml )
 	int max_length_sml = -1;
 	size_t maxlen = 0;
 	for( size_t i = 0; i < ml.sml_table.size(); i++ )
-		if( ml.sml_table[i].Length() > maxlen )
+		if( ml.sml_table[i]->Length() > maxlen )
 		{
-			maxlen = ml.sml_table[i].Length();
+			maxlen = ml.sml_table[i]->Length();
 			max_length_sml = i;
 		}
 
 	chunk_starts.push_back( vector< gnSeqI >( seq_count, 0 ) );
 
-	size_t cur_len = 0;
-	while( cur_len < ml.sml_table[max_length_sml].Length() )
+	while( chunk_starts.back()[max_length_sml] < ml.sml_table[max_length_sml]->Length() )
 	{
 		vector< gnSeqI > tmp( seq_count, 0 );
-		GetBreakpoint(max_length_sml, chunk_starts.back()[max_length_sml] + break_size, tmp);
+		GetBreakpoint(max_length_sml, chunk_starts.back()[max_length_sml] + CHUNK_SIZE, tmp);
 		chunk_starts.push_back(tmp);
 	}
 	
 	// now that it's all chunky, search in parallel
-#pragma omp parallel for shedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
 	for( int i = 0; i < chunk_starts.size()-1; i++ )
 	{
-		vector< gnSeqI > chunk_lens;
+		vector< gnSeqI > chunk_lens(seq_count);
 		for( size_t j = 0; j < seq_count; j++ )
-			chunk_lens[j] = chunk_starts[i+1] - chunk_starts[i];
-		SearchRange( chunk_starts, chunk_lens );
+			chunk_lens[j] = chunk_starts[i+1][j] - chunk_starts[i][j];
+		SearchRange( chunk_starts[i], chunk_lens );
 	}
 		
 }
@@ -135,7 +138,7 @@ MatchHashEntry* ParallelMemHash::AddHashEntry(MatchHashEntry& mhe){
 	uint32 bucketI = ((offset % table_size) + table_size) % table_size;
 
 	// lock the bucket
-	omp_guard(omp_locks[bucketI]);
+	omp_guard rex( omp_locks[bucketI] );
 
 	// do the normal procedure
 	return MemHash::AddHashEntry(mhe);

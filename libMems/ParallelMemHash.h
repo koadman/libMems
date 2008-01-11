@@ -25,10 +25,7 @@ namespace mems {
  * ParallelMemHash implements an algorithm for finding exact matches of a certain minimal
  * length in several sequences.
  */
-class ParallelMemHash : public MemHash{
-
-   
-
+class ParallelMemHash : public MemHash {
 public:
 	ParallelMemHash();
 	ParallelMemHash(const ParallelMemHash& mh);
@@ -55,12 +52,8 @@ protected:
 };
 
 
-
 }
 
 #endif // _OPENMP
-
-
-}
 
 #endif //_ParallelMemHash_h_
