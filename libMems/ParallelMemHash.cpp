@@ -53,6 +53,13 @@ void ParallelMemHash::SetTableSize(uint32 new_table_size)
 
 void ParallelMemHash::FindMatches( MatchList& ml ) 
 {
+	for( uint32 seqI = 0; seqI < ml.seq_table.size(); ++seqI ){
+                if( !AddSequence( ml.sml_table[ seqI ], ml.seq_table[ seqI ] ) ){
+                        ErrorMsg( "Error adding " + ml.seq_filename[seqI] + "\n");
+                        return;
+                }
+        }
+
 	size_t CHUNK_SIZE = 500000;
 	// break up the SMLs into nice small chunks
 	vector< vector< gnSeqI > > chunk_starts;
@@ -70,7 +77,7 @@ void ParallelMemHash::FindMatches( MatchList& ml )
 
 	chunk_starts.push_back( vector< gnSeqI >( seq_count, 0 ) );
 
-	while( chunk_starts.back()[max_length_sml] < ml.sml_table[max_length_sml]->Length() )
+	while( chunk_starts.back()[max_length_sml] + CHUNK_SIZE < ml.sml_table[max_length_sml]->Length() )
 	{
 		vector< gnSeqI > tmp( seq_count, 0 );
 		GetBreakpoint(max_length_sml, chunk_starts.back()[max_length_sml] + CHUNK_SIZE, tmp);
@@ -79,14 +86,18 @@ void ParallelMemHash::FindMatches( MatchList& ml )
 	
 	// now that it's all chunky, search in parallel
 #pragma omp parallel for schedule(dynamic)
-	for( int i = 0; i < chunk_starts.size()-1; i++ )
+	for( int i = 0; i < chunk_starts.size(); i++ )
 	{
 		vector< gnSeqI > chunk_lens(seq_count);
-		for( size_t j = 0; j < seq_count; j++ )
-			chunk_lens[j] = chunk_starts[i+1][j] - chunk_starts[i][j];
+		if( i + 1 < chunk_starts.size() )
+		{
+			for( size_t j = 0; j < seq_count; j++ )
+				chunk_lens[j] = chunk_starts[i+1][j] - chunk_starts[i][j];
+		}else
+			chunk_lens = vector< gnSeqI >( seq_count, GNSEQI_END );
 		SearchRange( chunk_starts[i], chunk_lens );
 	}
-		
+	GetMatchList( ml );	
 }
 
 
