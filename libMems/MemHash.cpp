@@ -202,11 +202,15 @@ void MemHash::SetDirection(MatchHashEntry& mhe){
 				mhe.SetStart(seqI, -mhe[seqI]);
 }
 
+MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe ){
+	return AddHashEntry( mem_table );
+}
+
 // Tries to add a new mem to the mem hash table
 // If the mem already exists in the table, a pointer to it
 // is returned.  Otherwise mhe is added and a pointer to
 // it is returned.
-MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe){
+MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe, std::vector< std::vector<MatchHashEntry*> >& mem_table ){
 	//first compute which hash table bucket this is going into
 	int64 offset = mhe.Offset();
 

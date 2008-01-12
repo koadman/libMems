@@ -15,6 +15,7 @@
 
 #ifdef _OPENMP
 
+#include "threadstorage.h"
 #include <omp.h>
 #include "libMems/MemHash.h"
 
@@ -39,16 +40,11 @@ public:
 	virtual void FindMatches( MatchList& match_list );
 
 
-	/**
-	 * Sets the size of the hash table to new_table_size.
-	 * @param new_table_size The new hash table size
-	 */
-	virtual void SetTableSize(uint32 new_table_size);	
-
 protected:
 	virtual MatchHashEntry* AddHashEntry(MatchHashEntry& mhe);
+	virtual void MergeTable();
 
-	std::vector< omp_lock_t > omp_locks;
+	TLS< std::vector< std::vector<MatchHashEntry*> > > thread_mem_table;
 };
 
 

@@ -23,9 +23,6 @@ namespace mems {
 	ParallelMemHash::ParallelMemHash() : MemHash()
 
 {
-	omp_locks.resize(table_size);
-	for( size_t i = 0; i < table_size; i++ )
-		omp_init_lock( &omp_locks[i] );
 }
 
 ParallelMemHash::ParallelMemHash(const ParallelMemHash& mh) : MemHash(mh)
@@ -34,21 +31,12 @@ ParallelMemHash::ParallelMemHash(const ParallelMemHash& mh) : MemHash(mh)
 }
 
 ParallelMemHash& ParallelMemHash::operator=( const ParallelMemHash& mh ){
-	omp_locks = mh.omp_locks;
+	thread_mem_table = mh.thread_mem_table;
 	return *this;
 }
 
 ParallelMemHash* ParallelMemHash::Clone() const{
 	return new ParallelMemHash(*this);
-}
-
-
-void ParallelMemHash::SetTableSize(uint32 new_table_size)
-{
-	MemHash::SetTableSize(new_table_size);
-	omp_locks.resize(new_table_size);
-	for( size_t i = 0; i < new_table_size; i++ )
-		omp_init_lock( &omp_locks[i] );
 }
 
 void ParallelMemHash::FindMatches( MatchList& ml ) 
@@ -88,6 +76,9 @@ void ParallelMemHash::FindMatches( MatchList& ml )
 #pragma omp parallel for schedule(dynamic)
 	for( int i = 0; i < chunk_starts.size(); i++ )
 	{
+		if(thread_mem_table.get().size() != mem_table.size())
+			thread_mem_table.get().resize( mem_table.size() );
+
 		vector< gnSeqI > chunk_lens(seq_count);
 		if( i + 1 < chunk_starts.size() )
 		{
@@ -96,10 +87,24 @@ void ParallelMemHash::FindMatches( MatchList& ml )
 		}else
 			chunk_lens = vector< gnSeqI >( seq_count, GNSEQI_END );
 		SearchRange( chunk_starts[i], chunk_lens );
+		MergeTable();
 	}
 	GetMatchList( ml );	
 }
 
+void ParallelMemHash::MergeTable()
+{
+#pragma omp critical
+	{
+		size_t buckets = thread_mem_table.get().size();
+		for( size_t bI = 0; bI < buckets; bI++ )
+		{
+			vector< MatchHashEntry* >& bucket = thread_mem_table.get()[bI];
+			for( size_t mI = 0; mI < bucket.size(); mI++ )
+				AddHashEntry(bucket[mI], mem_table);
+		}
+	}
+}
 
 /** This is a class for guard objects using OpenMP
 *  It is adapted from the book
@@ -138,21 +143,9 @@ private:
 };
 
 
-// Tries to add a new mem to the mem hash table
-// If the mem already exists in the table, a pointer to it
-// is returned.  Otherwise mhe is added and a pointer to
-// it is returned.
 MatchHashEntry* ParallelMemHash::AddHashEntry(MatchHashEntry& mhe){
-	//first compute which hash table bucket this is going into
-	int64 offset = mhe.Offset();
-
-	uint32 bucketI = ((offset % table_size) + table_size) % table_size;
-
-	// lock the bucket
-	omp_guard rex( omp_locks[bucketI] );
-
-	// do the normal procedure
-	return MemHash::AddHashEntry(mhe);
+	// do the normal procedure, but use the thread-local mem table.
+	return MemHash::AddHashEntry(mhe, thread_mem_table.get());
 }
 
 
