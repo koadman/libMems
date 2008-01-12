@@ -103,6 +103,7 @@ void ParallelMemHash::MergeTable()
 			for( size_t mI = 0; mI < bucket.size(); mI++ )
 				AddHashEntry(bucket[mI], mem_table);
 		}
+		thread_mem_table.get() = mem_table;
 	}
 }
 
