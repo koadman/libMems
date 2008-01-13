@@ -296,6 +296,8 @@ boolean MatchFinder::SearchRange(vector<gnSeqI>& start_points, vector<gnSeqI>& s
 			
 			// update the mers processed
 			mers_processed += mer_vector[cur_id].size();
+#pragma omp critical
+{
 			float64 m_oldprogress = m_progress;
 			m_progress = ((float64)mers_processed / (float64)total_mers) * PROGRESS_GRANULARITY;
 			if( log_stream != NULL ){
@@ -306,6 +308,7 @@ boolean MatchFinder::SearchRange(vector<gnSeqI>& start_points, vector<gnSeqI>& s
 				if(((int)m_oldprogress / 10) != ((int)m_progress / 10))
 					(*log_stream) << std::endl;
 			}
+}
 			uint32 read_size = MER_BUFFER_SIZE;
 			if(MER_BUFFER_SIZE + mer_baseindex[cur_id] > search_len[cur_id])
 				read_size = search_len[cur_id] - mer_baseindex[cur_id];
