@@ -17,6 +17,7 @@
 #include <list>
 #include <stdexcept>
 #include <iostream>
+#include "libMUSCLE/threadstorage.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -24,6 +25,7 @@
 
 namespace mems {
 
+#ifdef _OPENMP
 /** This is a class for guard objects using OpenMP
 *  It is adapted from the book
 *  "Pattern-Oriented Software Architecture". */
@@ -60,7 +62,7 @@ private:
     omp_guard (const omp_guard &);
     void operator= (const omp_guard &);
 };
-
+#endif
 
 /** When more space is needed to store a datatype, the memory pool will grow by this factor */
 const double POOL_GROWTH_RATE = 1.6;
@@ -85,34 +87,30 @@ public:
 		Purge();
 	};
 	void Purge(){
-#pragma omp critical
-{
+//#pragma omp critical
+//{
+	std::vector<T*>& data = this->data.get();
+	unsigned& tail_free = this->tail_free.get();
+	unsigned& n_elems = this->n_elems.get();
+	std::vector< T* >& free_list = this->free_list.get();
 		for( unsigned dataI = 0; dataI < data.size(); dataI++ )
 			free(data[dataI]);
 		data.clear();
 		free_list.clear();
 		tail_free = 0;
 		n_elems = 0;
-}
+//}
 	}
 
 protected:
-	std::vector<T*> data;
-	unsigned tail_free;
-	unsigned n_elems;	/**< number of T in the most recently allocated block */
+	TLS< std::vector<T*> > data;
+	TLS< unsigned > tail_free;
+	TLS< unsigned > n_elems;	/**< number of T in the most recently allocated block */
 
-	std::vector< T* > free_list;
-
-#ifdef _OPENMP
-	omp_lock_t locker;
-#endif
+	TLS< std::vector< T* > > free_list;
 
 private:
-	SlotAllocator() : tail_free(0), n_elems(0) { 
-#ifdef _OPENMP
-		omp_init_lock( &locker );
-#endif
-	};
+	SlotAllocator() : tail_free(0), n_elems(0) {};
 	SlotAllocator& operator=( SlotAllocator& sa ){ n_elems = sa.n_elems; data = sa.data; tail_free = sa.tail_free; return *this;};
 	SlotAllocator( SlotAllocator& sa ){ *this = sa; };
 		
@@ -132,7 +130,11 @@ T* SlotAllocator< T >::Allocate(){
 	T* t_ptr = NULL;
 
 {
-	omp_guard rex( locker );
+	std::vector<T*>& data = this->data.get();
+	unsigned& tail_free = this->tail_free.get();
+	unsigned& n_elems = this->n_elems.get();
+	std::vector< T* >& free_list = this->free_list.get();
+//	omp_guard rex( locker );
 	if( free_list.begin() != free_list.end() ){
 		t_ptr = free_list.back();
 		free_list.pop_back();
@@ -179,7 +181,8 @@ void SlotAllocator< T >::Free( T* t ){
 */	
 	t->~T();
 {
-	omp_guard rex( locker );
+//	omp_guard rex( locker );
+	std::vector< T* >& free_list = this->free_list.get();
 
 	free_list.push_back( t );
 }
@@ -196,7 +199,8 @@ void SlotAllocator< T >::Free( std::vector<T*>& chunk ){
 	for( size_t i = 0; i < chunk.size(); i++ )
 		chunk[i]->~T();
 {
-	omp_guard rex( locker );
+//	omp_guard rex( locker );
+	std::vector< T* >& free_list = this->free_list.get();
 	free_list.insert(free_list.end(), chunk.begin(), chunk.end());
 }
 	chunk.clear();
