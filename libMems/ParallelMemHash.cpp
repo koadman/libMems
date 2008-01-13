@@ -101,7 +101,10 @@ void ParallelMemHash::MergeTable()
 		{
 			vector< MatchHashEntry* >& bucket = thread_mem_table.get()[bI];
 			for( size_t mI = 0; mI < bucket.size(); mI++ )
-				AddHashEntry(bucket[mI], mem_table);
+			{
+				MemHash::AddHashEntry((*(bucket[mI])), mem_table);
+				bucket[mI]->Free();
+			}
 		}
 		thread_mem_table.get() = mem_table;
 	}

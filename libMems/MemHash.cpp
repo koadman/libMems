@@ -203,7 +203,7 @@ void MemHash::SetDirection(MatchHashEntry& mhe){
 }
 
 MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe ){
-	return AddHashEntry( mem_table );
+	return AddHashEntry( mhe, mem_table );
 }
 
 // Tries to add a new mem to the mem hash table

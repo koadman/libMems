@@ -15,7 +15,7 @@
 
 #ifdef _OPENMP
 
-#include "threadstorage.h"
+#include "libMUSCLE/threadstorage.h"
 #include <omp.h>
 #include "libMems/MemHash.h"
 
