@@ -48,20 +48,29 @@ void ParallelMemHash::FindMatches( MatchList& ml )
                 }
         }
 
-	size_t CHUNK_SIZE = 500000;
+	size_t CHUNK_SIZE = 5000;
 	// break up the SMLs into nice small chunks
 	vector< vector< gnSeqI > > chunk_starts;
 	vector< gnSeqI > chunk_lengths;
+
+	// set the progress counter data
+	mers_processed = 0;
+	total_mers = 0;
+	m_progress = -1;
+	for( size_t i = 0; i < ml.sml_table.size(); i++ )
+		total_mers += ml.sml_table[i]->Length();
 
 	// break up on the longest SML
 	int max_length_sml = -1;
 	size_t maxlen = 0;
 	for( size_t i = 0; i < ml.sml_table.size(); i++ )
+	{
 		if( ml.sml_table[i]->Length() > maxlen )
 		{
 			maxlen = ml.sml_table[i]->Length();
 			max_length_sml = i;
 		}
+	}
 
 	chunk_starts.push_back( vector< gnSeqI >( seq_count, 0 ) );
 
@@ -71,6 +80,7 @@ void ParallelMemHash::FindMatches( MatchList& ml )
 		GetBreakpoint(max_length_sml, chunk_starts.back()[max_length_sml] + CHUNK_SIZE, tmp);
 		chunk_starts.push_back(tmp);
 	}
+
 	
 	// now that it's all chunky, search in parallel
 #pragma omp parallel for schedule(dynamic)
@@ -103,7 +113,7 @@ void ParallelMemHash::MergeTable()
 			for( size_t mI = 0; mI < bucket.size(); mI++ )
 			{
 				MemHash::AddHashEntry((*(bucket[mI])), mem_table);
-				bucket[mI]->Free();
+//				bucket[mI]->Free();
 			}
 		}
 		thread_mem_table.get() = mem_table;

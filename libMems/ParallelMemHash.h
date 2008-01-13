@@ -50,6 +50,26 @@ protected:
 
 }
 
+#else // _OPENMP
+
+namespace mems {
+
+
+/**
+ * When built without OpenMP, the ParallelMemHash is just a stub wrapper around MemHash
+ */
+class ParallelMemHash : public MemHash {
+public:
+	ParallelMemHash() : MemHash();
+	ParallelMemHash(const ParallelMemHash& mh) : MemHash(mh);
+	ParallelMemHash& operator=( const ParallelMemHash& mh ) : MemHash::operator=(mh){ return *this; }
+	virtual ParallelMemHash* Clone() const{ return new ParallelMemHash(*this); }
+};
+
+
+}
+
+
 #endif // _OPENMP
 
 #endif //_ParallelMemHash_h_

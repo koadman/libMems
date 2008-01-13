@@ -232,7 +232,8 @@ MatchHashEntry* MemHash::AddHashEntry(MatchHashEntry& mhe, std::vector< std::vec
 	MatchHashEntry* new_mhe = allocator.Allocate();
 	new_mhe = new(new_mhe) MatchHashEntry(mhe); 
 //	*new_mhe = mhe;
-	allocated.push_back(new_mhe);
+
+//	allocated.push_back(new_mhe);
 	
 	// can't insert until after the extend!!
 	insert_he = std::lower_bound(mem_table[bucketI].begin(), mem_table[bucketI].end(), new_mhe, mhecomp);
