@@ -19,7 +19,8 @@ AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
 twister.h SubstitutionMatrix.h RepeatMatchList.h \
 Backbone.h ProgressiveAligner.h PairwiseMatchAdapter.h PairwiseMatchFinder.h \
 SeedOccurrenceList.h TreeUtilities.h SuperInterval.h GreedyBreakpointElimination.h \
-LCB.h DistanceMatrix.h Scoring.h configuration.h Memory.h Files.h gnRAWSequence.h
+LCB.h DistanceMatrix.h Scoring.h configuration.h Memory.h Files.h gnRAWSequence.h \
+ParallelMemHash.h
 
 HOMOLOGYHMM_H = HomologyHMM/homology.h HomologyHMM/dptables.h HomologyHMM/algebras.h
 
@@ -41,7 +42,7 @@ Islands.cpp          MaskedMemHash.cpp    GappedAlignment.cpp \
 MuscleInterface.cpp  PhyloTree.cpp         \
 RepeatMatchList.cpp  RepeatMatch.cpp \
 Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp \
-SuperInterval.cpp	GreedyBreakpointElimination.cpp
+SuperInterval.cpp	GreedyBreakpointElimination.cpp ParallelMemHash.cpp
 
 HOMOLOGYHMM_SRC = \
 HomologyHMM/algebras.cc HomologyHMM/homology.cc HomologyHMM/homologymain.cc

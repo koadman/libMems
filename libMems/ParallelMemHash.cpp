@@ -48,7 +48,7 @@ void ParallelMemHash::FindMatches( MatchList& ml )
                 }
         }
 
-	size_t CHUNK_SIZE = 5000;
+	size_t CHUNK_SIZE = 200000;
 	// break up the SMLs into nice small chunks
 	vector< vector< gnSeqI > > chunk_starts;
 	vector< gnSeqI > chunk_lengths;
