@@ -28,11 +28,11 @@ struct idmer{
 	sarID_t	id;			//the sequence identifier.
 };
 
-typedef std::list<idmer, boost::fast_pool_allocator<idmer> > IdmerList;
+// typedef std::list<idmer, boost::fast_pool_allocator<idmer> > IdmerList;
 // using boost::fast_pool_allocator<idmer> results in a significant speedup
 // over std::allocator.  testing on a Salmonella vs. Y. pestis comparison shows
 // a 30% speedup
-// typedef std::list<idmer> IdmerList;
+typedef std::list<idmer> IdmerList;
 
 const unsigned int PROGRESS_GRANULARITY = 100;
 
