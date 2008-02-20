@@ -456,8 +456,6 @@ try{
 		}
 		seqs.push_back( seqI );
 // the gnSequence pointers are shared across threads and have a common ifstream
-#pragma omp critical
-{
 		// extract sequence data
 		if( r_end == NULL || r_end->Start( seqI ) > 0 ){
 			starts.push_back( gap_start );
@@ -469,7 +467,6 @@ try{
 			rc_filter->ReverseFilter( cur_seq_data );
 			seq_data.push_back( cur_seq_data );
 		}
-}
 	}
 
 	if( seqs.size() <= 1 )
@@ -589,8 +586,6 @@ try{
 			diff = 1;
 		}
 // the gnSequence pointers are shared across threads and have a common ifstream
-#pragma omp critical
-{
 		if( r_end == NULL || r_end->Start( seqI ) > 0 ){
 			starts.push_back( gap_start );
 			//std::cout << seq_table[ 0 ]->ToString( diff , gap_start ) << std::endl;
@@ -607,7 +602,6 @@ try{
 			seq_data.push_back( cur_seq_data );
 			//std::cout << cur_seq_data << std::endl;
 		}
-}
 	}
 
 	if( seqs.size() <= 1 )

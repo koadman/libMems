@@ -73,6 +73,10 @@ public:
 
 	void MoveEnd(int64 move_amount);
 
+	virtual uint UsedSeq( uint seqI ) const {
+		return seqI;
+	}
+
 protected:
 
 	uint m_seq_count;

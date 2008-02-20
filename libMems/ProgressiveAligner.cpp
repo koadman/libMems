@@ -3276,6 +3276,7 @@ void ProgressiveAligner::CreatePairwiseBPDistance( boost::multi_array<double, 2>
 		IdentifyBreakpoints( ml, breakpoints );
 		ComputeLCBs_v2( ml, breakpoints, LCB_list );
 		vector< double > lcb_scores( LCB_list.size() );
+		cerr << "Pair " << seq_pairs[i].first << ", " << seq_pairs[i].second << " has " << LCB_list.size() << " initial LCBs\n";
 		for( size_t lcbI = 0; lcbI < LCB_list.size(); ++lcbI )
 			lcb_scores[lcbI] = GetPairwiseAnchorScore( LCB_list[lcbI], ml.seq_table, this->subst_scoring, sol_list[seqI], sol_list[seqJ] );
 

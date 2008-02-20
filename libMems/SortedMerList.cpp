@@ -803,12 +803,9 @@ void SortedMerList::Create(const gnSequence& seq, const uint64 seed){
 	// use the nifty Array class as a wrapper for the buffer to ensure correct deallocation
 	gnSeqI buf_len = seq.isCircular() ? seq_len + seed_length : seq_len;
 	Array<gnSeqC> seq_buf( buf_len );
-#pragma omp critical
-{
 	seq.ToArray(seq_buf.data, seq_len);
 	if( seq.isCircular() )
 		seq.ToArray(seq_buf.data + seq_len, seed_length-1);
-}
 
 	// set header information
 	header.length = seq_len;

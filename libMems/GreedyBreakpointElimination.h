@@ -762,7 +762,7 @@ template< class SearchScorer >
 double greedySearch( SearchScorer& spbs )
 {
 	double prev_score = spbs.score();
-	uint report_frequency = 10;
+	uint report_frequency = 1000;
 	uint moves_made = 0;
 	if( debug_aligner )
 		spbs.validate();
@@ -852,8 +852,11 @@ double greedySearch( SearchScorer& spbs )
 		prev_progress = progress;
 		progress = (100 * moves_made) / move_count;
 		printProgress( prev_progress, progress, std::cout );
-//		if( moves_made % report_frequency == 0 )
-//			cout << "move: " << moves_made << " alignment score " << cur_score << " success ratio " << successful / invalids << endl;
+		if( moves_made % report_frequency == 0 )
+		{
+			std::cout << "move: " << moves_made << " alignment score " << best_move.first << " success ratio " << ((double)successful / (double)invalids) << std::endl;
+			std::cout.flush();
+		}
 	}
 
 	return spbs.score();
