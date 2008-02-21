@@ -45,7 +45,6 @@ public:
 };
 
 
-
 double getDefaultBreakpointPenalty( std::vector< genome::gnSequence* >& sequences );
 
 /**
@@ -629,5 +628,9 @@ void applyBreakpoints( std::vector< gnSeqI >& bp_list, std::vector<T>& iv_list, 
 
 
 }
+
+//namespace std {
+//	void swap( PhyloTree<mems::AlignmentTreeNode>& a, PhyloTree<mems::AlignmentTreeNode>& b);
+//}
 
 #endif // _ProgressiveAligner_h_

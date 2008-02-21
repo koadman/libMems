@@ -51,11 +51,31 @@ public:
 	bool operator<( const SuperInterval& si ) const{ return left_end < si.left_end; }
 
 	void ValidateSelf() const;
+
+	void swap( SuperInterval& other )
+	{
+		reference_iv.swap(other.reference_iv);
+		std::swap(c1_siv, other.c1_siv);
+		std::swap(c2_siv, other.c2_siv);
+		std::swap(parent_siv, other.parent_siv);
+		std::swap(left_end, other.left_end);
+		std::swap(length, other.length);
+	}
+
 protected:
 	int64 left_end;
 	int64 length;
 };
 
+
 } // namespace mems
+
+namespace std {
+template<> inline
+void swap( mems::SuperInterval& a, mems::SuperInterval& b )
+{
+	a.swap(b);
+}
+}
 
 #endif //__SuperInterval_h__

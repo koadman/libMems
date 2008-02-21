@@ -65,7 +65,16 @@ public:
 	virtual AbstractMatch* Split( gnSeqI before_column );
 
 	virtual bool IsGap( uint seq, gnSeqI col ) const;
+
+	void swap( GappedAlignment& other ){ swap(&other); }
+
 protected:
+	// for use by derived classes in order to swap contents
+	void swap( GappedAlignment* other ){
+		std::swap( align_matrix, other->align_matrix );
+		AbstractGappedAlignment::swap( other );
+	}
+
 	std::vector< std::string > align_matrix;
 
 	void CropStartCoords(gnSeqI crop_amount);
@@ -149,7 +158,7 @@ void GappedAlignment::CropEnd(gnSeqI crop_amount){
 	std::vector< std::string > new_matrix(SeqCount());
 	for( uint i=0; i < SeqCount(); i++ )
 		new_matrix[ i ] = align_matrix[ i ].substr( 0, AlignmentLength() );
-	swap( new_matrix, align_matrix );
+	std::swap( new_matrix, align_matrix );
 }
 
 inline
@@ -207,9 +216,9 @@ AbstractMatch* GappedAlignment::Split( gnSeqI before_column )
 		ga->SetStart( seqI, Start(seqI) );
 		ga->SetLength( Length(seqI), seqI );
 	}
-	swap(ga->align_matrix, align_matrix);
+	std::swap(ga->align_matrix, align_matrix);
 	ga->CropStartCoords(before_column);
-	swap(ga->align_matrix, align_matrix);
+	std::swap(ga->align_matrix, align_matrix);
 
 	ga->align_matrix.resize(SeqCount());
 	for( size_t seqI = 0; seqI < SeqCount(); seqI++ )
@@ -259,6 +268,16 @@ bool GappedAlignment::IsGap( uint seq, gnSeqI col ) const
 }
 
 }
+
+
+namespace std {
+template<> inline
+void swap( mems::GappedAlignment& a, mems::GappedAlignment& b )
+{
+	a.swap(b);
+}
+}
+
 
 #endif // __GappedAlignment_h__
 

@@ -92,8 +92,30 @@ protected:
 	std::vector<int64, int64Alloc > starts;
 
 	uint SeqToIndex( uint seqI ) const;
+
+	// for use by derived classes in order to swap contents
+	void swap( HybridAbstractMatch* other );
 };
 
+
+template< unsigned FIXED_SEQ_COUNT, class gnSeqIAlloc, class uintAlloc >
+void HybridAbstractMatch< FIXED_SEQ_COUNT, gnSeqIAlloc, uintAlloc >::swap( HybridAbstractMatch* other )
+{
+	std::swap( m_seq_count, other->m_seq_count );
+
+	uint tmp_ids[FIXED_SEQ_COUNT];
+	for( int i = 0; i < FIXED_SEQ_COUNT; i++ ) tmp_ids[i] = other->fixed_seq_ids[i];
+	for( int i = 0; i < FIXED_SEQ_COUNT; i++ ) other->fixed_seq_ids[i] = fixed_seq_ids[i];
+	for( int i = 0; i < FIXED_SEQ_COUNT; i++ ) fixed_seq_ids[i] = tmp_ids[i];
+
+	int64 tmp_starts[FIXED_SEQ_COUNT];
+	for( int i = 0; i < FIXED_SEQ_COUNT; i++ ) tmp_starts[i] = other->fixed_starts[i];
+	for( int i = 0; i < FIXED_SEQ_COUNT; i++ ) other->fixed_starts[i] = fixed_starts[i];
+	for( int i = 0; i < FIXED_SEQ_COUNT; i++ ) fixed_starts[i] = tmp_starts[i];
+
+	std::swap( seq_ids, other->seq_ids );
+	std::swap( starts, other->starts );
+}
 
 template< unsigned FIXED_SEQ_COUNT, class gnSeqIAlloc, class uintAlloc >
 uint HybridAbstractMatch< FIXED_SEQ_COUNT, gnSeqIAlloc, uintAlloc >::FirstStart() const

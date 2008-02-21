@@ -24,8 +24,8 @@ public:
 };
 
 template< class T >
-class PhyloTree : 
-	public std::vector< T > {
+class PhyloTree 
+{
 public:
 	PhyloTree();
 	PhyloTree( const PhyloTree<T>& pt );
@@ -33,6 +33,7 @@ public:
 	~PhyloTree();
 	double weight;	/**< Overall tree weight */
 	node_id_t root;	/**< root of the tree */
+	std::vector< T > nodes;	/**< nodes of the tree */
 	void clear();
 	/**
 	 * Reads a tree in Newick format.  WARNING:  only reads rooted trees correctly
@@ -50,13 +51,28 @@ public:
 	 * Determines the height of the tree along the path from nodeI to its left-most descendant leaf node
 	 */
 	double getHeight( node_id_t nodeI ) const;
+
+	T& operator[]( const unsigned i ){ return nodes[i]; }
+	const T& operator[]( const unsigned i ) const{ return nodes[i]; }
+	size_t size() const{ return nodes.size(); }
+	void push_back( T& t ){ nodes.push_back(t); }
+	T& back() { return nodes.back(); }
+	const T& back() const{ return nodes.back(); }
+	void resize( const unsigned s ){ nodes.resize(s); }
+
+
+	void swap( PhyloTree<T>& other )
+	{
+		std::swap( weight, other.weight );
+		std::swap( root, other.root );
+		nodes.swap( other.nodes );
+	}
 protected:
 };
 
 
 template< class T >
-PhyloTree<T>::PhyloTree() : 
-std::vector< T >() 
+PhyloTree<T>::PhyloTree()
 {
 	weight = 0;
 	root = 0;
@@ -64,7 +80,7 @@ std::vector< T >()
 
 template< class T >
 PhyloTree<T>::PhyloTree( const PhyloTree<T>& pt ) :
-std::vector< T >( pt ),
+nodes( pt.nodes ),
 weight( pt.weight ),
 root( pt.root )
 {}
@@ -72,7 +88,7 @@ root( pt.root )
 template< class T >
 PhyloTree<T>& PhyloTree<T>::operator=( const PhyloTree<T>& pt )
 {
-	std::vector< T >::operator=( pt );
+	nodes = pt.nodes;
 	weight = pt.weight;
 	root = pt.root;
 	return *this;
@@ -85,7 +101,7 @@ PhyloTree<T>::~PhyloTree()
 template< class T >
 void PhyloTree<T>::clear()
 {
-	std::vector< T >::clear();
+	nodes.clear();
 	weight = 0;
 	root = 0;
 }
@@ -159,7 +175,7 @@ void PhyloTree<T>::readTree( std::istream& tree_file )
 					(*this)[ node_stack.top() ].children.push_back( (node_id_t)(*this).size() );
 				}
 				node_stack.push( (node_id_t)(*this).size() );
-				push_back( new_node );
+				nodes.push_back( new_node );
 				read_state = 1;
 				section_start = charI + 1;
 				break;
@@ -177,7 +193,7 @@ void PhyloTree<T>::readTree( std::istream& tree_file )
 						new_node.parents.push_back( node_stack.top() );
 						(*this)[ node_stack.top() ].children.push_back( (node_id_t)(*this).size() );
 						node_stack.push( (node_id_t)(*this).size() );
-						push_back( new_node );
+						nodes.push_back( new_node );
 						read_state = 2;	// pop this node after reading its branch length
 					}
 					(*this)[ node_stack.top() ].name = tree_line.substr( section_start, charI - section_start );
@@ -203,7 +219,7 @@ void PhyloTree<T>::readTree( std::istream& tree_file )
 						new_node.parents.push_back( node_stack.top() );
 						(*this)[ node_stack.top() ].children.push_back( (node_id_t)(*this).size() );
 						node_stack.push( (node_id_t)(*this).size() );
-						push_back( new_node );
+						nodes.push_back( new_node );
 						read_state = 2;	// pop this node after reading its name
 					}
 					(*this)[ node_stack.top() ].name = tree_line.substr( section_start, charI - section_start );
@@ -221,7 +237,7 @@ void PhyloTree<T>::readTree( std::istream& tree_file )
 					new_node.parents.push_back( node_stack.top() );
 					(*this)[ node_stack.top() ].children.push_back( (node_id_t)(*this).size() );
 					node_stack.push( (node_id_t)(*this).size() );
-					push_back( new_node );
+					nodes.push_back( new_node );
 					read_state = 2;	// pop this node after reading its branch length
 				}
 				(*this)[ node_stack.top() ].name = tree_line.substr( section_start, charI - section_start );
@@ -353,5 +369,15 @@ void getLeaves( TreeType& tree, node_id_t node, std::vector< node_id_t >& leaves
 	}
 }
 
+namespace std {
+
+template< class T > inline
+void swap( PhyloTree<T>& a, PhyloTree<T>& b )
+{
+	a.swap(b);
+}
+
+template<> inline void swap( PhyloTree<TreeNode>& a, PhyloTree<TreeNode>& b){ a.swap(b); }
+}
 
 #endif // __PhyloTree_h__

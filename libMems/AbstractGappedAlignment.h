@@ -37,6 +37,10 @@ public:
 
 	gnSeqI AlignmentLength() const {return align_length;}
 	void SetAlignmentLength(gnSeqI len){ align_length = len; }
+
+protected:
+	// for use by derived classes in order to swap contents
+	void swap( AbstractGappedAlignment* other );	
 private:
 	std::vector< gnSeqI > length;
 	gnSeqI align_length;
@@ -54,6 +58,14 @@ AbstractGappedAlignment<AbstractMatchImpl>::AbstractGappedAlignment( uint seq_co
 {
 	length = std::vector< gnSeqI >( seq_count, 0 );
 	this->align_length = align_length;
+}
+
+template<class AbstractMatchImpl>
+void AbstractGappedAlignment<AbstractMatchImpl>::swap( AbstractGappedAlignment* other )
+{
+	std::swap( length, other->length );
+	std::swap( align_length, other->align_length );
+	AbstractMatchImpl::swap( other );
 }
 
 template<class AbstractMatchImpl>

@@ -2360,22 +2360,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 						search_cache_db(seqI, seqJ)[i] = sc_array[i];
 					delete[] sc_array;
 
-//					search_cache_db(seqI,seqJ).insert( search_cache_db(seqI,seqJ).end(), new_cache_db(seqI, seqJ).begin(), new_cache_db(seqI, seqJ).end() );
 					new_cache_db(seqI, seqJ).clear();
-/*					ofstream cachedb("cachedb_debug.txt");
-					for( size_t mI = 0; mI < search_cache_db(seqI,seqJ).size(); mI++ )
-					{
-						cachedb << search_cache_db(seqI,seqJ)[mI].first << '\t';
-						if( search_cache_db(seqI,seqJ)[mI].first != NULL )
-							cachedb << *(search_cache_db(seqI,seqJ)[mI].first);
-						cachedb << '\t' << search_cache_db(seqI,seqJ)[mI].second << '\t';
-						if( search_cache_db(seqI,seqJ)[mI].second != NULL )
-							cachedb << *(search_cache_db(seqI,seqJ)[mI].second);
-						cachedb << std::endl;
-					}
-					cachedb.close();
-*/
-//					std::sort( search_cache_db(seqI, seqJ).begin(), search_cache_db(seqI, seqJ).end(), cache_comparator );
 				}
 				if( pairwise_matches(seqI,seqJ).size() > 0 )
 					cout << seqI << "," << seqJ << " has an additional " << pairwise_matches(seqI,seqJ).size() << " matches\n";
@@ -2389,7 +2374,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		// breakpoints applied to the descendants
 		cout << "Restoring backed up alignment tree...\n";
 		cout.flush();
-		alignment_tree = aln_tree_backup;
+		swap( alignment_tree, aln_tree_backup );
 
 	}	// end while(true)
 
@@ -2410,7 +2395,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 	printMemUsage();
 
 	// aln_tree_backup has the highest scoring alignment_tree
-	alignment_tree = aln_tree_backup;
+	swap( alignment_tree, aln_tree_backup );
 	cout << "propagating ancestral breakpoints\n";
 	recursiveApplyAncestralBreakpoints(ancestor);
 
@@ -2942,7 +2927,7 @@ void extendRootBranches( PhyloTree< AlignmentTreeNode >& alignment_tree )
 		if( alignment_tree[nI].children.size() > 0 &&
 			alignment_tree[nI].children[0] > alignment_tree[nI].children[1] )
 		{
-			swap( alignment_tree[nI].children[0], alignment_tree[nI].children[1] );
+			std::swap( alignment_tree[nI].children[0], alignment_tree[nI].children[1] );
 		}
 	}
 	for( size_t cI = 0; cI < alignment_tree[ancestor].children.size(); ++cI )

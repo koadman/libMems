@@ -66,6 +66,9 @@ protected:
 	std::vector<gnSeqI, gnSeqIAlloc > leftend;
 	bitset_t orient;	// bitset_t has its own allocator
 	uint SeqToIndex( uint seqI ) const;
+
+	// for use by derived classes in order to swap contents
+	void swap( SparseAbstractMatch* other );	
 };
 
 
@@ -74,6 +77,14 @@ SparseAbstractMatch< gnSeqIAlloc, uintAlloc >::SparseAbstractMatch(const uint se
 m_seq_count(seq_count)
 {}
 
+template< class gnSeqIAlloc, class uintAlloc >
+void SparseAbstractMatch< gnSeqIAlloc, uintAlloc >::swap( SparseAbstractMatch* other )
+{
+	std::swap(seq_ids, other->seq_ids);
+	std::swap(m_seq_count, other->m_seq_count);
+	std::swap(leftend, other->leftend);
+	std::swap(orient, other->orient);
+}
 
 template< class gnSeqIAlloc, class uintAlloc >
 uint SparseAbstractMatch< gnSeqIAlloc, uintAlloc >::FirstStart() const

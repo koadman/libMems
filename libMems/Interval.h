@@ -165,7 +165,15 @@ public:
 
 	/** self test code */
 	void ValidateMatches() const;
+
+	void swap( GenericInterval& other ){ swap(&other); }
+
 protected:
+	// for use by derived classes in order to swap contents
+	void swap( GenericInterval* other ){
+		std::swap( matches, other->matches );
+		GappedBaseImpl::swap( other );
+	}
 	std::vector< AbstractMatch* > matches;
 private:
 	void addUnalignedRegions();
@@ -175,6 +183,7 @@ private:
 };
 
 typedef GenericInterval<> Interval;
+
 
 template<class GappedBaseImpl>
 GenericInterval<GappedBaseImpl>* GenericInterval<GappedBaseImpl>::Copy() const
@@ -933,7 +942,14 @@ bool GenericInterval<GappedBaseImpl>::IsGap( uint seq, gnSeqI col ) const
 	return column[seq];
 }
 
+}
 
+namespace std {
+template<> inline
+void swap( mems::Interval& a, mems::Interval& b )
+{
+	a.swap(b);
+}
 }
 
 #endif	// __Interval_h__

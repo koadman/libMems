@@ -103,12 +103,22 @@ public:
 	/** Eliminates any columns that contain only gap characters */
 	void CondenseGapColumns();
 
+	void swap( CompactGappedAlignment& other ){ swap(&other); }
+
 protected:
+	// for use by derived classes in order to swap contents
+	void swap( CompactGappedAlignment* other ){
+		std::swap( align_matrix, other->align_matrix );
+		std::swap( bcount, other->bcount );
+		BaseType::swap( other );
+	}
+
 	std::vector< bitset_t > align_matrix;		/**< aligned positions have true values, gaps are false */
 	std::vector< std::vector< size_t > > bcount;
 
 	void create_bitcount();
 	gnSeqI SeqPosToColumn( gnSeqI pos, const bitset_t& bvec, const std::vector< size_t >& index ) const;
+
 };
 
 static bool debug_cga = false;
@@ -234,7 +244,7 @@ void CompactGappedAlignment<BaseType>::SetAlignment( const std::vector< std::str
 template< class BaseType >
 void CompactGappedAlignment<BaseType>::SetAlignment( std::vector< bitset_t >& seq_align )
 {
-	swap( align_matrix, seq_align );
+	std::swap( align_matrix, seq_align );
 	seq_align.clear();
 	if( align_matrix.size() > 0 )
 		this->SetAlignmentLength( align_matrix[0].size() );
@@ -795,6 +805,15 @@ void CompactGappedAlignment<BaseType>::CondenseGapColumns()
 
 
 }
+
+namespace std {
+template<> inline
+void swap( mems::CompactGappedAlignment<>& a, mems::CompactGappedAlignment<>& b )
+{
+	a.swap(b);
+}
+}
+
 
 #endif // __CompactGappedAlignment_h__
 
