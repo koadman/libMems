@@ -131,7 +131,7 @@ boolean FileSML::WriteHeader(){
 		Throw_gnExMsg(IOStreamFailed(), "File is not valid.");
 	}
 	boolean success = true;
-	char* errormsg = "";
+	const char* errormsg = "";
 	// Open sarfile for writing and write new header.
 	OpenForWriting( false );
 	sarfile.write((char*)&header, sizeof(struct SMLHeader));

@@ -88,7 +88,7 @@ bool pipeExec( char** cmd_argv, const string& command, const string& input, stri
 	boolean success = false;
 	pid_t sid;
 	pid_t pid1;
-	char* fail;
+	const char* fail;
 	char buf[1024];
 	ssize_t bread = 0;
 	int rval = 0;
@@ -711,7 +711,7 @@ boolean MuscleInterface::CallMuscleFast( vector< string >& aln_matrix, const vec
 
 	// now construct a SeqVect containing input sequences
 	SeqVect sv;
-	char* seqname = "seq00000";
+	const char* seqname = "seq00000";
 	for( size_t seqI = 0; seqI < seq_table.size(); seqI++ )
 	{
 		Seq curseq;

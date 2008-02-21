@@ -45,9 +45,10 @@
 // each SML bin
 //#define NO_RESTRUCTURE_PERF_TEST
 
+#ifndef NELEMS
 #define NELEMS(x) \
     ( sizeof((x)) / sizeof((x)[0]) )
-
+#endif
 
 #define MIN(x,y)    ((x)<(y)?(x):(y))
 #define MINRECS     (1311)
