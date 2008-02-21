@@ -72,7 +72,7 @@ protected:
 	// for use by derived classes in order to swap contents
 	void swap( GappedAlignment* other ){
 		std::swap( align_matrix, other->align_matrix );
-		AbstractGappedAlignment::swap( other );
+		AbstractGappedAlignment< SparseAbstractMatch<> >::swap( other );
 	}
 
 	std::vector< std::string > align_matrix;
