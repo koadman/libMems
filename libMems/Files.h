@@ -28,6 +28,40 @@
 #include <iostream>
 #include <iomanip>
 
+
+/**
+ * Register a file name to be deleted before the process exits
+ * When passed an empty string, it does not add to the list of files to delete
+ * @param fname	The name of a file to delete, empty strings are ignored
+ * @return A vector of file names registered for deletion
+ */
+std::vector< std::string >& registerFileToDelete( std::string fname = "" );
+
+inline
+std::vector< std::string >& registerFileToDelete( std::string fname ) {
+	// since this vector is needed when atexit() is called we allocate it
+	// on the heap so its destructor won't get called
+	static std::vector< std::string >* files = new std::vector< std::string >();
+#pragma omp critical
+{
+	if( fname != "" )
+		files->push_back( fname );
+}
+	return *files;
+}
+
+void deleteRegisteredFiles();
+inline
+void deleteRegisteredFiles() {
+	// don't be a slob, clean up after yourself:
+	// delete any files that are laying around
+	std::vector< std::string >& del_files = registerFileToDelete();
+	for( int fileI = 0; fileI < del_files.size(); fileI++ )
+		boost::filesystem::remove( del_files[ fileI ] );
+	del_files.clear();	// clear the deleted files from the list
+}
+
+
 /**
  * Create a temporary file
  */

@@ -244,6 +244,7 @@ void LoadAndCreateRawSequences( MatchListType& mlist, std::ostream* log_stream )
 		tmpfilename = CreateTempFileName("rawseq");
 		genome::gnRAWSource::Write( *file_sequence, tmpfilename );
 		delete file_sequence;
+		registerFileToDelete( tmpfilename );
 
 		if( log_stream != NULL )
 			(*log_stream) << "Storing raw sequence at " << tmpfilename << std::endl;	
@@ -254,7 +255,6 @@ void LoadAndCreateRawSequences( MatchListType& mlist, std::ostream* log_stream )
 			(*log_stream) << mlist.seq_filename[ seqI ] << " " << raw_seq->length() << " base pairs.\n";
 		}
 	}
-
 }
 
 
