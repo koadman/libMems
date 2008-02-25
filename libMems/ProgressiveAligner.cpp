@@ -3455,8 +3455,10 @@ void ProgressiveAligner::alignPP(IntervalList& prof1, IntervalList& prof2, Inter
 	// use the identity matrix method and convert to a distance matrix
 	ClustalInterface& ci = ClustalInterface::getClustalInterface();	
 	string guide_tree_fname1 = CreateTempFileName("guide_tree");
+	registerFileToDelete( guide_tree_fname1 );
 	ci.SetDistanceMatrix( distance1, guide_tree_fname1 );
 	string guide_tree_fname2 = CreateTempFileName("guide_tree");
+	registerFileToDelete( guide_tree_fname2 );
 	ci.SetDistanceMatrix( distance2, guide_tree_fname2 );
 
 	// read the trees
