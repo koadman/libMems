@@ -36,6 +36,9 @@ const mems::score_t DEFAULT_ISLAND_SCORE_THRESHOLD = 2727;
 typedef mems::UngappedLocalAlignment< mems::HybridAbstractMatch<> > ULA;
 typedef std::vector< std::vector< ULA* > > backbone_list_t;
 
+/** compute the GC content of a set of sequences */
+double computeGC( std::vector< genome::gnSequence* >& seq_table );
+
 /**
  * collapse Intervals that are trivially collinear with each other
  */
@@ -54,23 +57,19 @@ void checkForAllGapColumns( IntervalList& iv_list );
  * @param	result		(output) A newly allocated CompactGappedAlignment that contains the resulting alignment of 
  *						homologous sequence.  It is the caller's responsibility to free the memory using AbstractMatch::Free()
  * @param	bb_list		(output) A list of homologous segments among each component of the output match
- * @param	subst_scoring	The pairwise scoring scheme to apply
- * @param	score_threshold	The significance threshold for score drops that will indicate a transition 
- *							from homology to non-homology
- * @param	pGoHomo	        Unrelated to Homologous transition parameter
- * @param	pGoUnrelated	Homologous to Unrelated transition parameter
  * @param	left_homologous	Set to true if the detection code should assume that sequence beyond the left-most alignment
  *							column is homologous sequence
  * @param	right_homologous	Set to true if the detection code should assume that sequence beyond the right-most alignment
  *							column is homologous sequence
  */
-void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD, const float pGoHomo = 0.004, const float pGoUnrelated = 0.004, std::vector<double>* pEmitHomo = NULL, std::vector<double>* pEmitUnrelated = NULL, boolean left_homologous = false, boolean right_homologous = false );
+void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const Params& hmm_params, boolean left_homologous = false, boolean right_homologous = false );
+// void detectAndApplyBackbone( AbstractMatch* m, std::vector< genome::gnSequence* >& seq_table, CompactGappedAlignment<>*& result, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD, const float pGoHomo = 0.004, const float pGoUnrelated = 0.004, std::vector<double>* pEmitHomo = NULL, std::vector<double>* pEmitUnrelated = NULL, boolean left_homologous = false, boolean right_homologous = false );
 
 /**
  * Applies pairwise transitive homology statistics to detect backbone in a genome alignment
  * Unaligns any regions found to be non-homologous, returns coordinates of the homologous segments in bb_list
  */
-void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const PairwiseScoringScheme& subst_scoring, double pGoHomo, double pGoUnrelated, std::vector<double>* pEmitHomo = NULL, std::vector<double>* pEmitUnrelated = NULL,score_t score_threshold = DEFAULT_ISLAND_SCORE_THRESHOLD );
+void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const Params& hmm_params );
 
 /**
  * Writes a backbone column file.  This file type gets used by the Mauve GUI.
