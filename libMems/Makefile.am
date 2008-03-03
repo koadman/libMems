@@ -21,7 +21,7 @@ Backbone.h ProgressiveAligner.h PairwiseMatchAdapter.h PairwiseMatchFinder.h \
 SeedOccurrenceList.h TreeUtilities.h SuperInterval.h GreedyBreakpointElimination.h \
 LCB.h DistanceMatrix.h Scoring.h configuration.h Memory.h Files.h gnRAWSequence.h
 
-HOMOLOGYHMM_H = HomologyHMM/homology.h HomologyHMM/dptables.h HomologyHMM/algebras.h
+HOMOLOGYHMM_H = HomologyHMM/homology.h HomologyHMM/dptables.h HomologyHMM/algebras.h HomologyHMM/parameters.h
 
 DMSML_H = \
 dmSML/asyncio.h dmSML/alinuxaio.h dmSML/aPOSIXaio.h \
