@@ -765,13 +765,13 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		}
 		if( pair_1l.first < pair_1l.second )
 		{
-			iv_regions[seqI][seqJ][0].push_back(pair_1l.first);
-			iv_regions[seqI][seqJ][0].push_back(pair_1l.second);
+			iv_regions[n1][n2][0].push_back(pair_1l.first);
+			iv_regions[n1][n2][0].push_back(pair_1l.second);
 		}
 		if( pair_1r.first < pair_1r.second )
 		{
-			iv_regions[seqI][seqJ][0].push_back(pair_1r.first);
-			iv_regions[seqI][seqJ][0].push_back(pair_1r.second);
+			iv_regions[n1][n2][0].push_back(pair_1r.first);
+			iv_regions[n1][n2][0].push_back(pair_1r.second);
 			if( pair_1r.first <= pair_1l.second && pair_1r.second >= pair_1l.first )
 			{
 				cerr << "Ohno.  Overlap in outside LCB search intervals\n";
@@ -782,13 +782,13 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 
 		if( pair_2l.first < pair_2l.second )
 		{
-			iv_regions[seqI][seqJ][1].push_back(pair_2l.first);
-			iv_regions[seqI][seqJ][1].push_back(pair_2l.second);
+			iv_regions[n1][n2][1].push_back(pair_2l.first);
+			iv_regions[n1][n2][1].push_back(pair_2l.second);
 		}
 		if( pair_2r.first < pair_2r.second )
 		{
-			iv_regions[seqI][seqJ][1].push_back(pair_2r.first);
-			iv_regions[seqI][seqJ][1].push_back(pair_2r.second);
+			iv_regions[n1][n2][1].push_back(pair_2r.first);
+			iv_regions[n1][n2][1].push_back(pair_2r.second);
 			if( pair_2r.first <= pair_2l.second && pair_2r.second >= pair_2l.first )
 			{
 				cerr << "Ohno.  Overlap in outside LCB search intervals\n";
