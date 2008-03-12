@@ -714,6 +714,10 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 
 // first determine the outer aligned boundaries of the LCB and record them for
 // later use
+		pair< int64, int64 > pair_1l(0,0);
+		pair< int64, int64 > pair_1r(0,0);
+		pair< int64, int64 > pair_2l(0,0);
+		pair< int64, int64 > pair_2r(0,0);
 		for( uint colI = 0; colI <= iv_aln_length; colI++ )
 		{
 			if( (aln_matrix[seqI].test(colI) && aln_matrix[seqJ].test(colI)) )
@@ -721,21 +725,13 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 				if( colI == 0 )
 					break;	// nothing to see here, move along...
 				if( iv.Orientation(seqI) == AbstractMatch::forward )
-				{
-					iv_regions[n1][n2][0].push_back( iv.LeftEnd(seqI) );
-					iv_regions[n1][n2][0].push_back( iv.LeftEnd(seqI)+charI );
-				}else{
-					iv_regions[n1][n2][0].push_back( iv.RightEnd(seqI)-charI );
-					iv_regions[n1][n2][0].push_back( iv.RightEnd(seqI) );
-				}
+					pair_1l = make_pair( iv.LeftEnd(seqI), iv.LeftEnd(seqI)+charI );
+				else
+					pair_1r = make_pair( iv.RightEnd(seqI)-charI, iv.RightEnd(seqI) );
 				if( iv.Orientation(seqJ) == AbstractMatch::forward )
-				{
-					iv_regions[n1][n2][1].push_back( iv.LeftEnd(seqJ) );
-					iv_regions[n1][n2][1].push_back( iv.LeftEnd(seqJ)+charJ );
-				}else{
-					iv_regions[n1][n2][1].push_back( iv.RightEnd(seqJ)-charJ );
-					iv_regions[n1][n2][1].push_back( iv.RightEnd(seqJ) );
-				}
+					pair_2l = make_pair( iv.LeftEnd(seqJ), iv.LeftEnd(seqJ)+charJ );
+				else
+					pair_2r = make_pair( iv.RightEnd(seqJ)-charJ, iv.RightEnd(seqJ) );
 				break;
 			}
 			if( aln_matrix[seqI].test(colI) )
@@ -753,27 +749,52 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 				if( colI == iv_aln_length )
 					break;	// nothing to see here, move along...
 				if( iv.Orientation(seqI) == AbstractMatch::forward )
-				{
-					iv_regions[n1][n2][0].push_back( iv.RightEnd(seqI) );
-					iv_regions[n1][n2][0].push_back( iv.RightEnd(seqI)-charI );
-				}else{
-					iv_regions[n1][n2][0].push_back( iv.LeftEnd(seqI) );
-					iv_regions[n1][n2][0].push_back( iv.LeftEnd(seqI)+charI );
-				}
+					pair_1r = make_pair( iv.RightEnd(seqI)-charI, iv.RightEnd(seqI) );
+				else
+					pair_1l = make_pair( iv.LeftEnd(seqI), iv.LeftEnd(seqI)+charI );
 				if( iv.Orientation(seqJ) == AbstractMatch::forward )
-				{
-					iv_regions[n1][n2][1].push_back( iv.RightEnd(seqJ) );
-					iv_regions[n1][n2][1].push_back( iv.RightEnd(seqJ)-charJ );
-				}else{
-					iv_regions[n1][n2][1].push_back( iv.LeftEnd(seqJ) );
-					iv_regions[n1][n2][1].push_back( iv.LeftEnd(seqJ)+charJ );
-				}
+					pair_2r = make_pair( iv.RightEnd(seqJ)-charJ, iv.RightEnd(seqJ) );
+				else
+					pair_2l = make_pair( iv.LeftEnd(seqJ), iv.LeftEnd(seqJ)+charJ );
 				break;
 			}
 			if( aln_matrix[seqI].test(colI-1) )
 				++charI;
 			if( aln_matrix[seqJ].test(colI-1) )
 				++charJ;
+		}
+		if( pair_1l.first < pair_1l.second )
+		{
+			iv_regions[seqI][seqJ][0].push_back(pair_1l.first);
+			iv_regions[seqI][seqJ][0].push_back(pair_1l.second);
+		}
+		if( pair_1r.first < pair_1r.second )
+		{
+			iv_regions[seqI][seqJ][0].push_back(pair_1r.first);
+			iv_regions[seqI][seqJ][0].push_back(pair_1r.second);
+			if( pair_1r.first <= pair_1l.second && pair_1r.second >= pair_1l.first )
+			{
+				cerr << "Ohno.  Overlap in outside LCB search intervals\n";
+				cerr << "Left: " << pair_1l.first << '\t' << pair_1l.second << " right:  " << pair_1r.first << '\t' << pair_1r.second << endl;
+				genome::breakHere();
+			}
+		}
+
+		if( pair_2l.first < pair_2l.second )
+		{
+			iv_regions[seqI][seqJ][1].push_back(pair_2l.first);
+			iv_regions[seqI][seqJ][1].push_back(pair_2l.second);
+		}
+		if( pair_2r.first < pair_2r.second )
+		{
+			iv_regions[seqI][seqJ][1].push_back(pair_2r.first);
+			iv_regions[seqI][seqJ][1].push_back(pair_2r.second);
+			if( pair_2r.first <= pair_2l.second && pair_2r.second >= pair_2l.first )
+			{
+				cerr << "Ohno.  Overlap in outside LCB search intervals\n";
+				cerr << "Left: " << pair_2l.first << '\t' << pair_2l.second << " right:  " << pair_2r.first << '\t' << pair_2r.second << endl;
+				genome::breakHere();
+			}
 		}
 
 		charI = 0;
