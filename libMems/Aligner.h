@@ -175,9 +175,6 @@ public:
 	void GetBestLCB( MatchList& r_list, MatchList& best_lcb );
 	void DoSomethingCool( MatchList& mlist, Interval& iv );
 	
-	void CreateGapSearchList( std::vector< LCB >& adjacencies, MatchList& new_matches, std::vector< std::vector< int64 > >& iv_regions, boolean entire_genome );
-	void SearchLCBGaps( std::vector< LCB >& adjacencies, MatchList& new_matches, const std::vector< std::vector< int64 > >& iv_regions, boolean entire_genome );
-
 	/**
 	 * Set the minimum size of intervening region between two anchor matches that will
 	 * be considered for recursive anchor determination.  When the gaps between two anchors
@@ -266,6 +263,9 @@ void GetLCBCoverage( MatchList& lcb, uint64& coverage );
 
 int64 greedyBreakpointElimination( gnSeqI minimum_weight, std::vector< LCB >& adjacencies, std::vector< int64 >& weights, std::ostream* status_out = NULL );
 void filterMatches( std::vector< LCB >& adjacencies, std::vector< MatchList >& lcb_list, std::vector< int64 >& weights );
+
+void CreateGapSearchList( std::vector< LCB >& adjacencies, const std::vector< genome::gnSequence* >& seq_table, std::vector< std::vector< int64 > >& iv_regions, boolean entire_genome );
+void SearchLCBGaps( MatchList& new_matches, const std::vector< std::vector< int64 > >& iv_regions, MaskedMemHash& nway_mh );
 
 static const uint MIN_ANCHOR_LENGTH = 9;
 

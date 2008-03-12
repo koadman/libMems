@@ -677,9 +677,8 @@ void ProgressiveAligner::pairwiseAnchorSearch( MatchList& r_list, Match* r_begin
 		delete gap_list.sml_table[ seqI ];
 }
 
-
 template<class GappedAlignmentType>
-void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, const vector<node_id_t>& node2_seqs, const GappedAlignmentType& iv, Matrix<MatchList>& matches, Matrix< std::vector< search_cache_t > >& search_cache_db, Matrix< std::vector< search_cache_t > >& new_cache_db )
+void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, const vector<node_id_t>& node2_seqs, const GappedAlignmentType& iv, Matrix<MatchList>& matches, Matrix< std::vector< search_cache_t > >& search_cache_db, Matrix< std::vector< search_cache_t > >& new_cache_db, boost::multi_array< vector< vector< int64 > >, 2 >& iv_regions )
 {
 	matches = Matrix<MatchList>(node1_seqs.size(),node2_seqs.size());
 
@@ -715,6 +714,70 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		gnSeqI prev_charJ = 0;
 		bool in_gap = false;
 		const size_t iv_aln_length = iv.AlignmentLength();
+
+// first determine the outer aligned boundaries of the LCB and record them for
+// later use
+		for( uint colI = 0; colI <= iv_aln_length; colI++ )
+		{
+			if( (aln_matrix[seqI].test(colI) && aln_matrix[seqJ].test(colI)) )
+			{
+				if( colI == 0 )
+					break;	// nothing to see here, move along...
+				if( iv.Orientation(seqI) == AbstractMatch::forward )
+				{
+					iv_regions[n1][n2][0].push_back( iv.LeftEnd(seqI) );
+					iv_regions[n1][n2][0].push_back( iv.LeftEnd(seqI)+charI );
+				}else{
+					iv_regions[n1][n2][0].push_back( iv.RightEnd(seqI)-charI );
+					iv_regions[n1][n2][0].push_back( iv.RightEnd(seqI) );
+				}
+				if( iv.Orientation(seqJ) == AbstractMatch::forward )
+				{
+					iv_regions[n1][n2][1].push_back( iv.LeftEnd(seqJ) );
+					iv_regions[n1][n2][1].push_back( iv.LeftEnd(seqJ)+charJ );
+				}else{
+					iv_regions[n1][n2][1].push_back( iv.RightEnd(seqJ)-charJ );
+					iv_regions[n1][n2][1].push_back( iv.RightEnd(seqJ) );
+				}
+				break;
+			}
+			if( aln_matrix[seqI].test(colI) )
+				++charI;
+			if( aln_matrix[seqJ].test(colI) )
+				++charJ;
+		}
+
+		for( uint colI = iv_aln_length; colI > 0 ; colI-- )
+		{
+			if( (aln_matrix[seqI].test(colI-1) && aln_matrix[seqJ].test(colI-1)) )
+			{
+				if( colI == iv_aln_length )
+					break;	// nothing to see here, move along...
+				if( iv.Orientation(seqI) == AbstractMatch::forward )
+				{
+					iv_regions[n1][n2][0].push_back( iv.RightEnd(seqI) );
+					iv_regions[n1][n2][0].push_back( iv.RightEnd(seqI)-charI );
+				}else{
+					iv_regions[n1][n2][0].push_back( iv.LeftEnd(seqI) );
+					iv_regions[n1][n2][0].push_back( iv.LeftEnd(seqI)+charI );
+				}
+				if( iv.Orientation(seqJ) == AbstractMatch::forward )
+				{
+					iv_regions[n1][n2][1].push_back( iv.RightEnd(seqJ) );
+					iv_regions[n1][n2][1].push_back( iv.RightEnd(seqJ)-charJ );
+				}else{
+					iv_regions[n1][n2][1].push_back( iv.LeftEnd(seqJ) );
+					iv_regions[n1][n2][1].push_back( iv.LeftEnd(seqJ)+charJ );
+				}
+				break;
+			}
+			if( aln_matrix[seqI].test(colI-1) )
+				++charI;
+			if( aln_matrix[seqJ].test(colI-1) )
+				++charJ;
+		}
+
+
 		for( uint colI = 0; colI <= iv_aln_length; colI++ )
 		{
 			if( colI == iv_aln_length || 
@@ -2320,17 +2383,45 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		cout.flush();
 		Matrix<MatchList> matches;
 		Matrix< std::vector< search_cache_t > > new_cache_db(node1_seqs.size(), node2_seqs.size());
+		// initialize storage for intervening regions
+		boost::multi_array< std::vector< std::vector< int64 > >, 2 > iv_regions( boost::extents[node1_seqs.size()][node2_seqs.size()] );
+		for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
+			for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
+				iv_regions[seqI][seqJ].resize(2);
+		vector< gnSequence* > bseqs( node1_seqs.size() + node2_seqs.size() );
 		for( size_t aI = 0; aI < alignment_tree[ancestor].ordering.size(); aI++ )
 		{
 			CompactGappedAlignment<> cga;
 			extractAlignment(ancestor, aI, cga);
-			recurseOnPairs(node1_seqs, node2_seqs, cga, matches, search_cache_db, new_cache_db);
+			recurseOnPairs(node1_seqs, node2_seqs, cga, matches, search_cache_db, new_cache_db, iv_regions);
 
 			// add any new matches to the pairwise_matches matrix
 			for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
 				for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
 					pairwise_matches(seqI, seqJ).insert( pairwise_matches(seqI, seqJ).end(), matches(seqI, seqJ).begin(), matches(seqI, seqJ).end() );
+
 		}
+
+		// add seqs
+		for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
+			bseqs[seqI] = alignment_tree[ node1_seqs[seqI] ].sequence;
+		for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
+			bseqs[seqI+seqJ] =  alignment_tree[ node2_seqs[seqJ] ].sequence;
+
+		MaskedMemHash nway_mh;
+		// now search intervening regions
+		for( seqI = 0; seqI < node1_seqs.size(); seqI++ )
+			for( seqJ = 0; seqJ < node2_seqs.size(); seqJ++ )
+			{
+				std::sort( iv_regions[seqI][seqJ][0].begin(), iv_regions[seqI][seqJ][0].end() );
+				std::sort( iv_regions[seqI][seqJ][1].begin(), iv_regions[seqI][seqJ][1].end() );
+				MatchList new_matches;
+				new_matches.seq_table.resize(2);
+				new_matches.seq_table[0] = bseqs[seqI];
+				new_matches.seq_table[1] = bseqs[node1_seqs.size() + seqJ];
+				SearchLCBGaps( new_matches, iv_regions[seqI][seqJ], nway_mh );
+				pairwise_matches(seqI, seqJ).insert( pairwise_matches(seqI, seqJ).end(), new_matches.begin(), new_matches.end() );
+			}
 
 		if(using_cache_db)
 		{

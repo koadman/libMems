@@ -718,7 +718,7 @@ void scanRight( int& right_recurseI, vector< LCB >& adjacencies, int min_weight,
   * start positions organized as iv_regions[ seqI ][ lcbI * 2 ]
   * end positions organized as iv_regions[ seqI ][ lcbI * 2 + 1 ] 
  */
-void Aligner::CreateGapSearchList( vector< LCB >& adjacencies, MatchList& new_matches, vector< vector< int64 > >& iv_regions, boolean entire_genome ) 
+void CreateGapSearchList( vector< LCB >& adjacencies, const vector< gnSequence* >& seq_table, vector< vector< int64 > >& iv_regions, boolean entire_genome ) 
 {
 	iv_regions.clear();
 	if( adjacencies.size() == 0 )
@@ -726,6 +726,7 @@ void Aligner::CreateGapSearchList( vector< LCB >& adjacencies, MatchList& new_ma
 	if( adjacencies.size() == 1 && !entire_genome )
 		return; 	// there aren't any interveniing LCB regions in the local area
 	boolean debug_lcb_extension = false;	/**< enables debugging output */
+	const uint seq_count = seq_table.size();
 
 	uint seqI = 0;
 	int lcbI = 0;
@@ -750,20 +751,18 @@ void Aligner::CreateGapSearchList( vector< LCB >& adjacencies, MatchList& new_ma
 		gnSeqI seq_len = 0;
 		while( (lcbI != -1 || right_recurseI != -1 ) && right_recurseI < (int)adjacencies.size() ){
 			int64 l_end = lcbI == -1 ? 1 : adjacencies[ lcbI ].right_end[ seqI ];
-			int64 r_end = right_recurseI == -1 ? new_matches.seq_table[ seqI ]->length() : adjacencies[ right_recurseI ].left_end[ seqI ];
+			int64 r_end = right_recurseI == -1 ? seq_table[ seqI ]->length() : adjacencies[ right_recurseI ].left_end[ seqI ];
 
 			// break out if outside the last LCB and not searching the entire genome
 			if( !entire_genome && right_recurseI == -1 )
 				break;
 
-//			l_end = absolut( l_end );
-//			r_end = absolut( r_end );
 			l_end = absolut( l_end );
 			r_end = absolut( r_end );
 			
 			if( l_end > r_end && !( r_end + 1 == l_end && right_recurseI == -1 ) ){
-				cerr << "Overlapping LCBs.  lcbI " << lcbI << " right_recurseI " << right_recurseI << endl;
-				cerr << "lend: " << l_end << " rend: " << r_end << endl;
+				std::cerr << "Overlapping LCBs.  lcbI " << lcbI << " right_recurseI " << right_recurseI << endl;
+				std::cerr << "lend: " << l_end << " rend: " << r_end << endl;
 				l_end = r_end;
 				
 			}
@@ -778,18 +777,24 @@ void Aligner::CreateGapSearchList( vector< LCB >& adjacencies, MatchList& new_ma
 			iv_regions[ seqI ].push_back( r_end );
 		}
 		if( debug_lcb_extension )
-			cerr << "seqI " << seqI << " seq_len: " << seq_len << endl;
+			std::cerr << "seqI " << seqI << " seq_len: " << seq_len << endl;
 	}
 
 }
 
-void Aligner::SearchLCBGaps( vector< LCB >& adjacencies, MatchList& new_matches, const vector< vector< int64 > >& iv_regions, boolean entire_genome ) {
-	if( adjacencies.size() == 0 )
+void SearchLCBGaps( MatchList& new_matches, const std::vector< std::vector< int64 > >& iv_regions, MaskedMemHash& nway_mh ) {
+	if( iv_regions.size() == 0 )
 		return;		// there aren't any intervening LCB regions!
-	if( adjacencies.size() == 1 && !entire_genome )
-		return; 	// there aren't any interveniing LCB regions in the local area
+	size_t sI = 0;
+	for( ; sI < iv_regions.size(); sI++ )
+		if( iv_regions[sI].size() > 0 )
+			break;
+	if( sI == iv_regions.size() )
+		return;		// there aren't any intervening LCB regions!
+
 	boolean debug_lcb_extension = false;	/**< enables debugging output */
 
+	const uint seq_count = new_matches.seq_table.size();
 	uint seqI = 0;
 	int lcbI = 0;
 	MatchList gap_list;
@@ -808,7 +813,8 @@ void Aligner::SearchLCBGaps( vector< LCB >& adjacencies, MatchList& new_matches,
 			try{
 			if( debug_lcb_extension )
 				cerr << "Adding " << seqI << "\t" << l_end << "\t" << r_end << "\t(" << r_end - l_end << " bp)" << endl;
-			gap_list.seq_table[ seqI ]->append( new_matches.seq_table[ seqI ]->subseq( l_end, r_end - l_end ) );
+			gap_list.seq_table[ seqI ]->append( new_matches.seq_table[ seqI ]->ToString(r_end - l_end, l_end ) );
+//			gap_list.seq_table[ seqI ]->append( new_matches.seq_table[ seqI ]->subseq( l_end, r_end - l_end ) );
 			}catch(...){
 				cout << "";
 			}
@@ -1992,7 +1998,7 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 			if( status_out )
 				*status_out << "Performing LCB extension\n";
 			vector< vector< int64 > > cur_iv_regions;
-			CreateGapSearchList( adjacencies, new_matches, cur_iv_regions, entire_genome );
+			CreateGapSearchList( adjacencies, new_matches.seq_table, cur_iv_regions, entire_genome );
 			// only do the search if there's something new to search
 			if( prev_iv_regions != cur_iv_regions )
 			{
@@ -2002,8 +2008,8 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 					// search the gaps between the LCBs to extend the ends of LCBs
 					new_matches.clear();
 					vector< vector< int64 > > new_iv_regions;
-					CreateGapSearchList( adjacencies, new_matches, new_iv_regions, entire_genome );
-					SearchLCBGaps( adjacencies, new_matches, new_iv_regions, entire_genome );
+					CreateGapSearchList( adjacencies, new_matches.seq_table, new_iv_regions, entire_genome );
+					SearchLCBGaps( new_matches, new_iv_regions, nway_mh );
 					mlist.insert( mlist.end(), new_matches.begin(), new_matches.end() );
 					
 					AaronsLCB( mlist, breakpoints );
