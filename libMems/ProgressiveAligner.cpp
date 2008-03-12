@@ -710,9 +710,6 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 
 		gnSeqI charI = 0;
 		gnSeqI charJ = 0;
-		gnSeqI prev_charI = 0;
-		gnSeqI prev_charJ = 0;
-		bool in_gap = false;
 		const size_t iv_aln_length = iv.AlignmentLength();
 
 // first determine the outer aligned boundaries of the LCB and record them for
@@ -747,6 +744,8 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 				++charJ;
 		}
 
+		charI = 0;
+		charJ = 0;
 		for( uint colI = iv_aln_length; colI > 0 ; colI-- )
 		{
 			if( (aln_matrix[seqI].test(colI-1) && aln_matrix[seqJ].test(colI-1)) )
@@ -777,6 +776,11 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 				++charJ;
 		}
 
+		charI = 0;
+		charJ = 0;
+		gnSeqI prev_charI = 0;
+		gnSeqI prev_charJ = 0;
+		bool in_gap = false;
 
 		for( uint colI = 0; colI <= iv_aln_length; colI++ )
 		{
