@@ -768,14 +768,12 @@ void SortedMerList::FillDnaSeedSML(const gnSequence& seq, vector<bmer>& sml_arra
 	gnSeqI sar_len = SMLLength();
 	if( sar_len < header.seed_length )
 		return;	// can't have an sml if there ain't enough sequence
-	sml_array.reserve(sar_len);
+	sml_array.resize(sar_len);
 	
 	/* now fill in the sml_array with the forward sequence */
 	for( gnSeqI seedI = 0; seedI < sar_len; seedI++ ){
-		bmer new_mer;
-		new_mer.mer = GetDnaSeedMer( seedI );
-		new_mer.position = seedI;
-		sml_array.push_back( new_mer );
+		sml_array[seedI].mer = GetDnaSeedMer( seedI );
+		sml_array[seedI].position = seedI;
 	}
 }
 
