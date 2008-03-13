@@ -61,14 +61,6 @@ void MemorySML::Create(const gnSequence& seq, const uint64 seed ){
 	}
 
 }
-/*
-void MemorySML::FillSML(gnSeqI sml_len, vector<gnSeqI>& sml_array){
-	sml_array.clear();
-	sml_array.reserve( sml_len );
-	for(gnSeqI seqI = 0; seqI < sml_len; seqI++ )
-		sml_array.push_back(seqI);
-}
-*/
 
 boolean MemorySML::Read(vector<bmer>& readVector, gnSeqI size, gnSeqI offset )
 {
@@ -100,7 +92,7 @@ bmer MemorySML::operator[](gnSeqI index)
 {
 	bmer cur_mer;
 	cur_mer.position = positions[index];
-	cur_mer.mer = GetMer( cur_mer.position );
+	cur_mer.mer = GetSeedMer( cur_mer.position );
 	return cur_mer;
 }
 

@@ -31,7 +31,8 @@ public:
 		size_t seedI = 1;
 		bmer prevmer;
 		bmer merI = sml[0];
-		for( seedI = 1; seedI < total_len; seedI++ )
+		const size_t sml_length = sml.SMLLength();
+		for( seedI = 1; seedI < sml_length; seedI++ )
 		{
 			prevmer = merI;
 			merI = sml[seedI];
@@ -47,9 +48,9 @@ public:
 			cur_seed_count = 1;
 		}
 		// set seed frequencies for the last few
-		for( size_t i = seed_start; i < seedI && i < total_len; ++i )
+		for( size_t i = seed_start; i < seedI && i < sml_length; ++i )
 			count[sml[i].position] = (frequency_type)cur_seed_count;
-		// hack: fudge the last few values on the end of the sequence
+		// hack: fudge the last few values on the end of the sequence, necessary when sequence isn't circular
 		for( ; seedI < total_len; ++seedI )
 			count[seedI]=1;
 
