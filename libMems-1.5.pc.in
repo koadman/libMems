@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: libMems 
 Description: c++ library supporting DNA sequence and genome alignment 
 Version: @VERSION@
-Requires: libClustalW-1.0 libGenome-1.3 libMUSCLE-3.6
+Requires: libGenome-1.3 libMUSCLE-3.6
 Libs: -L${libdir} @OPENMP_CXXFLAGS@ -lMems-@GENERIC_API_VERSION@ @BOOST_LDFLAGS@ @BOOST_FILESYSTEM_LIB@ @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@ @LIBS@ 
 Cflags: -I${includedir}/@GENERIC_LIBRARY_NAME@-@GENERIC_API_VERSION@ @BOOST_CPPFLAGS@ @OPENMP_CXXFLAGS@ 
 

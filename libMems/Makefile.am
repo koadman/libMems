@@ -9,7 +9,7 @@ LIBMEMS_H = \
 RepeatHash.h      MatchHashEntry.h \
 DNAFileSML.h     MemorySML.h         MatchProjectionAdapter.h \
 DNAMemorySML.h  MatchFinder.h           SortedMerList.h IntervalList.h \
-FileSML.h      gnAlignedSequences.h  Interval.h        ClustalInterface.h  \
+FileSML.h      gnAlignedSequences.h  Interval.h        \
 MemHash.h      AbstractMatch.h    SlotAllocator.h \
 Aligner.h   Match.h     MatchList.h Matrix.h NumericMatrix.h \
 Islands.h   MaskedMemHash.h   SlotAllocator.h SeedMasks.h GappedAlignment.h \
@@ -30,7 +30,7 @@ dmSML/util.h dmSML/sorting.h dmSML/dmsort.h \
 dmSML/timing.h dmSML/sml.h
 
 LIBMEMS_SRC = \
-RepeatHash.cpp       ClustalInterface.cpp \
+RepeatHash.cpp       \
 DNAFileSML.cpp       MatchFinder.cpp       \
 DNAMemorySML.cpp     MemorySML.cpp        SortedMerList.cpp \
 FileSML.cpp          MemHash.cpp          MatchHashEntry.cpp \
