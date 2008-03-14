@@ -23,7 +23,10 @@
 #include "libMUSCLE/tree.h"
 #include "libMUSCLE/clust.h"
 #include "libMUSCLE/profile.h"
-#include "libMUSCLE/clustsetmsa.h"
+#include "libMUSCLE/distfunc.h"
+#include "libMUSCLE/clustsetdf.h"
+#include "libMUSCLE/textfile.h"
+#include "libMUSCLE/types.h"
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/case_conv.hpp"
 
@@ -1129,6 +1132,32 @@ bool MuscleInterface::ProfileAlignFast( const GappedAlignment& ga1, const Gapped
 	}catch(...){
 	}
 	return false;
+}
+
+
+void MuscleInterface::CreateTree( const NumericMatrix<double>& distances, const std::string& tree_filename  )
+{
+	DistFunc df;
+	df.SetCount( distances.rows() );
+	for( size_t i = 0; i < distances.rows(); i++ )
+		for( size_t j = 0; j < distances.rows(); j++ )
+			df.SetDist( i, j, distances(i,j) );
+
+	for( size_t i = 0; i < distances.rows(); i++ )
+	{
+		stringstream ss;
+		ss << "seq";
+		ss << i + 1;
+		df.SetName( i, ss.str().c_str() );
+		df.SetId( i, i );
+	}
+	ClustSetDF csdf( df );
+	Clust crusty;
+	crusty.Create( csdf, CLUSTER_NeighborJoining );
+	Tree tt;
+	tt.FromClust( crusty );
+	TextFile tf( tree_filename.c_str(), true );
+	tt.ToFile( tf );
 }
 
 

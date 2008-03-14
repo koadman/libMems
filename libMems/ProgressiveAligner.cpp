@@ -3147,40 +3147,40 @@ void ProgressiveAligner::setPairwiseMatches( MatchList& pair_ml )
 
 node_id_t createAlignmentTreeRoot( PhyloTree< AlignmentTreeNode >& alignment_tree, node_id_t node1, node_id_t node2 )
 {
-	// create a new node and link it inline between node1 and node2
-	AlignmentTreeNode atn;
-	alignment_tree.push_back( atn );
-	AlignmentTreeNode& old_root = alignment_tree[alignment_tree.root];
-	AlignmentTreeNode& new_root = alignment_tree.back();
+		// create a new node and link it inline between node1 and node2
+		AlignmentTreeNode atn;
+		alignment_tree.push_back( atn );
+		AlignmentTreeNode& old_root = alignment_tree[alignment_tree.root];
+		AlignmentTreeNode& new_root = alignment_tree.back();
 
-	if( find( alignment_tree[node1].children.begin(), alignment_tree[node1].children.end(), node2 ) !=
-		alignment_tree[node1].children.end() )
-	{
-		new_root.children.push_back(node2);
-		new_root.parents.push_back(node1);
-		alignment_tree[node2].parents.push_back(alignment_tree.size()-1);
-		alignment_tree[node1].children.push_back(alignment_tree.size()-1);
-	}else{
-		new_root.parents.push_back(node2);
-		new_root.children.push_back(node1);
-		alignment_tree[node2].children.push_back(alignment_tree.size()-1);
-		alignment_tree[node1].parents.push_back(alignment_tree.size()-1);
-	}
+		if( find( alignment_tree[node1].children.begin(), alignment_tree[node1].children.end(), node2 ) !=
+			alignment_tree[node1].children.end() )
+		{
+			new_root.children.push_back(node2);
+			new_root.parents.push_back(node1);
+			alignment_tree[node2].parents.push_back(alignment_tree.size()-1);
+			alignment_tree[node1].children.push_back(alignment_tree.size()-1);
+		}else{
+			new_root.parents.push_back(node2);
+			new_root.children.push_back(node1);
+			alignment_tree[node2].children.push_back(alignment_tree.size()-1);
+			alignment_tree[node1].parents.push_back(alignment_tree.size()-1);
+		}
 
-	// completely unlink node1 and node2 from each other
-	findAndErase( alignment_tree[node1].children, node2 );
-	findAndErase( alignment_tree[node2].children, node1 );
-	findAndErase( alignment_tree[node1].parents, node2 );
-	findAndErase( alignment_tree[node2].parents, node1 );
+		// completely unlink node1 and node2 from each other
+		findAndErase( alignment_tree[node1].children, node2 );
+		findAndErase( alignment_tree[node2].children, node1 );
+		findAndErase( alignment_tree[node1].parents, node2 );
+		findAndErase( alignment_tree[node2].parents, node1 );
 
 
-	// re-root the tree on the new node
-	rerootTree( alignment_tree, alignment_tree.size()-1 );
+		// re-root the tree on the new node
+		rerootTree( alignment_tree, alignment_tree.size()-1 );
 
-	new_root.children_aligned = vector< boolean >( new_root.children.size(), false );
-	old_root.children_aligned = vector< boolean >( old_root.children.size(), false );
-	old_root.parents_aligned = vector< boolean >( old_root.parents.size(), false );
-	new_root.sequence = NULL;
+		new_root.children_aligned = vector< boolean >( new_root.children.size(), false );
+		old_root.children_aligned = vector< boolean >( old_root.children.size(), false );
+		old_root.parents_aligned = vector< boolean >( old_root.parents.size(), false );
+		new_root.sequence = NULL;
 
 	return alignment_tree.root;
 }
@@ -3790,7 +3790,10 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 			output_guide_tree_fname = CreateTempFileName("guide_tree");
 		input_guide_tree_fname = output_guide_tree_fname;
 		cout << "Writing guide tree to " << output_guide_tree_fname << endl;
-		ci.SetDistanceMatrix( distance, output_guide_tree_fname );
+		MuscleInterface& mi = MuscleInterface::getMuscleInterface();
+		mi.CreateTree( distance, output_guide_tree_fname );
+
+	//	ci.SetDistanceMatrix( distance, output_guide_tree_fname );
 	}
 
 	conservation_distance.resize(boost::extents[seq_count][seq_count]);
@@ -3821,10 +3824,10 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 	node_id_t node1;
 	node_id_t node2;
 	// midpoint root the tree
-	findMidpoint( alignment_tree, node1, node2 );
-	node_id_t ancestor = 0;
-	if( seq_count > 2 )	// if only two sequences then the tree already has a root
-		ancestor = createAlignmentTreeRoot( alignment_tree, node1, node2 );
+//	findMidpoint( alignment_tree, node1, node2 );
+//	node_id_t ancestor = 0;
+//	if( seq_count > 2 )	// if only two sequences then the tree already has a root
+//		ancestor = createAlignmentTreeRoot( alignment_tree, node1, node2 );
 
 	// write out the rooted guide tree, but don't clobber the user's input tree
 	if( !input_tree_specified || output_tree_specified )
