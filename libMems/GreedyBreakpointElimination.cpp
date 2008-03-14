@@ -11,7 +11,6 @@
 #include "libMems/MuscleInterface.h"	// it's the default gapped aligner
 #include "libGenome/gnRAWSource.h"
 #include "libMems/gnAlignedSequences.h"
-#include "libMems/ClustalInterface.h"
 #include "libMems/CompactGappedAlignment.h"
 #include "libMems/MatchProjectionAdapter.h"
 #include "libMems/PairwiseMatchFinder.h"

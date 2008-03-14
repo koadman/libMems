@@ -18,7 +18,6 @@
 #include "libMems/DNAFileSML.h"
 #include "libMems/MuscleInterface.h"	// it's the default gapped aligner
 #include "libMems/gnAlignedSequences.h"
-#include "libMems/ClustalInterface.h"
 #include "libMems/CompactGappedAlignment.h"
 #include "libMems/MatchProjectionAdapter.h"
 #include "libMems/PairwiseMatchFinder.h"
@@ -3569,13 +3568,13 @@ void ProgressiveAligner::alignPP(IntervalList& prof1, IntervalList& prof2, Inter
 
 	// Make a phylogenetic tree
 	// use the identity matrix method and convert to a distance matrix
-	ClustalInterface& ci = ClustalInterface::getClustalInterface();	
+	MuscleInterface& ci = MuscleInterface::getMuscleInterface();	
 	string guide_tree_fname1 = CreateTempFileName("guide_tree");
 	registerFileToDelete( guide_tree_fname1 );
-	ci.SetDistanceMatrix( distance1, guide_tree_fname1 );
+	ci.CreateTree( distance1, guide_tree_fname1 );
 	string guide_tree_fname2 = CreateTempFileName("guide_tree");
 	registerFileToDelete( guide_tree_fname2 );
-	ci.SetDistanceMatrix( distance2, guide_tree_fname2 );
+	ci.CreateTree( distance2, guide_tree_fname2 );
 
 	// read the trees
 	ifstream tree_file1( guide_tree_fname1.c_str() );
@@ -3784,7 +3783,6 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 	bool output_tree_specified = output_guide_tree_fname != "";
 	if( !input_tree_specified )
 	{
-		ClustalInterface& ci = ClustalInterface::getClustalInterface();	
 		// Make a phylogenetic guide tree
 		if( !output_tree_specified )
 			output_guide_tree_fname = CreateTempFileName("guide_tree");

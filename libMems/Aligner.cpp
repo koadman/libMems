@@ -10,7 +10,6 @@
 #include "libMems/Islands.h"
 #include "libMems/DNAFileSML.h"
 #include "libMems/MuscleInterface.h"	// it's the default gapped aligner
-#include "libMems/ClustalInterface.h"
 #include "libGenome/gnRAWSource.h"
 #include "libMems/DistanceMatrix.h"
 #include "libMems/Files.h"
@@ -2224,8 +2223,8 @@ void Aligner::align( MatchList& mlist, IntervalList& interval_list, double LCB_m
 // Step 2) Compute a phylogenetic guide tree using the multi-MUMs
 //
 
-	ClustalInterface& ci = ClustalInterface::getClustalInterface();	
-	boolean guide_tree_loaded = ci.guideTreeLoaded();
+	bool guide_tree_loaded = false;
+	MuscleInterface& mi = MuscleInterface::getMuscleInterface();	
 
 	if( !guide_tree_loaded && (recursive || tree_filename != "") ){
 		// Make a phylogenetic tree for ClustalW
@@ -2236,7 +2235,7 @@ void Aligner::align( MatchList& mlist, IntervalList& interval_list, double LCB_m
 		DistanceMatrix( mlist, distance );
 		if( tree_filename == "" )
 			tree_filename = CreateTempFileName("guide_tree");
-		ci.SetDistanceMatrix( distance, tree_filename );
+		mi.CreateTree( distance, tree_filename );
 	}
 
 //
