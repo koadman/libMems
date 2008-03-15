@@ -745,11 +745,11 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 				if( iv.Orientation(seqI) == AbstractMatch::forward )
 					pair_1l = make_pair( iv.LeftEnd(seqI), iv.LeftEnd(seqI)+charI );
 				else
-					pair_1r = make_pair( iv.RightEnd(seqI)-charI, iv.RightEnd(seqI) );
+					pair_1r = make_pair( iv.RightEnd(seqI)-charI+1, iv.RightEnd(seqI)+1 );
 				if( iv.Orientation(seqJ) == AbstractMatch::forward )
 					pair_2l = make_pair( iv.LeftEnd(seqJ), iv.LeftEnd(seqJ)+charJ );
 				else
-					pair_2r = make_pair( iv.RightEnd(seqJ)-charJ, iv.RightEnd(seqJ) );
+					pair_2r = make_pair( iv.RightEnd(seqJ)-charJ+1, iv.RightEnd(seqJ)+1 );
 				break;
 			}
 			if( colI < iv_aln_length && aln_matrix[seqI].test(colI) )
@@ -767,11 +767,11 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 				if( colI == iv_aln_length )
 					break;	// nothing to see here, move along...
 				if( iv.Orientation(seqI) == AbstractMatch::forward )
-					pair_1r = make_pair( iv.RightEnd(seqI)-charI, iv.RightEnd(seqI) );
+					pair_1r = make_pair( iv.RightEnd(seqI)-charI+1, iv.RightEnd(seqI)+1 );
 				else
 					pair_1l = make_pair( iv.LeftEnd(seqI), iv.LeftEnd(seqI)+charI );
 				if( iv.Orientation(seqJ) == AbstractMatch::forward )
-					pair_2r = make_pair( iv.RightEnd(seqJ)-charJ, iv.RightEnd(seqJ) );
+					pair_2r = make_pair( iv.RightEnd(seqJ)-charJ+1, iv.RightEnd(seqJ)+1 );
 				else
 					pair_2l = make_pair( iv.LeftEnd(seqJ), iv.LeftEnd(seqJ)+charJ );
 				break;
