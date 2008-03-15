@@ -788,7 +788,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		}
 		if( pair_1r.first < pair_1r.second )
 		{
-			if( pair_1r.first == pair_1l.second )
+			if( pair_1l.first < pair_1l.second && pair_1r.first == pair_1l.second )
 			{
 				// just merge them into a single interval
 				iv_regions[n1][n2][0].back() = pair_1r.second;
@@ -813,7 +813,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		}
 		if( pair_2r.first < pair_2r.second )
 		{
-			if( pair_2r.first == pair_2l.second )
+			if( pair_2l.first < pair_2l.second && pair_2r.first == pair_2l.second )
 			{
 				// just merge them into a single interval
 				iv_regions[n1][n2][1].back() = pair_2r.second;
