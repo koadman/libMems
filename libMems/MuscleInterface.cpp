@@ -1137,6 +1137,7 @@ bool MuscleInterface::ProfileAlignFast( const GappedAlignment& ga1, const Gapped
 
 void MuscleInterface::CreateTree( const NumericMatrix<double>& distances, const std::string& tree_filename  )
 {
+	g_bQuiet.get() = true;			// don't print anything to the console!
 	DistFunc df;
 	df.SetCount( distances.rows() );
 	for( size_t i = 0; i < distances.rows(); i++ )
