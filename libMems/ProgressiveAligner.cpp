@@ -788,14 +788,21 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		}
 		if( pair_1r.first < pair_1r.second )
 		{
-			iv_regions[n1][n2][0].push_back(pair_1r.first);
-			iv_regions[n1][n2][0].push_back(pair_1r.second);
-			if( pair_1r.first <= pair_1l.second && pair_1r.second >= pair_1l.first )
+			if( pair_1r.first == pair_1l.second )
 			{
-				cout << "Ohno.  Overlap in outside LCB search intervals\n";
-				cout << "Left: " << pair_1l.first << '\t' << pair_1l.second << " right:  " << pair_1r.first << '\t' << pair_1r.second << endl;
-				if( pair_1l.first == 0 )
-					genome::breakHere();
+				// just merge them into a single interval
+				iv_regions[n1][n2][0].back() = pair_1r.second;
+			}else{
+				iv_regions[n1][n2][0].push_back(pair_1r.first);
+				iv_regions[n1][n2][0].push_back(pair_1r.second);
+				if( pair_1r.first <= pair_1l.second && pair_1r.second >= pair_1l.first )
+				{
+					cout << "Ohno.  Overlap in outside LCB search intervals\n";
+					cout << "Left: " << pair_1l.first << '\t' << pair_1l.second << " right:  " << pair_1r.first << '\t' << pair_1r.second << endl;
+					cout << "iv.LeftEnd(" << seqI << "): " << iv.LeftEnd(seqI) << '\t' << "iv.RightEnd(" << seqI << "): " << iv.RightEnd(seqI) << endl;
+					if( pair_1l.first == 0 )
+						genome::breakHere();
+				}
 			}
 		}
 
@@ -806,14 +813,22 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		}
 		if( pair_2r.first < pair_2r.second )
 		{
-			iv_regions[n1][n2][1].push_back(pair_2r.first);
-			iv_regions[n1][n2][1].push_back(pair_2r.second);
-			if( pair_2r.first <= pair_2l.second && pair_2r.second >= pair_2l.first )
+			if( pair_2r.first == pair_2l.second )
 			{
-				cout << "Ohno.  Overlap in outside LCB search intervals\n";
-				cout << "Left: " << pair_2l.first << '\t' << pair_2l.second << " right:  " << pair_2r.first << '\t' << pair_2r.second << endl;
-				if( pair_2l.first == 0 )
-					genome::breakHere();
+				// just merge them into a single interval
+				iv_regions[n1][n2][1].back() = pair_2r.second;
+			}else{
+				iv_regions[n1][n2][1].push_back(pair_2r.first);
+				iv_regions[n1][n2][1].push_back(pair_2r.second);
+				if( pair_2r.first <= pair_2l.second && pair_2r.second >= pair_2l.first )
+				{
+					cout << "Ohno.  Overlap in outside LCB search intervals\n";
+					cout << "Left: " << pair_2l.first << '\t' << pair_2l.second << " right:  " << pair_2r.first << '\t' << pair_2r.second << endl;
+					cout << "iv.LeftEnd(" << seqJ << "): " << iv.LeftEnd(seqJ) << '\t' << "iv.RightEnd(" << seqJ << "): " << iv.RightEnd(seqJ) << endl;
+					cout << "charI " << charI << "\tcharJ" << charJ << endl;
+					if( pair_2l.first == 0 )
+						genome::breakHere();
+				}
 			}
 		}
 
