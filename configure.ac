@@ -107,6 +107,8 @@ AC_CHECK_LIB(pthread, pthread_mutex_unlock)
 AC_CHECK_LIB(rt, aio_write)
 AC_SUBST(DEPS_LIBS)
 
+dnl Make doxygen docs
+DX_INIT_DOXYGEN( "libMems", "projects/libMems.doxygen", "doc" )
 
 AM_CONFIG_HEADER(config.h)
 
@@ -122,5 +124,5 @@ AC_PROG_GCC_TRADITIONAL
 dnl SAVE_LIBRARY_VERSION
 AC_SUBST(LIBTOOL_VERSION_INFO)
 
-AC_OUTPUT(Makefile libMems/Makefile doc/Makefile libMems-1.5.pc )
+AC_OUTPUT(Makefile libMems/Makefile libMems-1.5.pc )
 #doc/html/Makefile  doc/man/Makefile  doc/man/man3/Makefile)
