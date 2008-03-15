@@ -59,7 +59,7 @@ double min_window_size = 200;
 double max_window_size = 20000;  // don't feed MUSCLE anything bigger than this
 double min_density = .5;
 double max_density = .9;
-size_t max_gap_length = 3000;
+size_t max_gap_length = 5000;
 size_t lcb_hangover = 300;
 
 
@@ -722,7 +722,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		pair< int64, int64 > pair_2r(0,0);
 		for( uint colI = 0; colI <= iv_aln_length; colI++ )
 		{
-			if( (aln_matrix[seqI].test(colI) && aln_matrix[seqJ].test(colI)) )
+			if( colI == iv_aln_length || (aln_matrix[seqI].test(colI) && aln_matrix[seqJ].test(colI)) )
 			{
 				if( colI == 0 )
 					break;	// nothing to see here, move along...
@@ -736,9 +736,9 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 					pair_2r = make_pair( iv.RightEnd(seqJ)-charJ, iv.RightEnd(seqJ) );
 				break;
 			}
-			if( aln_matrix[seqI].test(colI) )
+			if( colI < iv_aln_length && aln_matrix[seqI].test(colI) )
 				++charI;
-			if( aln_matrix[seqJ].test(colI) )
+			if( colI < iv_aln_length && aln_matrix[seqJ].test(colI) )
 				++charJ;
 		}
 
@@ -776,8 +776,8 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 			iv_regions[n1][n2][0].push_back(pair_1r.second);
 			if( pair_1r.first <= pair_1l.second && pair_1r.second >= pair_1l.first )
 			{
-				cerr << "Ohno.  Overlap in outside LCB search intervals\n";
-				cerr << "Left: " << pair_1l.first << '\t' << pair_1l.second << " right:  " << pair_1r.first << '\t' << pair_1r.second << endl;
+				cout << "Ohno.  Overlap in outside LCB search intervals\n";
+				cout << "Left: " << pair_1l.first << '\t' << pair_1l.second << " right:  " << pair_1r.first << '\t' << pair_1r.second << endl;
 				genome::breakHere();
 			}
 		}
@@ -793,8 +793,8 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 			iv_regions[n1][n2][1].push_back(pair_2r.second);
 			if( pair_2r.first <= pair_2l.second && pair_2r.second >= pair_2l.first )
 			{
-				cerr << "Ohno.  Overlap in outside LCB search intervals\n";
-				cerr << "Left: " << pair_2l.first << '\t' << pair_2l.second << " right:  " << pair_2r.first << '\t' << pair_2r.second << endl;
+				cout << "Ohno.  Overlap in outside LCB search intervals\n";
+				cout << "Left: " << pair_2l.first << '\t' << pair_2l.second << " right:  " << pair_2r.first << '\t' << pair_2r.second << endl;
 				genome::breakHere();
 			}
 		}
@@ -2447,6 +2447,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 				new_matches.seq_table[0] = bseqs[seqI];
 				new_matches.seq_table[1] = bseqs[node1_seqs.size() + seqJ];
 				SearchLCBGaps( new_matches, iv_regions[seqI][seqJ], nway_mh );
+				cout << seqI << "," << seqJ << " have " << new_matches.size() << " new matches outside LCBs\n";
 				pairwise_matches(seqI, seqJ).insert( pairwise_matches(seqI, seqJ).end(), new_matches.begin(), new_matches.end() );
 			}
 
@@ -3379,6 +3380,7 @@ void ProgressiveAligner::CreatePairwiseBPDistance( boost::multi_array<double, 2>
 		IdentifyBreakpoints( ml, breakpoints );
 		ComputeLCBs_v2( ml, breakpoints, LCB_list );
 		vector< double > lcb_scores( LCB_list.size() );
+		cout << "Pair " << seq_pairs[i].first << ", " << seq_pairs[i].second << " has " << LCB_list.size() << " initial LCBs\n";
 		for( size_t lcbI = 0; lcbI < LCB_list.size(); ++lcbI )
 			lcb_scores[lcbI] = GetPairwiseAnchorScore( LCB_list[lcbI], ml.seq_table, this->subst_scoring, sol_list[seqI], sol_list[seqJ] );
 
