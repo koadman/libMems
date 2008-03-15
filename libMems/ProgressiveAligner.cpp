@@ -707,6 +707,9 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		mlist.seq_table.push_back( alignment_tree[*n1_iter].sequence );
 		mlist.seq_table.push_back( alignment_tree[*n2_iter].sequence );
 
+		if( iv.LeftEnd(seqI) == NO_MATCH || iv.LeftEnd(seqJ) == NO_MATCH )
+			continue;	// no sense searching one isn't defined!
+
 		gnSeqI charI = 0;
 		gnSeqI charJ = 0;
 		const size_t iv_aln_length = iv.AlignmentLength();
