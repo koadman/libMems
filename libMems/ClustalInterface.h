@@ -50,7 +50,6 @@ namespace mems {
 
 class ClustalInterface : public GappedAligner {
 public:
-	~ClustalInterface(){}
 	/**
 	 * Returns a reference to a usable ClustalInterface
 	 */

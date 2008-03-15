@@ -22,9 +22,6 @@ DNAFileSML::DNAFileSML() : FileSML(){
 	FileSML::header.version = FormatVersion();
 }
 
-DNAFileSML::~DNAFileSML(){
-}
-
 DNAFileSML::DNAFileSML(const string& fname, const uint8* table, const uint32 alpha_bits){
 	header.alphabet_bits = alpha_bits;
 	memcpy(header.translation_table, table, UINT8_MAX);

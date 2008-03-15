@@ -30,7 +30,6 @@ public:
 	PhyloTree();
 	PhyloTree( const PhyloTree<T>& pt );
 	PhyloTree<T>& operator=( const PhyloTree<T>& pt );
-	~PhyloTree();
 	double weight;	/**< Overall tree weight */
 	node_id_t root;	/**< root of the tree */
 	std::vector< T > nodes;	/**< nodes of the tree */
@@ -93,10 +92,6 @@ PhyloTree<T>& PhyloTree<T>::operator=( const PhyloTree<T>& pt )
 	root = pt.root;
 	return *this;
 }
-
-template< class T >
-PhyloTree<T>::~PhyloTree()
-{}
 
 template< class T >
 void PhyloTree<T>::clear()

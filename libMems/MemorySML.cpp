@@ -37,9 +37,6 @@ MemorySML* MemorySML::Clone() const{
 	return new MemorySML(*this);
 }
 
-MemorySML::~MemorySML(){
-}
-
 void MemorySML::Clear(){
 	SortedMerList::Clear();
 	positions.clear();

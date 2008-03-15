@@ -38,8 +38,6 @@ public:
 	MemorySML& operator=(const MemorySML& msa );
 	MemorySML* Clone() const;
 	
-	~MemorySML();
-
 	virtual void Clear();
 
 	virtual void Create(const genome::gnSequence& seq, const uint64 seed);

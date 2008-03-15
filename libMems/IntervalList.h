@@ -41,7 +41,6 @@ public:
 	GenericIntervalList(){};
 	GenericIntervalList( const GenericIntervalList& ml );
 	GenericIntervalList& operator=( const GenericIntervalList& ml );
-	~GenericIntervalList(){};
 	
 	/**
 	 * Deletes the objects associated

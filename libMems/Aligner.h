@@ -69,8 +69,6 @@ public:
 		int64 diff = a_start - b_start;
 		return diff < 0;
 	}
-	~LabeledMemComparator() {
-	}
 protected:
 	uint m_seq;
 private:
@@ -116,8 +114,6 @@ public:
 
 		int64 diff = a_start - b_start;
 		return diff < 0;
-	}
-	~PlacementMatchComparator() {
 	}
 protected:
 	uint m_seq;

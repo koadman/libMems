@@ -56,10 +56,6 @@ public:
 	 * Copy Constructor, creates a copy of toCopy.
 	 */
 	gnAlignedSequences(const gnAlignedSequences &toCopy);
-	/**
-	 * Destructor, frees the memory used.
-	 */
-	~gnAlignedSequences();
 
 
 	/**
@@ -393,10 +389,6 @@ private:
 	std::vector <int> indexPositions; // 1->n if a standard alignment, variable for varible sites
 }; // gnAlignedSequences
 
-
-// destructor
-inline
-gnAlignedSequences::~gnAlignedSequences() {}
 
 inline
 void gnAlignedSequences::assignFileName(std::string name) {alignedSequenceFileName=name;}

@@ -37,7 +37,6 @@ public:
 	DNAFileSML(const std::string& fname, const uint8* table = SortedMerList::BasicDNATable(), const uint32 alpha_bits = DNA_ALPHA_BITS);
 	DNAFileSML(const SortedMerList& sa);
 	DNAFileSML& operator=(const DNAFileSML& msa );
-	~DNAFileSML();
 	
 	DNAFileSML* Clone() const;
 	
