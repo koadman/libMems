@@ -707,8 +707,24 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 		mlist.seq_table.push_back( alignment_tree[*n1_iter].sequence );
 		mlist.seq_table.push_back( alignment_tree[*n2_iter].sequence );
 
-		if( iv.LeftEnd(seqI) == NO_MATCH || iv.LeftEnd(seqJ) == NO_MATCH )
+		if( iv.LeftEnd(seqI) == NO_MATCH )
+		{
+			if( iv.LeftEnd(seqJ) != NO_MATCH )
+			{
+				iv_regions[n1][n2][1].push_back(iv.LeftEnd(seqJ));
+				iv_regions[n1][n2][1].push_back(iv.RightEnd(seqJ));
+			}
 			continue;	// no sense searching one isn't defined!
+		}
+		if(iv.LeftEnd(seqJ) == NO_MATCH )
+		{
+			if( iv.LeftEnd(seqI) != NO_MATCH )
+			{
+				iv_regions[n1][n2][0].push_back(iv.LeftEnd(seqI));
+				iv_regions[n1][n2][0].push_back(iv.RightEnd(seqI));
+			}
+			continue;	// no sense searching one isn't defined!
+		}
 
 		gnSeqI charI = 0;
 		gnSeqI charJ = 0;
@@ -778,7 +794,8 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 			{
 				cout << "Ohno.  Overlap in outside LCB search intervals\n";
 				cout << "Left: " << pair_1l.first << '\t' << pair_1l.second << " right:  " << pair_1r.first << '\t' << pair_1r.second << endl;
-				genome::breakHere();
+				if( pair_1l.first == 0 )
+					genome::breakHere();
 			}
 		}
 
@@ -795,7 +812,8 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 			{
 				cout << "Ohno.  Overlap in outside LCB search intervals\n";
 				cout << "Left: " << pair_2l.first << '\t' << pair_2l.second << " right:  " << pair_2r.first << '\t' << pair_2r.second << endl;
-				genome::breakHere();
+				if( pair_2l.first == 0 )
+					genome::breakHere();
 			}
 		}
 
