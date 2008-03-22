@@ -762,6 +762,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\libMems\Memory.h"
+					>
+				</File>
+				<File
 					RelativePath="..\libmems\NumericMatrix.h"
 					>
 				</File>
@@ -843,6 +847,10 @@
 				</File>
 				<File
 					RelativePath="..\libMems\HomologyHMM\homologymain.cc"
+					>
+				</File>
+				<File
+					RelativePath="..\libMems\HomologyHMM\parameters.h"
 					>
 				</File>
 			</Filter>
