@@ -86,7 +86,7 @@ AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_IOSTREAMS
 
 dnl Get location of libGenome Headers
-PKG_CHECK_MODULES(DEPS, libGenome-1.3 >= 1.0.0  libMUSCLE-3.6 >= 1.0.0)
+PKG_CHECK_MODULES(DEPS, libGenome-1.3 >= 1.0.0  libMUSCLE-3.7 >= 1.0.0)
 AC_SUBST(DEPS_CFLAGS)
 
 dnl Check for OpenMP
