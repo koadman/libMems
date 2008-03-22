@@ -33,12 +33,17 @@
 #include <sstream>
 #include <fstream>
 
-// this gets defined in muscle.cpp, but not declared in any headers
-extern void MUSCLE(SeqVect &v, MSA &msaOut);
-extern void RefineW(const MSA &msaIn, MSA &msaOut);
-
 using namespace std;
 using namespace genome;
+
+// this gets defined in muscle.cpp, but not declared in any headers
+namespace muscle {
+extern void MUSCLE(SeqVect &v, MSA &msaOut);
+extern void RefineW(const MSA &msaIn, MSA &msaOut);
+}
+
+using namespace muscle;
+
 namespace mems {
 
 bool debug_muscle = false;
