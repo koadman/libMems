@@ -120,7 +120,9 @@ double getDefaultBreakpointPenalty( std::vector< gnSequence* >& sequences )
 
 double getDefaultBpDistEstimateMinScore( std::vector< gnSequence* >& sequences )
 {
-	return 2.0 * getDefaultBreakpointPenalty(sequences);
+	// this value was empirically derived by a process that involved burning incense
+	// and uttering arcane words
+	return 3.0 * getDefaultBreakpointPenalty(sequences);
 }
 
 
@@ -134,7 +136,7 @@ double getDefaultBpDistEstimateMinScore( std::vector< gnSequence* >& sequences )
 ProgressiveAligner::ProgressiveAligner( uint seq_count ) :
 Aligner( seq_count ),
 breakpoint_penalty( -1 ),
-min_breakpoint_penalty( 2000 ),
+min_breakpoint_penalty( 4000 ),
 debug(false),
 refine(true),
 scoring_scheme(ExtantSumOfPairsScoring),
@@ -799,7 +801,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 				{
 					cout << "Ohno.  Overlap in outside LCB search intervals\n";
 					cout << "Left: " << pair_1l.first << '\t' << pair_1l.second << " right:  " << pair_1r.first << '\t' << pair_1r.second << endl;
-					cout << "iv.LeftEnd(" << seqI << "): " << iv.LeftEnd(seqI) << '\t' << "iv.RightEnd(" << seqI << "): " << iv.RightEnd(seqI) << endl;
+					cout << "0 iv.Start(" << seqI << "): " << iv.Start(seqI) << '\t' << "iv.RightEnd(" << seqI << "): " << iv.RightEnd(seqI) << endl;
 					if( pair_1l.first == 0 )
 						genome::breakHere();
 				}
@@ -824,7 +826,7 @@ void ProgressiveAligner::recurseOnPairs( const vector<node_id_t>& node1_seqs, co
 				{
 					cout << "Ohno.  Overlap in outside LCB search intervals\n";
 					cout << "Left: " << pair_2l.first << '\t' << pair_2l.second << " right:  " << pair_2r.first << '\t' << pair_2r.second << endl;
-					cout << "iv.LeftEnd(" << seqJ << "): " << iv.LeftEnd(seqJ) << '\t' << "iv.RightEnd(" << seqJ << "): " << iv.RightEnd(seqJ) << endl;
+					cout << "1 iv.Start(" << seqJ << "): " << iv.Start(seqJ) << '\t' << "iv.RightEnd(" << seqJ << "): " << iv.RightEnd(seqJ) << endl;
 					cout << "charI " << charI << "\tcharJ" << charJ << endl;
 					if( pair_2l.first == 0 )
 						genome::breakHere();

@@ -387,7 +387,7 @@ uint getDefaultSeedWeight( gnSeqI avg_sequence_length );
 inline static
 #endif
 uint getDefaultSeedWeight( gnSeqI avg_sequence_length ){
-	uint mer_size = (uint)((log( (double)avg_sequence_length ) / log( 2.0 ))/1.5);
+	uint mer_size = (uint)ceil((log( (double)avg_sequence_length ) / log( 2.0 ))/1.5);
 	// don't allow even weights-- they can be palindromic
 	if( !(mer_size & 0x1 ) )
 		++mer_size;
