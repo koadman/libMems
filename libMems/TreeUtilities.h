@@ -87,6 +87,49 @@ void rerootTree( Tree& t, node_id_t new_root )
 	}
 }
 
+/**
+ * takes a rooted tree and moves the root to a branch
+ */
+template<class Tree>
+void moveRootToBranch( Tree& t, node_id_t left_node, node_id_t right_node )
+{
+	// this function has no effect if left_node or right_node are already the root
+	if( left_node == t.root || right_node == t.root )
+		return;
+	// left_node and right_node must be adjacent
+	if( (t[left_node].parents.size() == 0 || t[right_node].parents.size() == 0 ) ||
+		(t[left_node].parents[0] != right_node && t[right_node].parents[0] != left_node ) )
+		return;
+
+	// save the root
+	node_id_t old_root = t.root;
+	// reroot the tree on left_node, then move the old root on the branch leading to right_node
+	rerootTree( t, left_node );
+	// remove old_root
+	node_id_t rp = t[old_root].parents[0];
+	findAndErase( t[rp].children, old_root );
+	for( size_t cI = 0; cI < t[old_root].children.size(); cI++ )
+	{
+		t[t[old_root].children[cI]].parents[0] = rp;
+		t[t[old_root].children[cI]].distance += t[old_root].distance;
+		t[rp].children.push_back( t[old_root].children[cI] );
+	}
+	t[old_root].children.clear();
+
+	// link old_root in between left_node and right_node
+	findAndErase( t[left_node].children, right_node );
+	t[left_node].children.push_back( old_root );
+	t[old_root].parents[0] = left_node;
+	t[right_node].parents[0] = old_root;
+	t[old_root].children.push_back( right_node );
+	t[old_root].distance = t[right_node].distance / 2.0;
+	t[right_node].distance /= 2.0;
+
+	// finally reroot on old_root
+	rerootTree( t, old_root );
+}
+
+
 }	// namespace mems
 
 #endif // __TreeUtilities_h__

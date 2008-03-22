@@ -3855,10 +3855,12 @@ void ProgressiveAligner::align( vector< gnSequence* >& seq_table, IntervalList& 
 	tree_file.close();
 
 	cout << "initializing alignment tree...\n";
-
-	makeAlignmentTree( alignment_tree, mlist, node_sequence_map );
 	node_id_t node1;
 	node_id_t node2;
+	findMidpoint( alignment_tree, node1, node2 );
+	moveRootToBranch( alignment_tree, node1, node2 );
+
+	makeAlignmentTree( alignment_tree, mlist, node_sequence_map );
 	// midpoint root the tree
 //	findMidpoint( alignment_tree, node1, node2 );
 //	node_id_t ancestor = 0;
