@@ -73,6 +73,11 @@ public:
 	 *	Writes a gapped alignment of sequences in a standard format
 	 */
 	void WriteStandardAlignment( std::ostream& out_file ) const;
+
+    /**
+	 *	Writes a gapped alignment of sequences in xml format
+	 */
+    void WriteXMLAlignment( std::ostream& out_file ) const;
 	
 	/**
 	 * Reads in a set of intervals that are in xmfa (eXtended MultiFastA) format
@@ -293,6 +298,55 @@ void GenericIntervalList<MatchType>::WriteList(std::ostream& match_file) const
 		}
 		match_file << std::endl;
 	}
+}
+
+//stub for now, later use a XML library to write/read alignments in xml format..
+template< class MatchType >
+void GenericIntervalList<MatchType>::WriteXMLAlignment( std::ostream& out_file ) const 
+{
+	if( this->size() == 0 )
+		return;
+    // write source sequence filenames and formats
+	// to make Paul happy
+	boolean single_input = true;
+    uint seqI = 0;
+	for( seqI = 1; seqI < seq_filename.size(); seqI++ ){
+		if( seq_filename[ 0 ] != seq_filename[ seqI ] ){
+			single_input = false;
+			break;
+		}
+	}
+//	unsigned int seq_count = seq_table.size();
+	
+    out_file << "<procrastAlignment sequence=\"" << seq_filename[ 0 ] << "\">" << std::endl;
+	for( uint ivI = 0; ivI < this->size(); ivI++ ){
+		if( (*this)[ ivI ].AlignmentLength() == 0 ){
+			continue;
+		}
+        out_file << "\t<localAlignment id = \"" << ivI+1 << "\" length = \"" << (*this)[ ivI ].AlignmentLength() << "\" multiplicity = \"" << (*this)[ ivI ].Multiplicity() << "\" spscore=\"" << (*this)[ ivI ].spscore << "\">" << std::endl;
+    
+		std::vector<std::string> alignment;
+		if( seq_table.size() == 1 && seq_table.size() != (*this)[ ivI ].SeqCount() )
+		{
+			GetAlignment( (*this)[ ivI ], std::vector<genome::gnSequence*>((*this)[ ivI ].SeqCount(), seq_table[0]), alignment );
+		}else
+			GetAlignment( (*this)[ ivI ], seq_table, alignment );
+		for( seqI = 0; seqI < (*this)[ ivI ].SeqCount(); seqI++ ){
+			int64 startI = (*this)[ ivI ].Start( seqI );
+			gnSeqI length = (*this)[ ivI ].Length( seqI );
+			// if this genome doesn't have any sequence in this
+			// interval then skip it...
+			if( startI == 0 &&ivI > 0)	// kludge: write all seqs into the first interval so java parser can read it
+				continue;
+   
+		    out_file << "\t\t<component id=\"" << seqI+1 << "\" seqid=\"1\" leftend=\"" << (*this)[ ivI ].LeftEnd( seqI ) << "\" length=\"" << (*this)[ ivI ].Length( seqI ) << "\" orientation=\"" <<  (*this)[ ivI ].Orientation( seqI) << "\">" << alignment[ seqI ].data();
+            out_file << "\t\t</component> " << std::endl;
+
+
+		}
+		out_file << "\t</localAlignment>" << std::endl;
+	}
+	out_file << "</procrastAlignment>" << std::endl;
 }
 
 template< class MatchType >
