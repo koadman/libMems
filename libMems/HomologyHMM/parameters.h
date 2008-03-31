@@ -4,6 +4,8 @@
 #include "homology.h"
 
 Params getHoxdParams();
+Params getAdaptedHoxdMatrixParameters( double gc_content );
+void adaptToPercentIdentity( Params& params, double pct_identity );
 
 inline
 Params getHoxdParams()
@@ -53,6 +55,7 @@ Params getHoxdParams()
  * Adapts an emission matrix to an arbitrary nucleotide composition
  * @param gc_content	The fraction of the genome which is G/C
  */
+inline
 Params getAdaptedHoxdMatrixParameters( double gc_content )
 {
 	Params params;
@@ -131,6 +134,28 @@ Params getAdaptedHoxdMatrixParameters( double gc_content )
 	params.iGoStopFromUnrelated = 0.0000001;
 
 	return params;
+}
+
+inline
+void adaptToPercentIdentity( Params& params, double pct_identity )
+{
+	if( pct_identity <= 0 || pct_identity > 1 )
+		throw "Bad pct identity";		// error condition
+	// normalize new pct identity to gap content
+	double gapnorm_pct_id = pct_identity * (1.0 - params.aEmitHomologous[6] - params.aEmitHomologous[7]);
+	// calculate the previous expected identity as H_AA + H_CC
+	double prev_pct_id = params.aEmitHomologous[0] + params.aEmitHomologous[1];
+	double id_diff = prev_pct_id - gapnorm_pct_id;
+	// spread id_diff proportionally among other substitutions
+	double rest_sum = params.aEmitHomologous[2] + params.aEmitHomologous[3] + 
+		params.aEmitHomologous[4] + params.aEmitHomologous[5];
+	params.aEmitHomologous[2] += id_diff * params.aEmitHomologous[2] / rest_sum;
+	params.aEmitHomologous[3] += id_diff * params.aEmitHomologous[3] / rest_sum;
+	params.aEmitHomologous[4] += id_diff * params.aEmitHomologous[4] / rest_sum;
+	params.aEmitHomologous[5] += id_diff * params.aEmitHomologous[5] / rest_sum;
+
+	params.aEmitHomologous[0] -= id_diff * params.aEmitHomologous[0] / prev_pct_id;
+	params.aEmitHomologous[1] -= id_diff * params.aEmitHomologous[1] / prev_pct_id;
 }
 
 #endif	// __HomologyHMM_parameters_h__
