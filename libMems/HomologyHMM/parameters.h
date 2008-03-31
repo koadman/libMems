@@ -103,10 +103,10 @@ Params getAdaptedHoxdMatrixParameters( double gc_content )
 
     // Homologous state emission probabilities 
     params.aEmitHomologous[0] = (at_content/0.525)*H_AA; // a:a, t:t
-    params.aEmitHomologous[1] = (gc_content/0.525)*H_CC; // c:c, g:g
+    params.aEmitHomologous[1] = (gc_content/0.475)*H_CC; // c:c, g:g
     params.aEmitHomologous[2] = H_AC; //a:c, c:a, g:t, t:g
     params.aEmitHomologous[3] = H_AG; //a:g, g:a, c:t, t:c
-    params.aEmitHomologous[4] = (at_content/0.475)*H_AT; //a:t, t:a 
+    params.aEmitHomologous[4] = (at_content/0.525)*H_AT; //a:t, t:a 
     params.aEmitHomologous[5] = (gc_content/0.475)*H_CG; //g:c, c:g 
 
     
