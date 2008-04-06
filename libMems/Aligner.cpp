@@ -1000,7 +1000,7 @@ void transposeMatches( MatchList& mlist, uint seqI, const vector< int64 >& seq_r
 			trans_start = seq_regions[ regionI ] + ( trans_start - region_start_sum ) - 1;
 
 		int64 trans_end = mlist[ matchI ]->Start( seqI );
-		trans_end += trans_end > 0 ? mlist[ matchI ]->Length() - 1: -mlist[ matchI ]->Length() + 1;
+		trans_end += trans_end > 0 ? mlist[ matchI ]->Length() - 1: -(int64)(mlist[ matchI ]->Length()) + 1;
 		
 		mlist[ matchI ]->SetStart( seqI, trans_start );
 		
@@ -1022,7 +1022,7 @@ void transposeMatches( MatchList& mlist, uint seqI, const vector< int64 >& seq_r
 				left_match->CropStart( cur_match->Length() );
 			}
 
-			iv_orig_start += iv_orig_start > 0 ? cur_match->Length(): -cur_match->Length();
+			iv_orig_start += iv_orig_start > 0 ? cur_match->Length(): -(int64)cur_match->Length();
 
 			if( trans_start < 0 )
 				trans_start = -seq_regions[ end_regionI ] - ( -iv_orig_start - end_region_sum ) + 1;
@@ -2090,7 +2090,8 @@ void Aligner::RecursiveAnchorSearch( MatchList& mlist, gnSeqI minimum_weight, ve
 		int64 cur_perm_weight = permutation_weight != -1 ? permutation_weight : minimum_weight;
 		do{
 			vector<double> m_weights(weights.size());
-			std::copy( weights.begin(), weights.end(), m_weights.begin());
+			for( size_t wI = 0; wI < weights.size(); wI++ )
+				m_weights[wI] = (double)weights[wI];
 			SimpleBreakpointScorer sbs(adjacencies, cur_perm_weight, this->collinear_genomes);
 			if( status_out )
 				(*status_out) << "Performing greedy breakpoint elimination (this may take some time)\n";
