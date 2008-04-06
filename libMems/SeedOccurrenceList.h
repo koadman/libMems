@@ -88,8 +88,8 @@ public:
 		}
 	}
 
-	SeedOccurrenceList( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";};
-	SeedOccurrenceList& operator=( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";}
+//	SeedOccurrenceList( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";};
+//	SeedOccurrenceList& operator=( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";}
 
 protected:
 	/**
