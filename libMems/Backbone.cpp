@@ -314,7 +314,8 @@ double computeGC( std::vector< gnSequence* >& seq_table )
 	return double(counts[1]+counts[2]) / double(counts[1]+counts[2] + counts[0]+counts[3]);
 }
 
-void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlignment<>* >& iv_ptrs, vector< CompactGappedAlignment<>* >& iv_orig_ptrs, pairwise_genome_hss_t& hss_cols,  const Params& hmm_params )
+
+void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlignment<>* >& iv_ptrs, vector< CompactGappedAlignment<>* >& iv_orig_ptrs, pairwise_genome_hss_t& hss_cols, const HssDetector* detector )
 {
 	uint seq_count = iv_list.seq_table.size();
 	// make pairwise projections of intervals and find LCBs...
@@ -348,7 +349,7 @@ void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlign
 			vector< CompactGappedAlignment<>* > hss_list;
 			// now find islands
 			hss_array_t hss_array;
-			findHssHomologyHMM( pair_cgas, pair_ivs.seq_table, hss_array, hmm_params, true, true );
+			(*detector)( pair_cgas, pair_ivs.seq_table, hss_array );
 			HssArrayToCga(pair_cgas, pair_ivs.seq_table, hss_array, hss_list);
 
 			for( size_t cgaI = 0; cgaI < pair_cgas.size(); ++cgaI )
@@ -901,7 +902,6 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	findHssHomologyHMM( mlist, seq_table, island_array, hmm_params, left_homologous, right_homologous );
 	translateToPairwiseGenomeHSS( island_array, hss_cols );
 
-
 	// merge overlapping pairwise homology predictions into n-way predictions
 	backbone_list_t ula_list;
 	mergePairwiseHomologyPredictions( iv_orig_ptrs, hss_cols, ula_list );
@@ -929,21 +929,36 @@ void detectAndApplyBackbone( AbstractMatch* m, vector< gnSequence* >& seq_table,
 	bb_list.clear();
 	bb_list = ula_list;
 
-	//checkForAllGapColumns( iv_list );
-
 	result = tmp_cga.Copy();
 	if( iv_list.size() > 0 )
 		new (result)CompactGappedAlignment<>( iv_list[0] );
 }
 
 
-void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const Params& hmm_params )
+
+void applyBackbone( IntervalList& iv_list, vector< CompactGappedAlignment<>* >& iv_orig_ptrs, backbone_list_t& bb_list )
+{
+	// unalign regions found to be non-homologous
+	unalignIslands( iv_list, iv_orig_ptrs, bb_list );
+
+	// need to add in all the unaligned regions so the viewer doesn't throw a fit
+	addUnalignedRegions( iv_list );
+
+	// free all ULAs and reconstruct them from the new alignment column coordinates
+	for( size_t ulaI = 0; ulaI < bb_list.size(); ++ulaI )
+		for( size_t i = 0; i < bb_list[ulaI].size(); ++i )
+			bb_list[ulaI][i]->Free();
+	bb_list.clear();
+
+	createBackboneList( iv_list, bb_list );
+}
+
+void detectBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const HssDetector* detector, vector< CompactGappedAlignment<>* >& iv_orig_ptrs )
 {
 	// collapse any intervals that are trivially collinear
 	collapseCollinear( iv_list );
 
 	uint seq_count = iv_list.seq_table.size();
-	boost::multi_array< vector< CompactGappedAlignment<>* >, 2> island_array;
 
 	// indexed by seqI, seqJ, ivI, hssI (left col, right col)
 	pairwise_genome_hss_t hss_cols(boost::extents[seq_count][seq_count][iv_list.size()]);
@@ -956,37 +971,113 @@ void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, co
 		iv_ptrs[i] = tmp_cga.Copy();
 		new (iv_ptrs[i])CompactGappedAlignment<>( iv_list[i] );
 	}
-	vector< CompactGappedAlignment<>* > iv_orig_ptrs(iv_ptrs);
 
-	makeAllPairwiseGenomeHSS( iv_list, iv_ptrs, iv_orig_ptrs, hss_cols, hmm_params );
-
-	backbone_list_t ula_list;
+	iv_orig_ptrs = iv_ptrs;
+	makeAllPairwiseGenomeHSS( iv_list, iv_ptrs, iv_orig_ptrs, hss_cols, detector );
 
 	// merge overlapping pairwise homology predictions into n-way predictions
-	mergePairwiseHomologyPredictions( iv_orig_ptrs, hss_cols, ula_list );
-
-	// unalign regions found to be non-homologous
-	unalignIslands( iv_list, iv_orig_ptrs, ula_list );
-
-	// need to add in all the unaligned regions so the viewer doesn't throw a fit
-	addUnalignedRegions( iv_list );
-
-	// free all ULAs and reconstruct them from the new alignment column coordinates
-	for( size_t ulaI = 0; ulaI < ula_list.size(); ++ulaI )
-		for( size_t i = 0; i < ula_list[ulaI].size(); ++i )
-			ula_list[ulaI][i]->Free();
-	ula_list.clear();
-
-
-	createBackboneList( iv_list, ula_list );
-
-	iv_orig_ptrs.clear();
-
-	bb_list.clear();
-	bb_list = ula_list;
-
-	checkForAllGapColumns( iv_list );
+	mergePairwiseHomologyPredictions( iv_orig_ptrs, hss_cols, bb_list );
 }
+
+
+// add unique segments of some minimum length
+// FIXME: does not add begin and end segments!
+void addUniqueSegments( std::vector< bb_seqentry_t >& bb_seq_list, size_t min_length )
+{
+	if( bb_seq_list.size() == 0 )
+		return;
+	vector< bb_seqentry_t > new_segs;
+	uint seq_count = bb_seq_list[0].size();
+	// now mark segs that are too close to each other to be considered independent
+	for( size_t sI = 0; sI < seq_count; sI++ )
+	{
+		BbSeqEntrySorter bbs(sI);
+		std::sort( bb_seq_list.begin(), bb_seq_list.end(), bbs );
+		for( size_t bbI = 1; bbI < bb_seq_list.size(); bbI++ )
+		{
+			if( bb_seq_list[bbI][sI].first == 0 )
+				continue;
+			int64 diff = abs(bb_seq_list[bbI][sI].first) - abs(bb_seq_list[bbI-1][sI].second); 
+			if( abs(diff) > min_length )
+			{
+				bb_seqentry_t newb( seq_count, make_pair( 0,0 ) );
+				newb[sI].first = abs(bb_seq_list[bbI-1][sI].second) + 1;
+				newb[sI].second = abs(bb_seq_list[bbI][sI].first) - 1;
+				new_segs.push_back( newb );
+			}
+		}
+	}
+	bb_seq_list.insert( bb_seq_list.end(), new_segs.begin(), new_segs.end() );
+}
+
+
+void mergeAdjacentSegments( std::vector< bb_seqentry_t >& bb_seq_list )
+{
+	if( bb_seq_list.size() == 0 )
+		return;
+	uint seq_count = bb_seq_list[0].size();
+	// now mark segs that are too close to each other to be considered independent
+	for( size_t sI = 0; sI < seq_count; sI++ )
+	{
+		BbSeqEntrySorter bbs(sI);
+		std::sort( bb_seq_list.begin(), bb_seq_list.end(), bbs );
+		bitset_t merged;
+		merged.resize( bb_seq_list.size() );
+		for( size_t bbI = 1; bbI < bb_seq_list.size(); bbI++ )
+		{
+			if( bb_seq_list[bbI][sI].first == 0 )
+				continue;
+			size_t j = 0;
+			for( ; j < seq_count; j++ )
+			{
+				if( bb_seq_list[bbI][j].first == 0 ^ bb_seq_list[bbI-1][j].first == 0)
+					break;
+				if( bb_seq_list[bbI][j].first == 0)
+					continue;
+				int64 diff = 0;
+				if( bb_seq_list[bbI][j].first > 0 )
+					diff = bb_seq_list[bbI][j].first - bb_seq_list[bbI-1][j].second; 
+				else
+					diff = bb_seq_list[bbI][j].second - bb_seq_list[bbI-1][j].first;
+				if( diff != 1 )
+					break;
+			}
+			if(j == seq_count)
+			{	// they can be merged!
+				merged.set(bbI-1);
+				for( j = 0; j < seq_count; j++ )
+					if( bb_seq_list[bbI][j].first > 0 )
+						bb_seq_list[bbI][j].first = bb_seq_list[bbI-1][j].first;
+					else
+						bb_seq_list[bbI][j].second = bb_seq_list[bbI-1][j].second;
+			}
+		}
+		// remove merged entries
+		size_t cur = 0;
+		for( size_t bbI = 0; bbI < bb_seq_list.size(); bbI++ )
+			if( !merged.test( bbI ) )
+				swap( bb_seq_list[cur++], bb_seq_list[bbI] );
+		bb_seq_list.erase( bb_seq_list.begin() + cur, bb_seq_list.end() );
+	}
+}
+
+
+void detectBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const HssDetector* detector )
+{
+	vector< CompactGappedAlignment<>* > iv_orig_ptrs;
+	detectBackbone( iv_list, bb_list, detector, iv_orig_ptrs );
+	// FIXME: clean up iv_orig_ptrs
+}
+
+void detectAndApplyBackbone( IntervalList& iv_list, backbone_list_t& bb_list, const Params& hmm_params )
+{
+	HomologyHmmDetector* hmm_detector = new HomologyHmmDetector( hmm_params, true, true );
+	vector< CompactGappedAlignment<>* > iv_orig_ptrs;
+	detectBackbone( iv_list, bb_list, hmm_detector, iv_orig_ptrs );
+	applyBackbone( iv_list, iv_orig_ptrs, bb_list );
+	delete hmm_detector;
+}
+
 
 void writeBackboneColumns( ostream& bb_out, backbone_list_t& bb_list )
 {
