@@ -79,7 +79,7 @@ esac],[debug=false])
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
 
 dnl Get location of Boost
-AX_BOOST_BASE(1.33.1)
+AX_BOOST_BASE(1.34.0)
 AC_CXX_NAMESPACES
 AX_BOOST_FILESYSTEM
 AX_BOOST_PROGRAM_OPTIONS
