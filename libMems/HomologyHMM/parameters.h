@@ -20,13 +20,13 @@ Params getHoxdParams()
 		params->iGoStopFromUnrelated = 0.00000001;
 		params->iGoStopFromHomologous = 0.00000001;
 
-		// these values derived from the HOXD matrix of Chiaramonte et al 2002
-		params->aEmitHomologous[0] = 0.4522941233821017820048370573372;		//a:a, t:t
-		params->aEmitHomologous[1] = 0.44848066098577262840393576702477;	//c:c, g:g
-		params->aEmitHomologous[2] = 0.0051952975642225538102111260336614;	//a:c, c:a, g:t, t:g
-		params->aEmitHomologous[3] = 0.030436787995307373189004842137023;	//a:g, g:a, c:t, t:c
-		params->aEmitHomologous[4] = 0.0042890021493835663524878678185533;	//a:t, t:a
-		params->aEmitHomologous[5] = 0.0041101279232120962395233396480786;	//g:c, c:g
+		// original values from Chiaromonte et al supplied by Webb Miler
+		params->aEmitHomologous[0] = 0.1723;		//a:a, t:t
+		params->aEmitHomologous[1] = 0.1462;	//c:c, g:g
+		params->aEmitHomologous[2] = 0.0180;	//a:c, c:a, g:t, t:g
+		params->aEmitHomologous[3] = 0.0426;	//a:g, g:a, c:t, t:c
+		params->aEmitHomologous[4] = 0.0186;	//a:t, t:a
+		params->aEmitHomologous[5] = 0.0142;	//g:c, c:g
 		params->aEmitHomologous[6] = 0.004461;	// gap open (from an e. coli y pestis alignment)
 		// gap extend // 0.050733
 		params->aEmitHomologous[7] = 1 - (params->aEmitHomologous[0] + params->aEmitHomologous[1] + params->aEmitHomologous[2] +
