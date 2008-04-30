@@ -89,7 +89,7 @@ public:
 		std::copy(matches.begin(), matches.end(), this->matches.begin());
 //		this->matches.insert( this->matches.end(), matches.begin(), matches.end() );
 		CalculateOffset();
-		addUnalignedRegions();
+ 	    addUnalignedRegions();
 		CalculateAlignmentLength();
 		ValidateMatches();
 
@@ -101,18 +101,19 @@ public:
 	template< class MatchVector >
 	void SetMatchesTemp( MatchVector& matches )
 	{
-		
-		// delete the allocated dummy match
+		// Set the SeqCount and other bits
+		Match m( matches[0]->SeqCount() );
+		std::vector<AbstractMatch*> tmp(1, &m);
+		*this = GenericInterval( tmp.begin(), tmp.end() );
+
+		// then delete the allocated dummy match
 		for( std::size_t mI = 0; mI < this->matches.size(); mI++ )
 			this->matches[mI]->Free();
 		
 		// now set the matches and update the interval data
 		this->matches.resize(matches.size());
 		std::copy(matches.begin(), matches.end(), this->matches.begin());
-//		this->matches.insert( this->matches.end(), matches.begin(), matches.end() );
 		CalculateOffset();
-		addUnalignedRegions();
-		CalculateAlignmentLength();
 		ValidateMatches();
 
 		// finally, clear the user supplied matches to indicate that we own the memory
@@ -351,12 +352,23 @@ void AddGapMatches( ListType& the_list, const Iter& first, const Iter& last,
 {
 	Iter iter = first;
 	int64 pos = left_end-1;
+    //MatchList& tmp_list;
+    std::vector< std::pair<Match*,Iter> > insert_pos;
 	for( ; iter != last; ++iter )
 	{
 		if( (*iter)->LeftEnd(seqI) != NO_MATCH )
 		{
 			gnSeqI len = (*iter)->LeftEnd(seqI)-pos-1;
-			if( len > 4000000000u )
+
+            //tjt: there are perfectly valid chains that blow up when this is enabled
+            //i.e:      
+            //                         <----c1----><----d1---->
+            //          <--a1---><---b1--->
+            // pos would get set to b1->RightEnd() since diff between a1 & b1 == 0
+            // but then c1->LeftEnd < pos, so genome::breakHere() gets called
+            // this is because SetMatches() gets called before finalize(), but should it??
+
+            if( len > 4000000000u )
 			{
 				std::cerr << "triplebogus interval data\n";
 				std::cerr << "(*iter)->LeftEnd(" << seqI << "): " << (*iter)->LeftEnd(seqI) << std::endl;
@@ -372,12 +384,18 @@ void AddGapMatches( ListType& the_list, const Iter& first, const Iter& last,
 				new_m->SetOrientation(seqI, seq_orient);
 				new_m->SetLength(len);
 				pos = (*iter)->RightEnd(seqI);
-				insert(the_list, iter, new_m);	// this may move iter
-			}else
+				//insert(the_list, iter, new_m);	// this may move iter
+                //tmp_list.push_back(new_m);
+                insert_pos.push_back(make_pair(new_m,iter));
+			}
+            else
 				pos = (*iter)->RightEnd(seqI);
 		}
 	}
-
+    for ( uint i = 0; i < insert_pos.size(); i++)
+    {
+        insert(the_list, insert_pos.at(i).second, insert_pos.at(i).first);
+    }
 	if( right_end != pos )
 	{
 		Match tmp(seq_count);
