@@ -556,14 +556,7 @@ try{
 		// determine the size of the gap
 		int64 gap_start = 0;
 		int64 gap_end = 0;
-		// skip this sequence if it's undefined
-		if( (r_end != NULL && r_end->Start( seqI ) == NO_MATCH) ||
-			(r_begin != NULL && r_begin->Start( seqI ) == NO_MATCH) ){
-			gap_start = 0;
-			gap_end = 0;
-			return true;
-		}
-				
+
 		// determine the size of the gap
 		gap_end = r_end != NULL ? r_end->Start( seqI ) : seq_table[ seqI ]->length() + 1;
 		gap_start = r_begin != NULL ? r_begin->End( seqI ) + 1 : 1;
@@ -583,6 +576,7 @@ try{
 			starts.push_back( NO_MATCH );
 			continue;	// skip this sequence if it's either too big or too small
 		}
+
 		seqs.push_back( seqI );
 
 		// extract sequence data
@@ -612,21 +606,45 @@ try{
 		}
 	}
 
-	if( seqs.size() <= 1 )
-		create_ok = false;
+    //no seqs able to be aligned..
+    if( seqs.size() == 0)
+        create_ok = false;
+
 
 	if( create_ok ){
 //		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
 		vector< string > aln_matrix;
 		if( !CallMuscleFast( aln_matrix, seq_data ) ){
 			cout << "Muscle was unable to align:\n";
-			//if( r_begin )
-			//	cout << "Left match: " << *r_begin << endl;
-			//if( r_end )
-			//	cout << "Right match: " << *r_end << endl;
 			return false;
 		}
-
+        
+        //fill in regions between adjacent seeds with gaps
+        //if aln_matrix is smaller than multiplicity, then we know 
+        //that there are some regions between seeds that have len == 0
+        if (aln_matrix.size() != r_begin->Multiplicity())
+        {
+            for( uint seqI = 0; seqI < starts.size(); seqI++ )
+            {
+                //if this a position between two adjacent matches..
+                if (starts.at(seqI) == NO_MATCH)
+                {
+                    //calculate the number of gaps to fill in
+                    int64 gap_end = r_end != NULL ? r_end->Start( seqI ) : seq_table[ seqI ]->length() + 1;
+		            int64 gap_start = r_begin != NULL ? r_begin->End( seqI ) + 1 : 1;
+                    if( r_end == NULL || r_end->Start( seqI ) > 0 ){
+			            starts[seqI] = 0;//gap_start;
+			            seq_data.insert(seq_data.begin()+(seqI),"");
+		            }else{
+			            starts[seqI] = 0;//-gap_start;
+			            seq_data.insert(seq_data.begin()+(seqI),"");
+		            }
+                    string tmp(aln_matrix[0].length(), '-');
+                    aln_matrix.insert(aln_matrix.begin()+(seqI), tmp);
+                    seqs.insert(seqs.begin()+(seqI),seqI);
+                }
+            }
+        }
 		gnSeqI aln_length = aln_matrix.size() == 0 ? 0 : aln_matrix[0].length();
 		cr = GappedAlignment( seq_count, aln_length );
 		vector< string > aln_mat = vector< string >( seq_count );
