@@ -67,6 +67,11 @@ AC_HEADER_STDC
 
 dnl Check what compiler we're using
 AM_CONDITIONAL(ICC, test x$CXX = xicc )
+EXTRA_CXX_FLAGS=""
+if( test x$CC == "xgcc" ) then
+	EXTRA_CXX_FLAGS="-Wno-deprecated"
+fi
+AC_SUBST(EXTRA_CXX_FLAGS)
 
 dnl Allow debugging compilation
 AC_ARG_ENABLE(debug,
