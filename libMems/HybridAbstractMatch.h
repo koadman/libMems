@@ -18,7 +18,7 @@
 #include "libMems/AbstractMatch.h"
 #include <vector>
 #include <limits>
-
+#include <cstring>
 namespace mems {
 
 /**

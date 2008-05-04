@@ -28,7 +28,8 @@
 #define _algebras_h_
 
 
-#include <math.h>
+#include <cstdlib>
+#include <cmath>
 #include <iostream>
 
 
