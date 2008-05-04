@@ -151,15 +151,15 @@ void PhyloTree<T>::readTree( std::istream& tree_file )
 	// ready to begin parsing the tree data.
 	std::string tree_line;
 	std::getline( line_str, tree_line, ';' );
-	uint read_state = 0;	/**< read_state of 0 indicates nothing has been parsed yet */
-	uint section_start = 0;
+	size_t read_state = 0;	/**< read_state of 0 indicates nothing has been parsed yet */
+	size_t section_start = 0;
 	std::stack< node_id_t > node_stack;
 	std::stringstream blen_str;
 	T new_node;
 	new_node.distance = 0;	// default the distance to 0
 	bool already_read_name = false;
 	bool blen_found = false;
-	for( uint charI = 0; charI < tree_line.size(); charI++ ){
+	for( size_t charI = 0; charI < tree_line.size(); charI++ ){
 		switch( tree_line[ charI ] ){
 			// if this is an open parens then simply create a new
 			// parent node and push it on the parent stack
@@ -250,7 +250,7 @@ void PhyloTree<T>::readTree( std::istream& tree_file )
 template< class T >
 void PhyloTree<T>::writeTree( std::ostream& os ) const{
 	std::stack< node_id_t > node_stack;
-	std::stack< uint > child_stack;
+	std::stack< size_t > child_stack;
 	node_stack.push( root );
 	child_stack.push( 0 );
 	bool write_branch_lengths = false;
