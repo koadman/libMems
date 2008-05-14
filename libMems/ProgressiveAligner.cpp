@@ -2561,7 +2561,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		cout << "performing a gapped alignment\n";
 		doGappedAlignment(ancestor, true);
 	}else
-		cerr << "skipping gapped alignment\n";
+		cout << "skipping gapped alignment\n";
 	if( refine )
 	{
 		size_t unrefined = countUnrefined( alignment_tree, ancestor );
