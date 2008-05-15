@@ -259,7 +259,7 @@ void LoadAndCreateRawSequences( MatchListType& mlist, std::ostream* log_stream )
 
 
 template< typename MatchPtrType >
-void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* log_stream, int seed_rank, bool solid = false ){
+void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* log_stream, int seed_rank, bool solid ){
 
 	// if the mer_size parameter is 0 then calculate a default mer size for these sequences
 	if( mer_size == 0 ){
