@@ -48,7 +48,7 @@ public:
 	 * @param	seed_rank	The rank of the seed to use, 0-2 are ranked spaced seeds, 
 	 *						other options include CODING_SEED and SOLID_SEED
 	 */
-	void LoadSMLs( uint mer_size, std::ostream* log_stream, int seed_rank = 0 );
+	void LoadSMLs( uint mer_size, std::ostream* log_stream, int seed_rank = 0, bool solid = false );
 
 	/**
 	 * Loads sequences to align from a Multi-FastA file and constructs a SML
@@ -259,7 +259,7 @@ void LoadAndCreateRawSequences( MatchListType& mlist, std::ostream* log_stream )
 
 
 template< typename MatchPtrType >
-void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* log_stream, int seed_rank ){
+void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* log_stream, int seed_rank, bool solid = false ){
 
 	// if the mer_size parameter is 0 then calculate a default mer size for these sequences
 	if( mer_size == 0 ){
@@ -271,6 +271,8 @@ void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* lo
 
 	// load and creates SMLs as necessary
 	uint64 default_seed = getSeed( mer_size, seed_rank );
+	if (solid)
+		uint64 default_seed = getSolidSeed( mer_size );
 	std::vector< uint > create_list;
 	uint seqI = 0;
 	for( seqI = 0; seqI < seq_table.size(); seqI++ ){
@@ -293,7 +295,7 @@ void GenericMatchList< MatchPtrType >::LoadSMLs( uint mer_size, std::ostream* lo
 			create_list.push_back( seqI );
 		}
 
-		if( success && !recreate && log_stream != NULL )
+		if( success && !recreate && log_stream != NULL  )
 			(*log_stream) << "Sorted mer list loaded successfully\n";
 	}
 
