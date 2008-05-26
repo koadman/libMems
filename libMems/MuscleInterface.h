@@ -92,9 +92,9 @@ public:
 	//     Such a change would involve changes to GappedAligner, and would require some additional care taken
 	//     with SeqCount & Multiplicity, as well as seq_table[ seqI ]->length()/seq_table[ 0 ]->length(i),
 	//     for now, leave like this. hopefully sooner than later, make pretty!
-	boolean Align( GappedAlignment& cr, Match* r_begin, Match* r_end, std::vector< genome::gnSequence* >& seq_table );
+	boolean Align( GappedAlignment& cr, Match* r_begin, Match* r_end, std::vector< genome::gnSequence* >& seq_table);
     
-	boolean Align( GappedAlignment& cr, AbstractMatch* r_begin, AbstractMatch* r_end, std::vector< genome::gnSequence* >& seq_table );
+	boolean Align( GappedAlignment& cr, AbstractMatch* r_begin, AbstractMatch* r_end, std::vector< genome::gnSequence* >& seq_table);
 
 	bool Refine( GappedAlignment& ga, size_t windowsize = 0 );
 
@@ -105,7 +105,7 @@ public:
 	 */
 	bool ProfileAlign( const GappedAlignment& ga1, const GappedAlignment& ga2, GappedAlignment& aln, bool anchored = true );
 	boolean CallMuscle( std::vector< std::string >& aln_matrix, const std::vector< std::string >& seq_table );
-	boolean CallMuscleFast( std::vector< std::string >& aln_matrix, const std::vector< std::string >& seq_table );
+	boolean CallMuscleFast( std::vector< std::string >& aln_matrix, const std::vector< std::string >& seq_table, int gap_open = 0, int gap_extend = 0);
 	bool RefineFast( GappedAlignment& ga, size_t windowsize = 0 );
 	bool ProfileAlignFast( const GappedAlignment& ga1, const GappedAlignment& ga2, GappedAlignment& aln, bool anchored = true );
 

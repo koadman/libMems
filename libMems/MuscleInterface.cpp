@@ -483,7 +483,7 @@ try{
 	if( create_ok ){
 //		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
 		vector< string > aln_matrix;
-		if( !CallMuscleFast( aln_matrix, seq_data ) ){
+		if( !CallMuscleFast( aln_matrix, seq_data, 0, 0 ) ){
 			cout << "Muscle was unable to align:\n";
 			if( r_begin )
 				cout << "Left match: " << *r_begin << endl;
@@ -520,7 +520,7 @@ try{
 
 static int failure_count = 0;
 
-boolean MuscleInterface::Align( GappedAlignment& cr, AbstractMatch* r_begin, AbstractMatch* r_end, vector< gnSequence* >& seq_table ){
+boolean MuscleInterface::Align( GappedAlignment& cr, AbstractMatch* r_begin, AbstractMatch* r_end, vector< gnSequence* >& seq_table){
 	gnSeqI gap_size = 0;
 	boolean create_ok = true;
 	//tjt: set the seq_count to a match m's multiplicity
@@ -614,7 +614,7 @@ try{
 	if( create_ok ){
 //		SetMuscleArguments( " -quiet -stable -seqtype DNA " );
 		vector< string > aln_matrix;
-		if( !CallMuscleFast( aln_matrix, seq_data ) ){
+		if( !CallMuscleFast( aln_matrix, seq_data, 0, 0 ) ){
 			cout << "Muscle was unable to align:\n";
 			return false;
 		}
@@ -622,7 +622,7 @@ try{
         //fill in regions between adjacent seeds with gaps
         //if aln_matrix is smaller than multiplicity, then we know 
         //that there are some regions between seeds that have len == 0
-        if (aln_matrix.size() != r_begin->Multiplicity())
+        if (aln_matrix.size() != r_begin->Multiplicity() && 0)
         {
             for( uint seqI = 0; seqI < starts.size(); seqI++ )
             {
@@ -724,10 +724,14 @@ boolean MuscleInterface::CallMuscle( vector< string >& aln_matrix, const vector<
 }
 
 // version 2 of this code: attempt to call muscle without performing costly disk I/O!!
-boolean MuscleInterface::CallMuscleFast( vector< string >& aln_matrix, const vector< string >& seq_table )
+boolean MuscleInterface::CallMuscleFast( vector< string >& aln_matrix, const vector< string >& seq_table, int gap_open, int gap_extend )
 {
+	if (gap_open != 0)
+		g_scoreGapOpen.get() = gap_open;
+	if (gap_extend != 0)
+		g_scoreGapExtend.get() = gap_extend;
 	g_SeqType.get() = SEQTYPE_DNA;	// we're operating on DNA
-	g_uMaxIters.get() = 1;			// and we don't want to refine the alignment...yet
+	g_uMaxIters.get() = 2;			// and we don't want to refine the alignment...yet
 	g_bStable.get() = true;			// we want output seqs in the same order as input
 	g_bQuiet.get() = true;			// and don't print anything to the console
 	g_SeqWeight1.get() = SEQWEIGHT_ClustalW;	// not sure what weighting scheme works best for DNA
