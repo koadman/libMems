@@ -731,7 +731,7 @@ boolean MuscleInterface::CallMuscleFast( vector< string >& aln_matrix, const vec
 	if (gap_extend != 0)
 		g_scoreGapExtend.get() = gap_extend;
 	g_SeqType.get() = SEQTYPE_DNA;	// we're operating on DNA
-	g_uMaxIters.get() = 2;			// and we don't want to refine the alignment...yet
+	g_uMaxIters.get() = 1;			// and we don't want to refine the alignment...yet
 	g_bStable.get() = true;			// we want output seqs in the same order as input
 	g_bQuiet.get() = true;			// and don't print anything to the console
 	g_SeqWeight1.get() = SEQWEIGHT_ClustalW;	// not sure what weighting scheme works best for DNA
