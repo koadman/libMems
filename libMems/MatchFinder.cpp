@@ -292,15 +292,6 @@ boolean MatchFinder::SearchRange(vector<gnSeqI>& start_points, vector<gnSeqI>& s
 
 		if(buffer_exhausted)
 		{
-			//catch last match before clobbering
-			if(cur_match.size() > 0)
-			{
-				//we are done with this matching.  hash it.
-				if(cur_match.size() > 1)
-					EnumerateMatches(cur_match);
-				cur_match.clear();
-				
-			}
 			//if we've exhausted our buffer then refill it
 			mer_baseindex[cur_id] += mer_vector[cur_id].size();
 			
@@ -341,7 +332,10 @@ boolean MatchFinder::SearchRange(vector<gnSeqI>& start_points, vector<gnSeqI>& s
 		}
 		
 	}
-	
+	//very last match in the dataset wasn't getting hashed.
+    if(cur_match.size() > 1)
+       EnumerateMatches(cur_match);
+
 	return true;
 }
 
