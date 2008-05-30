@@ -94,12 +94,12 @@ Params getAdaptedHoxdMatrixParameters( double gc_content )
                         + params.aEmitUnrelated[4] + params.aEmitUnrelated[5] + params.aEmitUnrelated[6]);
 
     //USE PRE-NORMALIZED VALUES (from the HOXD matrix)!!
-    double H_AA = 0.4786859804;		//a:a, t:t
-    double H_CC = 0.4746499983;		//c:c, g:g
-    double H_AC = 0.005498448862;	//a:c, c:a, g:t, t:g
-    double H_AG = 0.03221280788;	//a:g, g:a, c:t, t:c
-    double H_AT = 0.004539270118;	//a:t, t:a
-    double H_CG = 0.004349958385;	//g:c, c:g
+    double H_AA = 0.1723*2;		//a:a, t:t
+    double H_CC = 0.1462*2;		//c:c, g:g
+    double H_AC = 0.0180*4;	//a:c, c:a, g:t, t:g
+    double H_AG = 0.0426*4;	//a:g, g:a, c:t, t:c
+    double H_AT = 0.0186*2;	//a:t, t:a
+    double H_CG = 0.0142*2;	//g:c, c:g
 
     // Homologous state emission probabilities 
     params.aEmitHomologous[0] = (at_content/0.525)*H_AA; // a:a, t:t
