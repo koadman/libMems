@@ -30,8 +30,10 @@ public:
 		uint64 mer_mask = sml.GetSeedMask();
 		size_t seedI = 1;
 		bmer prevmer;
-		bmer merI = sml[0];
+		bmer merI; 
 		const size_t sml_length = sml.SMLLength();
+		if( sml_length > 0 )
+			merI = sml[0];
 		for( seedI = 1; seedI < sml_length; seedI++ )
 		{
 			prevmer = merI;

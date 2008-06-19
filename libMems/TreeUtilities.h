@@ -101,6 +101,9 @@ void moveRootToBranch( Tree& t, node_id_t left_node, node_id_t right_node )
 		(t[left_node].parents[0] != right_node && t[right_node].parents[0] != left_node ) )
 		return;
 
+	if( t[left_node].children.size() == 0 )
+		swap( left_node, right_node );	// left node was a leaf so root on right node
+
 	// save the root
 	node_id_t old_root = t.root;
 	// reroot the tree on left_node, then move the old root on the branch leading to right_node
