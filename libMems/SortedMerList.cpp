@@ -766,7 +766,7 @@ uint64 SortedMerList::GetDnaSeedMer( gnSeqI offset ) const
 void SortedMerList::FillDnaSeedSML(const gnSequence& seq, vector<bmer>& sml_array){
 	// first get the length of the sequence
 	gnSeqI sar_len = SMLLength();
-	if( sar_len < header.seed_length )
+	if( sar_len == 0 )
 		return;	// can't have an sml if there ain't enough sequence
 	sml_array.resize(sar_len);
 	
