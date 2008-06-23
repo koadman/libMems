@@ -45,7 +45,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="1"
@@ -109,7 +109,7 @@
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;NDEBUG;FASTDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="1"
@@ -175,7 +175,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="1"
@@ -240,7 +240,7 @@
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="1"
@@ -307,7 +307,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;WIN64;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -373,7 +373,7 @@
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;WIN64;NDEBUG;FASTDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -440,7 +440,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;WIN64;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -506,7 +506,7 @@
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;../../libClustalW/;..\..\boost\boost_1_34_0\;"
+				AdditionalIncludeDirectories="../../muscle/libMUSCLE;../../muscle;../../libGenome;../;..\..\boost\boost_1_34_0\;"
 				PreprocessorDefinitions="WIN32;WIN64;NDEBUG;_LIB;_SCL_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -727,10 +727,6 @@
 				>
 				<File
 					RelativePath="..\libmems\Aligner.h"
-					>
-				</File>
-				<File
-					RelativePath="..\libmems\ClustalInterface.h"
 					>
 				</File>
 				<File
@@ -987,10 +983,6 @@
 				>
 				<File
 					RelativePath="..\libmems\Aligner.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\libmems\ClustalInterface.cpp"
 					>
 				</File>
 				<File
