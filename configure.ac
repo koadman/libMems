@@ -9,11 +9,11 @@ GENERIC_LIBRARY_NAME=libMems
 
 #release versioning
 GENERIC_MAJOR_VERSION=1
-GENERIC_MINOR_VERSION=5
+GENERIC_MINOR_VERSION=6
 GENERIC_MICRO_VERSION=0
 
 #API version (often = GENERIC_MAJOR_VERSION.GENERIC_MINOR_VERSION)
-GENERIC_API_VERSION=1.5
+GENERIC_API_VERSION=1.6
 AC_SUBST(GENERIC_API_VERSION)
 
 #shared library versioning
@@ -92,7 +92,7 @@ AX_BOOST_IOSTREAMS
 AX_BOOST_SYSTEM
 
 dnl Get location of libGenome Headers
-PKG_CHECK_MODULES(DEPS, libGenome-1.3 >= 1.0.0  libMUSCLE-3.7 >= 1.0.0)
+PKG_CHECK_MODULES(DEPS, libGenome-1.3 >= 1.3.1  libMUSCLE-3.7 >= 1.0.0)
 AC_SUBST(DEPS_CFLAGS)
 
 dnl Check for OpenMP
@@ -130,5 +130,5 @@ AC_PROG_GCC_TRADITIONAL
 dnl SAVE_LIBRARY_VERSION
 AC_SUBST(LIBTOOL_VERSION_INFO)
 
-AC_OUTPUT(Makefile libMems/Makefile libMems-1.5.pc )
+AC_OUTPUT(Makefile libMems/Makefile libMems-1.6.pc )
 #doc/html/Makefile  doc/man/Makefile  doc/man/man3/Makefile)

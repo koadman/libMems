@@ -120,6 +120,11 @@ std::string CreateTempFileName(const std::string& prefix)
         dir = env_val != NULL ? env_val : "";
 
         if ( dir.size() == 0 ){
+            env_val = getenv("TMPDIR");
+            dir = env_val != NULL ? env_val : "";
+        }
+
+        if ( dir.size() == 0 ){
             env_val = getenv("TEMP");
             dir = env_val != NULL ? env_val : "";
         }

@@ -57,10 +57,10 @@ libmems_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/
 libmems_include_HEADERS = $(LIBMEMS_H) 
 
 # build libraries with gcc (no suffix)
-lib_LTLIBRARIES = libMems-1.5.la
-libMems_1_5_la_SOURCES = $(LIBMEMS_SRC) $(HOMOLOGYHMM_SRC) $(DMSML_SRC)
+lib_LTLIBRARIES = libMems-1.6.la
+libMems_1_6_la_SOURCES = $(LIBMEMS_SRC) $(HOMOLOGYHMM_SRC) $(DMSML_SRC)
 
-libMems_1_5_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION)  
+libMems_1_6_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION)  
 
 homologyhmm_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/HomologyHMM
 homologyhmm_include_HEADERS = $(HOMOLOGYHMM_H)
