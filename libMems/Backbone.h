@@ -31,6 +31,9 @@ namespace mems {
 
 typedef mems::UngappedLocalAlignment< mems::HybridAbstractMatch<> > ULA;
 typedef std::vector< std::vector< ULA* > > backbone_list_t;
+// indexed by seqI, seqJ, ivI, hssI (left col, right col)
+typedef boost::multi_array< std::vector< std::pair< size_t, size_t > >, 3 > pairwise_genome_hss_t;
+
 class HssDetector;
 
 /** compute the GC content of a set of sequences */
@@ -224,6 +227,9 @@ void readBackboneColsFile( std::istream& bbcol_input, std::vector< std::pair< si
 		bb_list.push_back( std::make_pair( ivI, tmp_ula ) );
 	}
 }
+
+void makeAllPairwiseGenomeHSS( IntervalList& iv_list, std::vector< CompactGappedAlignment<>* >& iv_ptrs, std::vector< CompactGappedAlignment<>* >& iv_orig_ptrs, pairwise_genome_hss_t& hss_cols, const HssDetector* detector );
+void mergePairwiseHomologyPredictions( 	std::vector< CompactGappedAlignment<>* >& iv_orig_ptrs, pairwise_genome_hss_t& hss_cols, std::vector< std::vector< ULA* > >& ula_list );
 
 
 }

@@ -269,8 +269,6 @@ void checkForAllGapColumns( IntervalList& iv_list )
 }
 
 
-// indexed by seqI, seqJ, ivI, hssI (left col, right col)
-typedef boost::multi_array< vector< pair< size_t, size_t > >, 3 > pairwise_genome_hss_t;
 
 void translateToPairwiseGenomeHSS( const hss_array_t& hss_array, pairwise_genome_hss_t& hss_cols )
 {
