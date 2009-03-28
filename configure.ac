@@ -100,7 +100,7 @@ PKG_CHECK_MODULES(DEPS, libGenome-1.3 >= 1.3.1  libMUSCLE-3.7 >= 1.0.0)
 AC_SUBST(DEPS_CFLAGS)
 
 dnl Check for OpenMP
-AC_OPENMP()
+AX_OPENMP()
 AC_SUBST(OPENMP_CFLAGS)
 dnl OpenMP checker only defines for C when compiling both C and C++
 OPENMP_CXXFLAGS=$OPENMP_CFLAGS
