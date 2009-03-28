@@ -120,7 +120,7 @@ AC_SUBST(DEPS_LIBS)
 dnl Make doxygen docs
 DX_INIT_DOXYGEN( "libMems", "projects/libMems.doxygen", "doc" )
 
-AM_CONFIG_HEADER(libMems/config.h)
+AM_CONFIG_HEADER(config.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
