@@ -1,5 +1,8 @@
 dnl Process this file with autoconf to produce a configure script.
+AC_PREREQ([2.59])
 AC_INIT(libMems/Match.h)
+AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl -----------------------------------------------
 dnl Package name and version number (user defined)
@@ -50,12 +53,13 @@ VERSION=$GENERIC_VERSION
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION, no-define)
 
-
+dnl Override default O2
+CFLAGS=${CFLAGS-""}
+CXXFLAGS=${CXXFLAGS-""}
 
 AC_PREFIX_DEFAULT(/usr/local)
 
 dnl Checks for programs.
-AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LN_S 
@@ -96,10 +100,10 @@ PKG_CHECK_MODULES(DEPS, libGenome-1.3 >= 1.3.1  libMUSCLE-3.7 >= 1.0.0)
 AC_SUBST(DEPS_CFLAGS)
 
 dnl Check for OpenMP
-#AX_OPENMP()
+AC_OPENMP()
 AC_SUBST(OPENMP_CFLAGS)
 dnl OpenMP checker only defines for C when compiling both C and C++
-#OPENMP_CXXFLAGS=$OPENMP_CFLAGS
+OPENMP_CXXFLAGS=$OPENMP_CFLAGS
 AC_SUBST(OPENMP_CXXFLAGS)
 
 dnl ensure portability for OS X with these checks
@@ -116,7 +120,7 @@ AC_SUBST(DEPS_LIBS)
 dnl Make doxygen docs
 DX_INIT_DOXYGEN( "libMems", "projects/libMems.doxygen", "doc" )
 
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(src/config.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
