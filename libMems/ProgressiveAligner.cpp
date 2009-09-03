@@ -1156,8 +1156,8 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 			gnSeqI split_point = (*gal_iter)->AlignmentLength() / 2;
 			list< GappedAlignment* >::iterator ins_iter = gal_iter;
 			++ins_iter;
-			ins_iter = gal_list.insert(ins_iter, new GappedAlignment(**gal_iter) );
-//			ins_iter = gal_list.insert(ins_iter, (*gal_iter)->Copy());
+//			ins_iter = gal_list.insert(ins_iter, new GappedAlignment(**gal_iter) );
+			ins_iter = gal_list.insert(ins_iter, (*gal_iter)->Copy());
 			vector<bool>::iterator gap_ins_iter = gap_iter;
 			size_t gap_off = gap_iter - gap_iv.begin();
 			++gap_ins_iter;
@@ -1236,8 +1236,8 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 			aln_matrix[seqI].replace(pos[seqI], tmp_mat[seqI].size(), tmp_mat[seqI]);
 			pos[seqI] += tmp_mat[seqI].size();
 		}
-//		(*gal_iter)->Free();
-		delete (*gal_iter);
+		(*gal_iter)->Free();
+//		delete (*gal_iter);
 	}
 	gal.SetAlignment(aln_matrix);
 }
