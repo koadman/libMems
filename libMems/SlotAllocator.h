@@ -17,7 +17,6 @@
 #include <list>
 #include <stdexcept>
 #include <iostream>
-#include <cmath>
 #include "libMUSCLE/threadstorage.h"
 
 
@@ -105,7 +104,7 @@ T* SlotAllocator< T >::Allocate(){
 
 		// Last resort:
 		// increase the size of the data array
-		unsigned new_size = round((double)n_elems * POOL_GROWTH_RATE);
+		unsigned new_size = (unsigned)(((double)n_elems * POOL_GROWTH_RATE)+0.5);
 		if( new_size == 0 )
 			new_size++;
 		T* new_data = NULL;
