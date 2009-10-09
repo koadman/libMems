@@ -995,12 +995,12 @@ void addUniqueSegments( std::vector< bb_seqentry_t >& bb_seq_list, size_t min_le
 		{
 			if( bb_seq_list[bbI][sI].first == 0 )
 				continue;
-			int64 diff = abs(bb_seq_list[bbI][sI].first) - abs(bb_seq_list[bbI-1][sI].second); 
-			if( abs(diff) > min_length )
+			int64 diff = genome::absolut(bb_seq_list[bbI][sI].first) - genome::absolut(bb_seq_list[bbI-1][sI].second); 
+			if( genome::absolut(diff) > min_length )
 			{
 				bb_seqentry_t newb( seq_count, make_pair( 0,0 ) );
-				newb[sI].first = abs(bb_seq_list[bbI-1][sI].second) + 1;
-				newb[sI].second = abs(bb_seq_list[bbI][sI].first) - 1;
+				newb[sI].first = genome::absolut(bb_seq_list[bbI-1][sI].second) + 1;
+				newb[sI].second = genome::absolut(bb_seq_list[bbI][sI].first) - 1;
 				new_segs.push_back( newb );
 			}
 		}

@@ -144,7 +144,7 @@ public:
 	BbSeqEntrySorter( size_t seqI ){ m_seq = seqI; }
 	bool operator()( const bb_seqentry_t& a, const bb_seqentry_t& b )
 	{
-		return abs(a[m_seq].first) < abs(b[m_seq].first);
+		return genome::absolut(a[m_seq].first) < genome::absolut(b[m_seq].first);
 	}
 	size_t m_seq;
 };
