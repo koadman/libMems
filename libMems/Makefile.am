@@ -14,7 +14,7 @@ DNAMemorySML.h  MatchFinder.h           SortedMerList.h IntervalList.h \
 FileSML.h      gnAlignedSequences.h  Interval.h        \
 MemHash.h      AbstractMatch.h    SlotAllocator.h \
 Aligner.h   Match.h     MatchList.h Matrix.h NumericMatrix.h \
-Islands.h   MaskedMemHash.h   SlotAllocator.h SeedMasks.h GappedAlignment.h \
+Islands.h   MaskedMemHash.h   SeedMasks.h GappedAlignment.h \
 MuscleInterface.h GappedAligner.h PhyloTree.h SparseAbstractMatch.h \
 DenseAbstractMatch.h RepeatMatch.h UngappedLocalAlignment.h \
 AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
