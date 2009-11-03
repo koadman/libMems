@@ -430,6 +430,11 @@ void SortedMerList::translate32(uint32* dest, const gnSeqC* src, const gnSeqI le
 	const uint32 alpha_bits = OPT_HEADER_ALPHABET_BITS;
 	dest[cur_word] = 0;
 	for(uint32 i=0; i < len; i++){
+		if(src[i]=='-'){
+			cerr << "ERROR! gap character encountered at genome sequence position " << i << std::endl;
+			cerr << "Input sequences must be unaligned and ungapped!\n";
+			throw "Gap in genome sequence\n";
+		}
 		uint32 tmp = header.translation_table[src[i]];
 		if(start_bit + alpha_bits <= 32){
 			tmp <<= 32 - start_bit - alpha_bits;
