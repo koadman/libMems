@@ -1178,7 +1178,9 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 	gap_iter = gap_iv.begin();
 
 	const size_t gal_count = gal_list.size();
-#pragma omp parallel for schedule(dynamic)
+// this section can not be paralellized b/c it makes calls to muscle
+#pragma omp critical
+{
 	for( int galI = 0; galI < gal_count; galI++ )
 	{
 		list<GappedAlignment*>::iterator my_g_iter = gal_list.begin();
@@ -1188,10 +1190,7 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 			++my_g_iter;
 			++my_b_iter;
 		}
-#pragma omp critical
-{
 		apt.cur_leftend += (*my_g_iter)->AlignmentLength();
-}
 		if( profile_aln && !(*my_b_iter) )
 		{
 			GappedAlignment ga1;
@@ -1213,15 +1212,13 @@ void ProgressiveAligner::refineAlignment( GappedAlignment& gal, node_id_t ancest
 		}
 
 		new_len += (*my_g_iter)->AlignmentLength();
-#pragma omp critical
-{
 		// print a progress message
 		double cur_progress = ((double)apt.cur_leftend / (double)apt.total_len)*100.0;
 		printProgress((uint)apt.prev_progress, (uint)cur_progress, cout);
 		apt.prev_progress = cur_progress;
-}
 	}
 	gal_iter = gal_list.end();
+}
 
 	// put humpty dumpty back together
 	vector< string > aln_matrix( gal.SeqCount(), string( new_len, '-' ) );
@@ -2382,7 +2379,10 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		if( collinear_genomes && cur_ancestral_seq_len >= prev_ancestral_seq_len )
 			break;
 
-		if( !collinear_genomes && cur_anchoring_score <= prev_anchoring_score )
+		// stop unless we've increased the anchoring score by at least 0.5%
+		// the 0.5% is important for large alignments where many slow iterations might otherwise occur
+		// that only increase the anchoring score by a tiny amount
+		if( !collinear_genomes && cur_anchoring_score <= prev_anchoring_score + (prev_anchoring_score/200.0) )
 			break;
 		prev_anchoring_score = cur_anchoring_score;
 		prev_ancestral_seq_len = cur_ancestral_seq_len;
