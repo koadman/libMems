@@ -114,6 +114,7 @@ public:
 		this->matches.resize(matches.size());
 		std::copy(matches.begin(), matches.end(), this->matches.begin());
 		CalculateOffset();
+		CalculateAlignmentLength();
 		ValidateMatches();
 
 		// finally, clear the user supplied matches to indicate that we own the memory
