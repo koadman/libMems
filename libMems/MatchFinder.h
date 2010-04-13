@@ -329,7 +329,7 @@ void MatchFinder::ExtendMatch(UngappedMatchType& mhe, std::vector<UngappedMatchT
 			int unmatched_diff = extend_attempts - extend_limit;
 			if( i < used_seqs )
 				unmatched_diff -= jump_size;
-			if( (unmatched_diff > 2000000000 || unmatched_diff > mhe.Length()) && unmatched_diff >= 0 )
+			if( (unmatched_diff > mhe.Length()) && unmatched_diff >= 0 )
 				std::cerr << "oh sheethockey mushrooms\n";
 			mhe.SetLength(mhe.Length() - unmatched_diff);
 			for(j=0; j < used_seqs; ++j){
