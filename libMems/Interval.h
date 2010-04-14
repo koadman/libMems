@@ -742,14 +742,6 @@ void FindBoundaries( const MatchVector& matches, std::vector<gnSeqI>& left_ends,
 			}
 			if( left_ends[seqI] != NO_MATCH && lengths[seqI] == 0 )
 				zero_exists = true;
-			if( lengths[seqI] > 10000000000 )
-			{
-				std::cerr << "matches[matchI - 1]->Length(" << seqI << ") = " << matches[matchI - 1]->Length(seqI) << std::endl;
-				std::cerr << "matches[matchI - 1]->LeftEnd(" << seqI << ") = " << matches[matchI - 1]->LeftEnd(seqI) << std::endl;
-
-				std::cerr << "oh skeethockey mushrooms\n";
-				genome::breakHere();
-			}
 		}
 		if( !zero_exists )
 			break;
@@ -783,14 +775,6 @@ void FindBoundaries( const MatchVector& matches, std::vector<gnSeqI>& left_ends,
 			}
 			if( lengths[seqI] == 0 )
 				zero_exists = true;
-			if( lengths[seqI] > 10000000000 )
-			{
-				std::cerr << "matches[" << matchI << "]->Length(" << seqI << ") = " << matches[matchI]->Length(seqI) << std::endl;
-				std::cerr << "matches[" << matchI << "]->LeftEnd(" << seqI << ") = " << matches[matchI]->LeftEnd(seqI) << std::endl;
-
-				std::cerr << "oh skeethockey mushrooms too\n";
-				genome::breakHere();
-			}
 		}
 		if( !zero_exists )
 			break;
