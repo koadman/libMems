@@ -2,7 +2,7 @@
 if DEBUG
 D_CXXFLAGS = -Wall -g -D__GNDEBUG__
 endif
-OPTIMIZATION = -O2 -Wall -funroll-loops -fomit-frame-pointer -ftree-vectorize 
+OPTIMIZATION = -O2 -funroll-loops -fomit-frame-pointer -ftree-vectorize 
 AM_CFLAGS = $(OPTIMIZATION) @DEPS_CFLAGS@ -DUSE_POSIX_AIO @OPENMP_CFLAGS@
 AM_CXXFLAGS = $(OPTIMIZATION) @DEPS_CFLAGS@ @BOOST_CPPFLAGS@ $(D_CXXFLAGS) @EXTRA_CXX_FLAGS@ @OPENMP_CXXFLAGS@ 
 AM_LDFLAGS = $(OPTIMIZATION)
