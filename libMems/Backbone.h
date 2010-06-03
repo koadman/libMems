@@ -183,6 +183,8 @@ void readBackboneSeqFile( std::istream& bbseq_input, std::vector< bb_seqentry_t 
 inline
 void writeBackboneSeqFile( std::ostream& bbseq_out, std::vector< bb_seqentry_t >& backbone )
 {
+	if(backbone.size()==0)
+		return;	// can't write if there's no backbone!
 	for( size_t seqI = 0; seqI < backbone[0].size(); seqI++ )
 	{
 		if( seqI > 0 )
