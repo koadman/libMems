@@ -192,13 +192,13 @@ void MemHash::SetDirection(MatchHashEntry& mhe){
 	uint32 seqI=0;
 	for(; seqI < mhe.SeqCount(); ++seqI)
 		if(mhe[seqI] != NO_MATCH){
-			ref_forward = !(GetSar(seqI)->GetMer(mhe[seqI] - 1) & 0x1);
+			ref_forward = !(GetSar(seqI)->GetDnaSeedMer(mhe[seqI] - 1) & 0x1);
 			break;
 		}
 	//set directional parity for the rest
 	for(++seqI; seqI < mhe.SeqCount(); ++seqI)
 		if(mhe[seqI] != NO_MATCH)
-			if(ref_forward == (GetSar(seqI)->GetMer(mhe[seqI] - 1) & 0x1))
+			if(ref_forward == (GetSar(seqI)->GetDnaSeedMer(mhe[seqI] - 1) & 0x1))
 				mhe.SetStart(seqI, -mhe[seqI]);
 }
 
