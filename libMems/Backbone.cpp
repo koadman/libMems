@@ -344,6 +344,18 @@ void makeAllPairwiseGenomeHSS( IntervalList& iv_list, vector< CompactGappedAlign
 				new (pair_cgas[lcbI])CompactGappedAlignment<>( pair_ivs[lcbI] );
 			}
 
+			// break up these alignments on contig and chromosome boundaries
+			for(int ssI=0; ssI<2; ssI++){
+				vector<gnSeqI> contig_bounds;
+				for( size_t cI=0; cI < pair_ivs.seq_table[ssI]->contigListSize(); cI++ ){
+					contig_bounds.push_back(pair_ivs.seq_table[ssI]->contigLength(cI));
+					if( cI > 0 )
+						contig_bounds[cI] += contig_bounds[cI-1];
+				}
+				GenericMatchSeqManipulator< CompactGappedAlignment<> > gmsm(ssI);
+				applyBreakpoints(contig_bounds, pair_cgas, gmsm);
+			}
+
 			vector< CompactGappedAlignment<>* > hss_list;
 			// now find islands
 			hss_array_t hss_array;
