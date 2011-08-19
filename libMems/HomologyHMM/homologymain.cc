@@ -47,7 +47,7 @@ void run(std::string& sequence, std::string& prediction, const Params& params )
 
     double iPosterior = pFWDP->getProb("homologous",i+1)*pBWDP->getProb("homologous",i+1)/iFWProb;
 //    if (iViterbiPath.toState(i) == iVHomologous) {
-    if (iPosterior >= 0.5) {
+    if (iPosterior >= 0.9) {
       prediction[i] = 'H';
     } else {
       prediction[i] = 'N';
