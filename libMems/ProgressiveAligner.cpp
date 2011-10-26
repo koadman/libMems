@@ -2382,7 +2382,7 @@ void ProgressiveAligner::alignProfileToProfile( node_id_t node1, node_id_t node2
 		// stop unless we've increased the anchoring score by at least 0.5%
 		// the 0.5% is important for large alignments where many slow iterations might otherwise occur
 		// that only increase the anchoring score by a tiny amount
-		if( !collinear_genomes && cur_anchoring_score <= prev_anchoring_score + (prev_anchoring_score/200.0) )
+		if( !collinear_genomes && cur_anchoring_score <= prev_anchoring_score + (genome::absolut(prev_anchoring_score)/200.0) )
 			break;
 		prev_anchoring_score = cur_anchoring_score;
 		prev_ancestral_seq_len = cur_ancestral_seq_len;
