@@ -20,6 +20,8 @@
 #include "unistd.h"
 #endif
 
+#define BOOST_FILESYSTEM_VERSION 2
+
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/exception.hpp"
 #include "boost/algorithm/string.hpp"
