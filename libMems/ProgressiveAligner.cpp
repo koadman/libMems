@@ -27,7 +27,6 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/property_map.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/johnson_all_pairs_shortest.hpp>
