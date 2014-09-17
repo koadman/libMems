@@ -80,7 +80,7 @@ std::string CreateTempFileName(const std::string& prefix)
 #endif
         boost::filesystem::path path( prefix );
         dir = path.branch_path().string();
-        name = path.leaf();
+        name = path.leaf().string();
         if( name == "/" )
         {
                 dir += name;
