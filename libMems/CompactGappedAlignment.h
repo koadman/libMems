@@ -572,7 +572,7 @@ void CompactGappedAlignment<BaseType>::CropEnd(gnSeqI crop_amount){
 			this->SetStart(i, 0);
 		}
 	}
-	SetAlignmentLength( this->AlignmentLength() - crop_amount );
+	this->SetAlignmentLength( this->AlignmentLength() - crop_amount );
 	this->create_bitcount();
 	if( !this->validate() )
 		std::cerr << "CropEnd error\n";

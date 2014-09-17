@@ -437,6 +437,7 @@ void GenericIntervalList<MatchType>::WriteStandardAlignment( std::ostream& out_f
 			}
 		}
 		out_file << "=" << std::endl;
+		out_file.flush();
 	}
 	
 }
