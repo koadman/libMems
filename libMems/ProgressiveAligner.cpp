@@ -3566,13 +3566,79 @@ void makeSuperIntervals( IntervalList& iv_list, PhyloTree< TreeNode >& alignment
 }
 */
 
-void ProgressiveAligner::alignPP(IntervalList& prof1, IntervalList& prof2, IntervalList& interval_list )
+
+/*
+ * Prepare a profile for addition of a new sequence
+ */
+void ProgressiveAligner::prepareProfile(IntervalList& prof1, IntervalList& interval_list )
 {
 	if( debug_aligner )
 	{
 		debug_interval = true;
 		debug_cga = true;
 	}
+	seq_count = prof1.seq_table.size() + 1;
+
+	if( this->breakpoint_penalty == -1 )
+		this->breakpoint_penalty = getDefaultBreakpointPenalty( original_ml.seq_table );
+
+	if( this->bp_dist_estimate_score == -1 )
+		this->bp_dist_estimate_score = getDefaultBpDistEstimateMinScore( original_ml.seq_table );
+	cout << "using default bp penalty: " << breakpoint_penalty << endl;
+	cout << "using default bp estimate min score: " << bp_dist_estimate_score << endl;
+
+	if( this->collinear_genomes )
+		this->breakpoint_penalty = -1;
+
+	if( collinear_genomes )
+		cout << "\nAssuming collinear genomes...\n";
+		
+	EliminateOverlaps_v2( original_ml );
+	// use existing pairwise matches
+	MatchList mlist;
+	mlist.clear();
+	mlist = original_ml;
+	cout << "Starting with " << mlist.size() << " multi-matches\n";
+
+//
+// Step 1) Compute guide trees for each profile and join them
+//
+	NumericMatrix< double > distance1;
+	DistanceMatrix( prof1, distance1 );
+
+	// Make a phylogenetic tree
+	// use the identity matrix method and convert to a distance matrix
+	MuscleInterface& ci = MuscleInterface::getMuscleInterface();	
+	string guide_tree_fname1 = CreateTempFileName("guide_tree");
+	registerFileToDelete( guide_tree_fname1 );
+	ci.CreateTree( distance1, guide_tree_fname1 );
+
+	// read the trees
+	ifstream tree_file1( guide_tree_fname1.c_str() );
+	if( !tree_file1.is_open() )
+		throw "Error opening guide tree file";
+	PhyloTree< AlignmentTreeNode > tree1;
+	tree1.readTree( tree_file1 );
+	tree_file1.close();
+
+//
+// construct the alignment tree for the profile
+//
+	vector< uint > nsmap1;
+	vector< uint > nsmap2;
+	makeAlignmentTree( tree1, prof1, nsmap1 );
+}
+
+void ProgressiveAligner::alignToProfile(IntervalList& profile, gnSequence& new_seq, IntervalList& result )
+{
+	// Find matches between the original sequence set and new sequence
+	TargetSequenceMemHash tsmh;
+	tsmh.SetTarget(profile.seq_table.size());
+	
+}
+
+void ProgressiveAligner::alignPP(IntervalList& prof1, IntervalList& prof2, IntervalList& interval_list )
+{
 
 	seq_count = prof1.seq_table.size() + prof2.seq_table.size();
 

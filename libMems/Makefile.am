@@ -18,7 +18,7 @@ Islands.h   MaskedMemHash.h   SeedMasks.h GappedAlignment.h \
 MuscleInterface.h GappedAligner.h PhyloTree.h SparseAbstractMatch.h \
 DenseAbstractMatch.h RepeatMatch.h UngappedLocalAlignment.h \
 AbstractGappedAlignment.h CompactGappedAlignment.h HybridAbstractMatch.h \
-twister.h SubstitutionMatrix.h RepeatMatchList.h \
+twister.h SubstitutionMatrix.h RepeatMatchList.h TargetSequenceMemHash.h \
 Backbone.h ProgressiveAligner.h PairwiseMatchAdapter.h PairwiseMatchFinder.h \
 SeedOccurrenceList.h TreeUtilities.h SuperInterval.h GreedyBreakpointElimination.h \
 LCB.h DistanceMatrix.h Scoring.h configuration.h Memory.h Files.h gnRAWSequence.h
@@ -41,7 +41,7 @@ gnAlignedSequences.cpp                     \
 MatchList.cpp        Aligner.cpp \
 Islands.cpp          MaskedMemHash.cpp    GappedAlignment.cpp \
 MuscleInterface.cpp  PhyloTree.cpp         \
-RepeatMatchList.cpp  RepeatMatch.cpp \
+RepeatMatchList.cpp  RepeatMatch.cpp TargetSequenceMemHash.cpp \
 Backbone.cpp	PairwiseMatchFinder.cpp	ProgressiveAligner.cpp \
 SuperInterval.cpp	GreedyBreakpointElimination.cpp
 

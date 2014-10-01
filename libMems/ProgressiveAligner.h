@@ -76,7 +76,8 @@ public:
 	void setOutputGuideTreeFileName( std::string& fname ){ this->output_guide_tree_fname = fname; }
 	/** set the max length (in columns) of alignments passed to MUSCLE */
 	void SetMaxGappedAlignmentLength( size_t len );
-	/** set whether a cache database should be used to speed up recursive anchor search */ 
+	/** set whether a cache database should be used to speed up recursive anchor search */
+ 
 	void SetUseCacheDb( bool cbd ){ this->using_cache_db = cbd; }
 
 	/** Set whether iterative refinement using MUSCLE should be performed (true/false) */
@@ -188,6 +189,8 @@ public:
 
 
 	void alignPP(mems::IntervalList& prof1, mems::IntervalList& prof2, mems::IntervalList& interval_list );
+
+	void prepareProfile(IntervalList& prof1, IntervalList& interval_list );
 
 protected:
 	void getAlignment( mems::IntervalList& interval_list );
