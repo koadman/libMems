@@ -71,7 +71,9 @@ public:
 		tfout.write(((const char*)count), sml.Length()*sizeof(frequency_type));
 		tfout.close();
 		delete[] count;
-
+		try{
+		data.close(); // ensure it's closed
+		}catch(...){}
 		data.open( tmpfile );	// map the file
 	}
 
