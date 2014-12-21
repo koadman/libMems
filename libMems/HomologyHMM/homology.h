@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using std::vector;
 using std::cout;
-using std::string;
 
 #include <map>
 
@@ -56,14 +55,14 @@ class HomologyDPTable {
     // If true, this class' destructor will delete the DP arrays
     bool isInCharge;
     // Pointers to arrays containing ids of states and transitions
-    const string* const stateId;
-    const string* const emissionId;
-    const string* const transitionId;
-    const string* const transitionFrom;
-    const string* const transitionTo;
-    const string* const transitionProb;
-    const string* const transitionEmit;
-    const string* const outputId;
+    const std::string* const stateId;
+    const std::string* const emissionId;
+    const std::string* const transitionId;
+    const std::string* const transitionFrom;
+    const std::string* const transitionTo;
+    const std::string* const transitionProb;
+    const std::string* const transitionEmit;
+    const std::string* const outputId;
     // The actual DP tables, and total sequence lengths (which determine size of DP arrays) follow:
     int iLen;
     DPTable<Statesblock2,1> StateMemoryblock2;
@@ -74,15 +73,15 @@ class HomologyDPTable {
     // Default copy constructor is used; user has to set isInCharge appropriately afterwards!
     HomologyDPTable(int iLen);
     ~HomologyDPTable();
-    // returns probability from DP table, given position and int or string state identifier
+    // returns probability from DP table, given position and int or std::string state identifier
     bfloat getProb(int iState ,int ) const;
-    bfloat getProb(const string sState ,int ) const;
-    // converts string identifier (for state, transition or emission) into integer id
-    static int getId(const string& sState);
-    static const string& getTransitionId(int id);
-    static const string& getEmissionId(int id);
-    static const string& getStateId(int id);
-    static const string& getOutputId(int id);
+    bfloat getProb(const std::string sState ,int ) const;
+    // converts std::string identifier (for state, transition or emission) into integer id
+    static int getId(const std::string& sState);
+    static const std::string& getTransitionId(int id);
+    static const std::string& getEmissionId(int id);
+    static const std::string& getStateId(int id);
+    static const std::string& getOutputId(int id);
     static void _cleanup() { getId("_cleanup_"); }
 };
 
@@ -123,7 +122,7 @@ class HomologyBaumWelch {
     private:
     static int atransitionIdx[8];
     static int aemissionIdx[3];
-    static map<const string,int> mId;
+    static map<const std::string,int> mId;
 };
 
 
