@@ -80,7 +80,11 @@ std::string CreateTempFileName(const std::string& prefix)
 #endif
         boost::filesystem::path path( prefix );
         dir = path.branch_path().string();
+#ifdef WIN32
+        name = path.leaf();
+#else
         name = path.leaf().string();
+#endif
         if( name == "/" )
         {
                 dir += name;
@@ -166,8 +170,10 @@ std::string CreateTempFileName(const std::string& prefix)
 
 #ifdef HAVE_MKTEMP
     // same as above
-    if ( mktemp( buf ) )
+    if ( int fdTemp = mktemp( buf ) ){
                 ret_path = buf;
+                close(fdTemp);
+    }
 
 #else // !HAVE_MKTEMP (includes __DOS__)
     // generate the unique file name ourselves
