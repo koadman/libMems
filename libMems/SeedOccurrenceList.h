@@ -21,10 +21,8 @@ public:
 	template< typename SMLType >
 	void construct( SMLType& sml )
 	{
-//		std::vector<mems::bmer> mer_vec;
-//		sml.Read( mer_vec, sml.SMLLength(), 0 );
 		const size_t total_len = sml.Length();
-		frequency_type* count = new frequency_type[total_len];
+		count.resize(total_len);
 		size_t seed_start = 0;
 		size_t cur_seed_count = 1;
 		uint64 mer_mask = sml.GetSeedMask();
@@ -56,51 +54,26 @@ public:
 		for( ; seedI < total_len; ++seedI )
 			count[seedI]=1;
 
-		smoothFrequencies( sml, count );
+		smoothFrequencies( sml );
 
 		// wipe out any stray zeros
 		for( size_t i = 0; i < total_len; ++i )
 			if( count[i]== 0 )
 				count[i] = 1;
-
-		// create a temporary memory-mapped file to store mer counts
-		tmpfile = CreateTempFileName("sol");
-		// resize the file to be big
-		std::ofstream tfout;
-		tfout.open(tmpfile.c_str(), std::ios::binary );
-		tfout.write(((const char*)count), sml.Length()*sizeof(frequency_type));
-		tfout.close();
-		delete[] count;
-		try{
-		data.close(); // ensure it's closed
-		}catch(...){}
-		data.open( tmpfile );	// map the file
 	}
 
 
 	frequency_type getFrequency( gnSeqI position )
 	{
-		return ((frequency_type*)data.data())[position];
+		return count[position];
 	}
-	~SeedOccurrenceList()
-	{
-		if(data.is_open())
-		{
-			data.close();
-			boost::filesystem::remove(tmpfile);
-			tmpfile.clear();
-		}
-	}
-
-//	SeedOccurrenceList( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";};
-//	SeedOccurrenceList& operator=( const SeedOccurrenceList& sol ){if(data.is_open()) throw "not copyable";}
 
 protected:
 	/**
 	 * converts position freqs to the average freq of all k-mers containing that position
 	 */
 	template< typename SMLType >
-	void smoothFrequencies( const SMLType& sml, frequency_type* count )
+	void smoothFrequencies( const SMLType& sml )
 	{
 		size_t seed_length = sml.SeedLength();
 		// hack: for beginning (seed_length) positions assume that previous
@@ -118,9 +91,7 @@ protected:
 		}
 	}
 	
-	boost::iostreams::mapped_file_source data;
-	std::string tmpfile;
-
+	std::vector<frequency_type> count;
 };
 
 }
