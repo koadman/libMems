@@ -49,7 +49,7 @@ public:
 	LabeledMemComparator( uint seq ){
 		m_seq = seq;
 	}
-	LabeledMemComparator( LabeledMemComparator& lmc ){
+	LabeledMemComparator( const LabeledMemComparator& lmc ){
 		m_seq = lmc.m_seq;
 	}
 	boolean operator()(const LabeledMem& a, const LabeledMem& b) const{
@@ -94,7 +94,7 @@ public:
 	PlacementMatchComparator( uint seq ){
 		m_seq = seq;
 	}
-	PlacementMatchComparator( PlacementMatchComparator& lmc ){
+	PlacementMatchComparator( const PlacementMatchComparator& lmc ){
 		m_seq = lmc.m_seq;
 	}
 	boolean operator()(const PlacementMatch& a, const PlacementMatch& b) const{
