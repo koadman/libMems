@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT(libMems/Match.h)
+AC_INIT([libMems], [1.6.0])
+AC_CONFIG_SRCDIR([libMems/Match.h])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -51,7 +52,7 @@ AC_SUBST(GENERIC_VERSION)
 
 VERSION=$GENERIC_VERSION
 
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION, no-define)
+AM_INIT_AUTOMAKE(no-define subdir-objects)
 
 dnl Override default O2
 CFLAGS=${CFLAGS-""}
