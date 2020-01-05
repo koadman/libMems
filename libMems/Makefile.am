@@ -2,7 +2,7 @@
 if DEBUG
 D_CXXFLAGS = -Wall -g -D__GNDEBUG__
 endif
-OPTIMIZATION = -O2 -funroll-loops -fomit-frame-pointer -ftree-vectorize 
+OPTIMIZATION = -Ofast 
 AM_CFLAGS = $(OPTIMIZATION) @DEPS_CFLAGS@ -DUSE_POSIX_AIO @OPENMP_CFLAGS@
 AM_CXXFLAGS = $(OPTIMIZATION) @DEPS_CFLAGS@ @BOOST_CPPFLAGS@ $(D_CXXFLAGS) @EXTRA_CXX_FLAGS@ @OPENMP_CXXFLAGS@ 
 AM_LDFLAGS = $(OPTIMIZATION)
@@ -62,7 +62,7 @@ libmems_include_HEADERS = $(LIBMEMS_H)
 lib_LTLIBRARIES = libMems-1.6.la
 libMems_1_6_la_SOURCES = $(LIBMEMS_SRC) $(HOMOLOGYHMM_SRC) $(DMSML_SRC)
 
-libMems_1_6_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION)  
+libMems_1_6_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) 
 
 homologyhmm_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/HomologyHMM
 homologyhmm_include_HEADERS = $(HOMOLOGYHMM_H)
@@ -72,14 +72,5 @@ dmsml_include_HEADERS = $(DMSML_H)
 
 EXTRA_DIST = \
 HomologyHMM/homology.xml 
-
-#EXTRA_PROGRAMS = TestSML TestSMLstatic
-
-
-#TestSMLstatic_SOURCES = TestSML.cpp
-#TestSMLstatic_INCLUDES = -I$(top_srcdir)/include/ `wx-config --cxxflags`
-#TestSMLstatic_LDFLAGS = -static $(top_builddir)/libMems/libMems.a `wx-config --static --libs`
-
-
 
 
