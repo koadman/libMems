@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT([libMems], [1.6.0])
+AC_INIT([libMems], [1.6.1])
 AC_CONFIG_SRCDIR([libMems/Match.h])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
@@ -14,7 +14,7 @@ GENERIC_LIBRARY_NAME=libMems
 #release versioning
 GENERIC_MAJOR_VERSION=1
 GENERIC_MINOR_VERSION=6
-GENERIC_MICRO_VERSION=0
+GENERIC_MICRO_VERSION=1
 
 #API version (often = GENERIC_MAJOR_VERSION.GENERIC_MINOR_VERSION)
 GENERIC_API_VERSION=1.6
